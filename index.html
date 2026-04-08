@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Family Learning Hub</title>
+    <title>Valerie & Venissa's Hub</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <style>
         body { font-family: -apple-system, sans-serif; background: #f0fdf4; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; color: #1f2937; }
@@ -31,9 +31,7 @@
         button.option { font-size: 26px; padding: 20px; border: 3px solid #e5e7eb; border-radius: 12px; background: #fff; cursor: pointer; color: #374151; font-weight: bold; }
         button.option.correct { border-color: #10b981; background: #d1fae5; color: #065f46; }
         button.option.incorrect { border-color: #ef4444; background: #fee2e2; color: #991b1b; }
-        
         input.text-input, textarea.text-input { font-size: 28px; padding: 16px; border: 3px solid #e5e7eb; border-radius: 12px; width: 100%; box-sizing: border-box; margin-bottom: 24px; }
-        textarea.text-input { height: 140px; resize: none; }
         
         .feedback { font-size: 24px; min-height: 36px; margin-bottom: 24px; font-weight: bold; }
         .feedback.success { color: #10b981; } .feedback.error { color: #ef4444; } .feedback.info { color: #2563eb; background: #eff6ff; padding: 16px; border-radius: 12px; text-align: left;}
@@ -54,12 +52,12 @@
 
 <div class="container">
     <div id="loading-screen" class="screen" style="display: flex; flex-direction: column; align-items: center; padding: 50px 0;">
-        <h2 id="sync-status">Connecting to Cloud...</h2>
-        <p id="debug-info" style="font-size: 14px; color: #94a3b8; margin-top: 10px;"></p>
+        <h2>Connecting to Cloud...</h2>
+        <p id="debug-info" style="color: #94a3b8; margin-top: 10px;"></p>
     </div>
 
     <div id="menu-screen" class="screen">
-        <h1>Family Learning Hub</h1>
+        <h1>Family Hub</h1>
         <div class="subtitle">Who is practicing today?</div>
         
         <div class="name-selector">
@@ -68,9 +66,7 @@
         </div>
 
         <div class="menu-grid" id="subject-grid"></div>
-        <div class="tools-area">
-            <button class="tool-btn" onclick="showMistakes()">🖨️ Review & Print Mistakes</button>
-        </div>
+        <div class="tools-area"><button class="tool-btn" onclick="showMistakes()">🖨️ Review & Print Mistakes</button></div>
     </div>
 
     <div id="quiz-screen" class="screen no-print">
@@ -93,7 +89,7 @@
     <div id="end-screen" class="screen no-print">
         <div style="font-size: 80px; margin-bottom: 24px;">🎉</div>
         <h2 style="font-size: 40px;">Excellent!</h2>
-        <p style="font-size: 24px; color: #64748b;">Practice session finished.</p>
+        <p style="font-size: 24px; color: #64748b;">Practice finished.</p>
         <button class="action-btn primary-btn" style="width: 100%;" onclick="showScreen('menu-screen')">Back to Menu</button>
     </div>
 
@@ -111,79 +107,44 @@
 </div>
 
 <script>
-    // =========================================================
-    // 1. PASTE YOUR CSV URL HERE
-    // =========================================================
-    const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQlpdRHnR9ybEHHgX6fouRI-vXOh8KQNLSjsbt0TYh9R3No_9i7QNv_4ELwJZJGQpTe3oZVXaZijaW4/pub?gid=0&single=true&output=csv"; 
-
+    const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQlpdRHnR9ybEHHgX6fouRI-vXOh8KQNLSjsbt0TYh9R3No_9i7QNv_4ELwJZJGQpTe3oZVXaZijaW4/pub?output=csv"; 
     const colors = ["#2563eb", "#059669", "#e11d48", "#d97706", "#7c3aed"];
+    
     let cloudDB = {}, mistakeBank = {}; 
     let curGrade = '', curChild = '', curSub = '', curQ = null, ansed = false, qCnt = 1, sessionQs = [];
 
-    // Load Local Errors
-    try { let saved = localStorage.getItem('family_errs_v4'); if (saved) mistakeBank = JSON.parse(saved); } catch(e) {}
+    try { let saved = localStorage.getItem('family_errs_final'); if (saved) mistakeBank = JSON.parse(saved); } catch(e) {}
 
-    // 2. RESILIENT LOADING LOGIC
     window.onload = function() {
-        const debug = document.getElementById('debug-info');
-        const status = document.getElementById('sync-status');
-
-        if (!GOOGLE_SHEET_CSV_URL || GOOGLE_SHEET_CSV_URL.includes("PASTE_YOUR_LINK")) {
-            status.innerText = "Setup Required";
-            debug.innerText = "Please paste your 'Publish to Web' CSV URL at line 133.";
-            return;
-        }
-
-        // Add Cache-Buster
-        const fetchUrl = GOOGLE_SHEET_CSV_URL + (GOOGLE_SHEET_CSV_URL.includes('?') ? '&' : '?') + 'cache=' + new Date().getTime();
-
-        Papa.parse(fetchUrl, {
-            download: true,
-            header: true,
+        Papa.parse(GOOGLE_SHEET_CSV_URL, { 
+            download: true, 
+            header: true, 
             skipEmptyLines: true,
-            complete: function(results) {
-                if (results.data && results.data.length > 0) {
-                    parseCSV(results.data);
-                } else {
-                    status.innerText = "Sync Failed";
-                    debug.innerText = "Sheet is empty or column headers are missing.";
-                }
-            },
-            error: function(err) {
-                status.innerText = "Connection Error";
-                debug.innerText = "Browser blocked the data. Try opening the HTML file in a different browser or uploading it to a cloud drive (Google Drive/GitHub).";
-                console.error(err);
-            }
+            complete: r => {
+                parseCSV(r.data);
+                showScreen('menu-screen');
+                selectChild('P3', 'Valerie');
+            }, 
+            error: () => document.getElementById('debug-info').innerText = "Sync Error. Check 'Publish to Web'." 
         });
     };
 
     function parseCSV(rows) {
         cloudDB = {};
         rows.forEach(r => {
-            // Flexible matching for column names
             const g = (r['Grade'] || "").trim();
             const s = (r['Subject'] || "").trim();
-            const q = (r['Question'] || "").trim();
-            const ans = (r['Correct Answer'] || "").trim();
-
-            if (!g || !s || !q) return;
-
-            if (!cloudDB[g]) cloudDB[g] = {};
-            if (!cloudDB[g][s]) cloudDB[g][s] = [];
-
+            if (!g || !s) return;
+            if (!cloudDB[g]) cloudDB[g] = {}; if (!cloudDB[g][s]) cloudDB[g][s] = [];
             cloudDB[g][s].push({
-                q: q,
+                q: r['Question'].trim(),
                 type: (r['Type'] || 'MCQ').trim().toUpperCase(),
                 options: [r['Option A'], r['Option B'], r['Option C'], r['Option D']].filter(x => x && x.trim() !== ''),
-                ans: ans
+                ans: r['Correct Answer'].trim()
             });
         });
-        
-        showScreen('menu-screen');
-        selectChild('P3', 'Valerie'); 
     }
 
-    // UI & QUIZ LOGIC
     function selectChild(grade, name) {
         curGrade = grade; curChild = name;
         document.getElementById('btn-valerie').classList.toggle('active', name === 'Valerie');
@@ -194,11 +155,7 @@
     function renderSubjects() {
         const grid = document.getElementById('subject-grid'); grid.innerHTML = '';
         if (!cloudDB[curGrade]) return;
-        
-        let subjects = Object.keys(cloudDB[curGrade]);
-        if (curChild === 'Valerie' && !subjects.includes('Math')) subjects.push('Math');
-
-        subjects.forEach((sub, i) => {
+        Object.keys(cloudDB[curGrade]).forEach((sub, i) => {
             let btn = document.createElement('button'); btn.className = 'subject-btn';
             btn.style.background = colors[i % colors.length]; btn.innerText = sub;
             btn.onclick = () => startQuiz(sub); grid.appendChild(btn);
@@ -207,38 +164,26 @@
 
     function startQuiz(sub) {
         curSub = sub; qCnt = 1; sessionQs = [];
-        document.getElementById('topic-badge').innerText = sub;
         let mkKey = `${curGrade}_${sub}`;
-        
         let mPool = shuffle(mistakeBank[mkKey] || []);
         for(let i=0; i<Math.min(2, mPool.length); i++) sessionQs.push(mPool[i]);
-
-        if(sub === 'Math' && curGrade === 'P3') {
-            while(sessionQs.length < 5) { let mq = genMathP3(); if(!sessionQs.some(x=>x.q===mq.q)) sessionQs.push(mq); }
-        } else {
-            let fPool = shuffle(cloudDB[curGrade][sub] || []);
-            for(let q of fPool) { if(sessionQs.length >= 5) break; if(!sessionQs.some(x=>x.q===q.q)) sessionQs.push(q); }
-        }
-        
-        if(sessionQs.length === 0) return alert("No questions found in cloud!");
+        let fPool = shuffle(cloudDB[curGrade][sub] || []);
+        for(let q of fPool) { if(sessionQs.length >= 5) break; if(!sessionQs.some(x=>x.q===q.q)) sessionQs.push(q); }
         sessionQs = shuffle(sessionQs).slice(0, 5);
         showScreen('quiz-screen'); renderQ();
     }
 
     function renderQ() {
-        ansed = false;
-        document.getElementById('feedback-text').innerText = '';
+        ansed = false; document.getElementById('feedback-text').innerText = '';
         document.getElementById('submit-btn').style.display = 'block'; 
         document.getElementById('next-btn').style.display = 'none';
         document.getElementById('self-wrong-btn').style.display = 'none'; 
         document.getElementById('self-right-btn').style.display = 'none';
-
         curQ = sessionQs[qCnt - 1];
         document.getElementById('question-text').innerText = curQ.q;
+        document.getElementById('topic-badge').innerText = curSub;
         document.getElementById('progress-text').innerText = `${qCnt} of ${sessionQs.length}`;
-        
         const cont = document.getElementById('dynamic-content'); cont.innerHTML = ''; 
-
         if (curQ.type === 'MCQ') {
             document.getElementById('submit-btn').style.display = 'none';
             let div = document.createElement('div'); div.className = 'options-mcq';
@@ -259,7 +204,7 @@
     function processMCQ(btn) {
         if(ansed) return; ansed = true;
         let fb = document.getElementById('feedback-text'); document.querySelectorAll('.option').forEach(b => b.disabled = true);
-        if(btn.value === curQ.ans) { btn.classList.add('correct'); fb.innerText = "Correct! Well done."; fb.className = 'feedback success'; logErr(false); } 
+        if(btn.value === curQ.ans) { btn.classList.add('correct'); fb.innerText = "Correct!"; fb.className = 'feedback success'; logErr(false); } 
         else { btn.classList.add('incorrect'); document.querySelectorAll('.option').forEach(b=>{if(b.value===curQ.ans) b.classList.add('correct');}); fb.innerText = "Incorrect."; fb.className = 'feedback error'; logErr(true); }
         showNext();
     }
@@ -271,7 +216,7 @@
             let v = document.getElementById('fitb-input').value.trim();
             if(!v) return; ansed = true; document.getElementById('fitb-input').disabled = true; document.getElementById('submit-btn').style.display = 'none';
             if(v.toLowerCase() === curQ.ans.toLowerCase()) { fb.innerText = "Correct!"; fb.className = 'feedback success'; logErr(false); } 
-            else { fb.innerText = `Incorrect. The answer is: ${curQ.ans}`; fb.className = 'feedback error'; logErr(true); }
+            else { fb.innerText = `Incorrect. Answer: ${curQ.ans}`; fb.className = 'feedback error'; logErr(true); }
             showNext();
         } else {
             ansed = true; document.getElementById('submit-btn').style.display = 'none';
@@ -280,33 +225,18 @@
         }
     }
 
-    function logSelf(isCorrect) {
-        document.getElementById('self-wrong-btn').style.display = 'none'; document.getElementById('self-right-btn').style.display = 'none';
-        logErr(!isCorrect); showNext();
-    }
-
+    function logSelf(isCorrect) { document.getElementById('self-wrong-btn').style.display = 'none'; document.getElementById('self-right-btn').style.display = 'none'; logErr(!isCorrect); showNext(); }
     function logErr(isWrong) {
         let k = `${curGrade}_${curSub}`; if(!mistakeBank[k]) mistakeBank[k] = [];
         if(isWrong) { if(!mistakeBank[k].some(m=>m.q===curQ.q)) mistakeBank[k].push(curQ); } 
         else { mistakeBank[k] = mistakeBank[k].filter(m=>m.q!==curQ.q); }
-        localStorage.setItem('family_errs_v4', JSON.stringify(mistakeBank));
+        localStorage.setItem('family_errs_final', JSON.stringify(mistakeBank));
     }
-
     function showNext() { let b = document.getElementById('next-btn'); b.innerText = qCnt === sessionQs.length ? "Finish" : "Next"; b.style.display = 'block'; }
     function handleNext() { if(qCnt < sessionQs.length) { qCnt++; renderQ(); } else showScreen('end-screen'); }
     function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.style.display = 'none'); document.getElementById(id).style.display = 'block'; }
     function shuffle(a) { let arr=[...a]; for(let i=arr.length-1; i>0; i--) { let j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
     
-    function genMathP3() {
-        let t = Math.floor(Math.random() * 3), q = '', a, isM = false;
-        if(t === 0) { let n1 = Math.floor(Math.random()*4000)+1000, n2 = Math.floor(Math.random()*4000)+1000; q=`${n1} + ${n2} = ?`; a = n1+n2; }
-        else if(t === 1) { let n1 = Math.floor(Math.random()*80)+11, n2 = [6,7,8,9][Math.floor(Math.random()*4)]; q=`${n1} × ${n2} = ?`; a = n1*n2; }
-        else { isM = true; let n1 = Math.floor(Math.random()*4000)+150, n2 = Math.floor(Math.random()*2000)+150; q=`$${(n1/100).toFixed(2)} + $${(n2/100).toFixed(2)} = ?`; a = n1+n2; }
-        let opts = new Set([a]);
-        while(opts.size < 4) { let w = a + [10,-10,100,-100,20,-20,1,-1][Math.floor(Math.random()*8)]; if(w>=0) opts.add(w); }
-        return { q, type: 'MCQ', options: Array.from(opts).map(v => isM ? '$'+(v/100).toFixed(2) : String(v)), ans: isM ? '$'+(a/100).toFixed(2) : String(a) };
-    }
-
     function showMistakes() {
         showScreen('mistake-screen');
         let list = document.getElementById('mistake-list'), cnt = 0; list.innerHTML = '';
@@ -314,14 +244,12 @@
             if(mistakeBank[k].length > 0) {
                 cnt += mistakeBank[k].length; let [g,s] = k.split('_');
                 list.innerHTML += `<div class="mistake-subject">[${g}] ${s}</div>`;
-                mistakeBank[k].forEach((m,i) => {
-                    list.innerHTML += `<div class="mistake-item"><strong>Q${i+1}:</strong> ${m.q}<div class="m-ans">Ans: ${m.ans}</div></div>`;
-                });
+                mistakeBank[k].forEach((m,i) => { list.innerHTML += `<div class="mistake-item"><strong>Q${i+1}:</strong> ${m.q}<div class="m-ans">Ans: ${m.ans}</div></div>`; });
             }
         }
-        if(!cnt) list.innerHTML = '<div style="margin-top:40px; text-align:center; font-size:24px;">No mistakes yet!</div>';
+        if(!cnt) list.innerHTML = '<div style="margin-top:40px; text-align:center; font-size:24px;">No mistakes!</div>';
     }
-    function clearMistakes() { if(confirm("Clear all mistakes?")) { mistakeBank={}; localStorage.removeItem('family_errs_v4'); showMistakes(); } }
+    function clearMistakes() { if(confirm("Clear mistakes?")) { mistakeBank={}; localStorage.removeItem('family_errs_final'); showMistakes(); } }
 </script>
 </body>
 </html>
