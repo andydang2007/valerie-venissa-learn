@@ -68,4 +68,524 @@
         
         .word-card-btn { width: 60px; height: 60px; font-size: 32px; font-weight: bold; border: 2px solid #e2e8f0; border-radius: 12px; background: white; color: #1e293b; cursor: pointer; transition: 0.2s; display: flex; justify-content: center; align-items: center; padding: 0; outline: none; }
         .word-card-btn:hover { border-color: #f59e0b; transform: translateY(-3px); box-shadow: 0 4px 10px rgba(245, 158, 11, 0.2); }
-        .word-card-btn.active { border-color: #f59e0b; background: #fffbeb; color: #ea580c; transform
+        .word-card-btn.active { border-color: #f59e0b; background: #fffbeb; color: #ea580c; transform: scale(1.1); box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3); }
+
+        .practice-pad-container { display: none; flex-direction: column; align-items: center; background: #f8fafc; padding: 25px; border-radius: 20px; border: 2px dashed #cbd5e1; margin-bottom: 20px; box-shadow: inset 0 2px 10px rgba(0,0,0,0.02); }
+        .practice-char-label { font-size: 24px; font-weight: bold; margin-bottom: 15px; color: #1e293b; }
+        .hanzi-practice-box { width: 220px; height: 220px; border: 3px solid #cbd5e1; border-radius: 16px; background: white; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .tool-btn { background: white; border: 2px solid #e2e8f0; padding: 10px 20px; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; color: #475569; transition: 0.2s; }
+        .tool-btn:hover { background: #f1f5f9; border-color: #cbd5e1; }
+
+        /* 画板 */
+        .draw-panel { display: none; flex-direction: column; align-items: center; margin-top: 15px; background: #f8fafc; padding: 15px; border-radius: 16px; border: 2px dashed #cbd5e1; }
+        canvas { background: white; border-radius: 12px; border: 1px solid #e2e8f0; touch-action: none; cursor: crosshair; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
+        .draw-tools { display: flex; justify-content: space-between; width: 100%; margin-top: 10px; }
+
+        .res-section { border-top: 2px dashed #e2e8f0; margin-top: 20px; padding-top: 20px; text-align: left; }
+        .res-card { background: #f1f5f9; padding: 15px; border-radius: 12px; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        
+        @media (min-width: 768px) {
+            body { justify-content: center; padding: 40px; background: #e2e8f0; }
+            .container { max-width: 750px; padding: 40px; border-radius: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); }
+            .checkbox-grid { grid-template-columns: 1fr 1fr; gap: 15px; }
+            .word-card-btn { width: 80px; height: 80px; font-size: 40px; }
+            .hanzi-practice-box { width: 280px; height: 280px; }
+            .pinyin-display { font-size: 36px; }
+        }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="loading" class="screen" style="display:block;">Syncing Lessons...</div>
+
+    <div id="menu-screen" class="screen">
+        <h2 style="margin:0 0 10px 0; color:#0f172a;">Did you <span class="magic-number" style="font-size:1em;">6~7</span> today?</h2>
+        <div id="school-term-display" class="date-badge">Loading Date...</div>
+        
+        <div class="name-selector">
+            <button id="btn-P3" class="name-btn" onclick="switchUser('P3')">Valerie (P3)</button>
+            <button id="btn-P1" class="name-btn" onclick="switchUser('P1')">Venissa (P1)</button>
+        </div>
+        
+        <div id="subject-grid" class="subject-grid"></div>
+        <button id="btn-spelling" class="spelling-btn" onclick="showTopicSelection('华文', true)">✍️ 学听写 (Spelling)</button>
+        
+        <div class="res-section">
+            <h3 style="margin-top:0;">Resources 📚</h3>
+            <div id="res-list"></div>
+        </div>
+    </div>
+
+    <div id="topic-screen" class="screen">
+        <h2 id="topic-title" style="margin:0 0 10px 0; color:#0f172a;">Select Topics</h2>
+        <p id="topic-desc" style="color:#64748b; margin-bottom: 25px;"></p>
+        
+        <div style="text-align: left; margin-bottom: 15px;">
+            <label class="checkbox-label" id="check-all-label" style="background:#eff6ff; border-color:#3b82f6;">
+                <input type="checkbox" id="check-all" onchange="toggleAllTopics(this)" checked>
+                <b id="check-all-text">🌟 Select All Topics</b>
+            </label>
+        </div>
+
+        <div id="topic-checkboxes" class="checkbox-grid"></div>
+        
+        <div class="action-row">
+            <button class="btn-action" style="background:#f1f5f9; color:#475569; border:2px solid #e2e8f0; flex:0.4;" onclick="showScreen('menu-screen')">← Back</button>
+            <button class="btn-action" style="background:#3b82f6; color:white; flex:0.6; font-size:18px;" onclick="startQuiz()">Start 🚀</button>
+        </div>
+    </div>
+
+    <div id="quiz-screen" class="screen">
+        <div id="progress-bar" class="milestone-track"></div>
+        <div style="display:flex; justify-content: space-between; align-items: center;">
+            <button class="tool-btn" style="color:#10b981; border-color:#10b981;" onclick="toggleDrawPad()">✍️ 草稿板</button>
+            <div style="font-size:14px; color:#94a3b8;" id="progress-text"></div>
+        </div>
+        <div id="q-text" class="q-text"></div>
+        <div id="draw-panel" class="draw-panel">
+            <canvas id="pad" width="300" height="200"></canvas>
+            <div class="draw-tools">
+                <button class="tool-btn" onclick="clearPad()">🗑️ 清除</button>
+                <button class="tool-btn" onclick="toggleDrawPad()">❌ 收起</button>
+            </div>
+        </div>
+        <div id="input-container"></div>
+        <div id="fb-text" class="feedback"></div>
+        <div class="controls">
+            <button id="exit-btn" class="btn-action" style="background:#f1f5f9; color:#475569;" onclick="location.reload()">Exit</button>
+            <button id="sub-btn" class="btn-action" style="background:#1e293b; color:white;" onclick="checkAns()">Submit</button>
+            <button id="next-btn" class="btn-action" style="background:#10b981; color:white; display:none;" onclick="nextQ()">Next →</button>
+        </div>
+    </div>
+
+    <div id="spelling-screen" class="screen">
+        <div id="spell-progress-bar" class="milestone-track"></div>
+        
+        <h3 style="color:#64748b; margin-top:0; font-size: 16px;">选择你要练习的字：</h3>
+        <div id="spelling-pinyin" class="pinyin-display"></div>
+        
+        <div id="word-cards-container" class="word-cards-container"></div>
+        
+        <div id="practice-pad-container" class="practice-pad-container">
+            <div id="practice-char-label" class="practice-char-label"></div>
+            <div id="hanzi-practice-box" class="hanzi-practice-box"></div>
+            <div style="display: flex; gap: 15px; width: 100%; justify-content: center;">
+                <button class="tool-btn" onclick="retryPractice()">🔄 重写</button>
+                <button class="tool-btn" onclick="closePractice()">❌ 收起</button>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn-action" style="background:#f1f5f9; color:#475569; flex:0.3;" onclick="location.reload()">Exit</button>
+            <button class="btn-action" style="background:#10b981; color:white; flex:0.7;" onclick="nextSpellQ()">记住了，下一题 →</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const GEMINI_API_KEY = ""; 
+    const SHEET_ID = "1vQlpdRHnR9ybEHHgX6fouRI-vXOh8KQNLSjsbt0TYh9R3No_9i7QNv_4ELwJZJGQpTe3oZVXaZijaW4";
+    const GIDS = { "English": "1893311738", "Math": "59294467", "Science": "1581471994", "华文": "2020673087", "Resources": "469231602" };
+
+    let db = {}, curUser = 'P3', curSub = '', sessionQs = [], curIdx = 0, sessionErrors = 0;
+    let isSpellingMode = false;
+    let currentWriter = null;
+
+    // --- 画板 ---
+    let canvas, ctx, drawing = false;
+    function initDrawPad() {
+        canvas = document.getElementById('pad'); ctx = canvas.getContext('2d');
+        canvas.width = document.getElementById('quiz-screen').clientWidth - 60;
+        ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.lineWidth = 4; ctx.strokeStyle = '#0f172a';
+        canvas.addEventListener('mousedown', startDraw); canvas.addEventListener('mousemove', draw); canvas.addEventListener('mouseup', stopDraw); canvas.addEventListener('mouseout', stopDraw);
+        canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDraw(e.touches[0]); }, {passive: false});
+        canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e.touches[0]); }, {passive: false});
+        canvas.addEventListener('touchend', stopDraw);
+    }
+    function getMousePos(evt) { const rect = canvas.getBoundingClientRect(); return { x: evt.clientX - rect.left, y: evt.clientY - rect.top }; }
+    function startDraw(e) { drawing = true; const pos = getMousePos(e); ctx.beginPath(); ctx.moveTo(pos.x, pos.y); }
+    function draw(e) { if (!drawing) return; const pos = getMousePos(e); ctx.lineTo(pos.x, pos.y); ctx.stroke(); }
+    function stopDraw() { drawing = false; }
+    function clearPad() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+    function toggleDrawPad() {
+        const p = document.getElementById('draw-panel');
+        if(p.style.display === 'flex') p.style.display = 'none';
+        else { p.style.display = 'flex'; if(!canvas) initDrawPad(); canvas.width = document.getElementById('quiz-screen').clientWidth - 60; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.lineWidth = 4; }
+    }
+
+    function updateSchoolTerm() {
+        const now = new Date();
+        document.getElementById('school-term-display').innerText = `📅 ${now.toLocaleDateString('en-SG', {weekday:'short', month:'short', day:'numeric'})} | Practice Hub`;
+    }
+
+    async function init() {
+        updateSchoolTerm();
+        const loads = Object.entries(GIDS).map(([name, gid]) => {
+            return new Promise(res => {
+                Papa.parse(`https://docs.google.com/spreadsheets/d/e/2PACX-${SHEET_ID}/pub?gid=${gid}&single=true&output=csv&t=${Date.now()}`, {
+                    download: true, header: true, skipEmptyLines: 'greedy',
+                    complete: r => {
+                        const cleaned = r.data.map(row => { let n = {}; Object.keys(row).forEach(k => n[k.trim()] = row[k]); return n; });
+                        res({ name, data: cleaned });
+                    }, error: () => res(null)
+                });
+            });
+        });
+        const results = await Promise.all(loads);
+        db = {};
+        results.forEach(r => {
+            if(!r || !r.data) return;
+            r.data.forEach(row => {
+                let g = (row.Grade || row.grade || "").trim().toUpperCase();
+                if(!g) return;
+                if(!db[g]) db[g] = {};
+                if(!db[g][r.name]) db[g][r.name] = [];
+                db[g][r.name].push(row);
+            });
+        });
+        document.getElementById('loading').style.display = 'none';
+        showScreen('menu-screen');
+        switchUser('P3');
+    }
+
+    function switchUser(g) {
+        curUser = g;
+        document.getElementById('btn-P3').className = g === 'P3' ? 'name-btn active' : 'name-btn';
+        document.getElementById('btn-P1').className = g === 'P1' ? 'name-btn active' : 'name-btn';
+        
+        const grid = document.getElementById('subject-grid'); grid.innerHTML = '';
+        const colors = {"English": "#3b82f6", "Math": "#ec4899", "华文": "#a855f7", "Science": "#10b981"};
+        const orderedSubjects = ["English", "Math", "华文", "Science"];
+        
+        if(db[g]) {
+            orderedSubjects.forEach(s => {
+                if(db[g][s] && db[g][s].length > 0) {
+                    const hasNormalQs = db[g][s].some(q => (q.Type||"").toUpperCase() !== 'SPELLING');
+                    if(hasNormalQs) {
+                        const btn = document.createElement('button');
+                        btn.className = 'sub-btn'; btn.style.background = colors[s]; btn.innerText = s; 
+                        btn.onclick = () => showTopicSelection(s, false);
+                        grid.appendChild(btn);
+                    }
+                }
+            });
+            const hasSpelling = db[g]['华文'] && db[g]['华文'].some(q => (q.Type||"").toUpperCase() === 'SPELLING');
+            document.getElementById('btn-spelling').style.display = hasSpelling ? 'block' : 'none';
+        }
+    }
+
+    function renderRes(g) {
+        const list = document.getElementById('res-list'); list.innerHTML = '';
+        if(db[g] && db[g]['Resources']) {
+            db[g]['Resources'].forEach(r => {
+                const div = document.createElement('div'); div.className = 'res-card';
+                if(r.Type === 'IMAGE') div.innerHTML = `<b>${r.Title}</b><img src="${r.Content}" style="width:100%;margin-top:10px;border-radius:8px;">`;
+                else if(r.Type === 'PDF') div.innerHTML = `<b>${r.Title}</b><br><a href="${r.Content}" target="_blank" style="color:#2563eb;display:block;margin-top:8px;">🔗 Open Reference</a>`;
+                else div.innerHTML = `<b>${r.Title}</b><p style="margin-top:8px;">${r.Content}</p>`;
+                list.appendChild(div);
+            });
+        } else { list.innerHTML = `<p style="color:#94a3b8;">No resources yet.</p>`; }
+    }
+
+    function getSortWeight(str) {
+        const numMatch = str.match(/\d+/); if (numMatch) return parseInt(numMatch[0]);
+        const cnNums = { "十": 10, "九": 9, "八": 8, "七": 7, "六": 6, "五": 5, "四": 4, "三": 3, "二": 2, "一": 1 };
+        for (let key in cnNums) { if (str.includes(key)) return cnNums[key]; }
+        return 999;
+    }
+
+    function showTopicSelection(s, spellingMode) {
+        curSub = s; isSpellingMode = spellingMode;
+        let pool = db[curUser][s];
+        if (!pool) return;
+        pool = pool.filter(q => { let type = (q.Type || "").toString().trim().toUpperCase(); return isSpellingMode ? (type === 'SPELLING') : (type !== 'SPELLING'); });
+        if (pool.length === 0) return;
+
+        let topics = new Set();
+        pool.forEach(q => { let t = (q.Topic || q.topic || q.Lesson || "").toString().trim(); if (t !== "") topics.add(t); });
+
+        const isCN = (s === '华文');
+        document.getElementById('topic-title').innerText = isSpellingMode ? `你要练习哪里的字？` : (isCN ? `复习进度` : `Select Topics`);
+        document.getElementById('topic-desc').innerText = isCN ? `可以多选组合哦！` : `Choose the topics you want to practice.`;
+        document.getElementById('check-all-text').innerText = isCN ? '🌟 全选所有' : '🌟 Select All';
+        document.getElementById('check-all').checked = true;
+        
+        let topicsArr = Array.from(topics).sort((a, b) => getSortWeight(a) - getSortWeight(b));
+        let maxWeight = 0; topicsArr.forEach(t => { let w = getSortWeight(t); if(w < 999 && w > maxWeight) maxWeight = w; });
+
+        let renderItems = []; let bundledTopics = new Set();
+        if (maxWeight > 5) { let t1 = topicsArr.filter(t => getSortWeight(t) >= 1 && getSortWeight(t) <= 5); if (t1.length > 0) { renderItems.push({ label: isCN ? "🎒 第一学段 (第1-5课)" : "🎒 Term 1", values: t1, isBundle: true }); t1.forEach(t => bundledTopics.add(t)); } }
+        if (maxWeight > 10) { let t2 = topicsArr.filter(t => getSortWeight(t) >= 6 && getSortWeight(t) <= 10); if (t2.length > 0) { renderItems.push({ label: isCN ? "🎒 第二学段 (第6-10课)" : "🎒 Term 2", values: t2, isBundle: true }); t2.forEach(t => bundledTopics.add(t)); } }
+
+        topicsArr.forEach(t => { if (!bundledTopics.has(t)) { renderItems.push({ label: `📖 ${t}`, values: [t], isBundle: false }); } });
+
+        const boxGrid = document.getElementById('topic-checkboxes'); boxGrid.innerHTML = '';
+        renderItems.forEach(item => {
+            let baseClass = item.isBundle ? 'checkbox-label selected bundle-label' : 'checkbox-label selected';
+            const label = document.createElement('label'); label.className = baseClass;
+            const cb = document.createElement('input'); cb.type = 'checkbox'; cb.value = JSON.stringify(item.values); cb.checked = true; cb.className = 'topic-cb';
+            cb.onchange = () => { label.className = cb.checked ? baseClass : baseClass.replace('selected', '').trim(); syncCheckAll(); };
+            label.appendChild(cb); label.appendChild(document.createTextNode(` ${item.label}`));
+            boxGrid.appendChild(label);
+        });
+
+        showScreen('topic-screen');
+    }
+
+    function toggleAllTopics(master) {
+        document.querySelectorAll('.topic-cb').forEach(cb => { cb.checked = master.checked; let p = cb.parentElement.className; cb.parentElement.className = master.checked ? (p.includes('selected') ? p : p + ' selected') : p.replace('selected', '').trim(); });
+    }
+    function syncCheckAll() {
+        const allChecked = Array.from(document.querySelectorAll('.topic-cb')).every(cb => cb.checked);
+        document.getElementById('check-all').checked = allChecked; document.getElementById('check-all-label').className = allChecked ? 'checkbox-label selected' : 'checkbox-label';
+    }
+
+    function startQuiz() {
+        let pool = db[curUser][curSub];
+        const selectedJSONs = Array.from(document.querySelectorAll('.topic-cb:checked')).map(cb => cb.value);
+        if (selectedJSONs.length === 0) { alert("请至少选择一个知识点！"); return; }
+        
+        let selectedTopics = [];
+        selectedJSONs.forEach(j => { selectedTopics = selectedTopics.concat(JSON.parse(j)); });
+        
+        pool = pool.filter(q => {
+            let t = (q.Topic || q.topic || q.Lesson || "").toString().trim();
+            let type = (q.Type || "").toString().trim().toUpperCase();
+            let modeMatch = isSpellingMode ? (type === 'SPELLING') : (type !== 'SPELLING');
+            return selectedTopics.includes(t) && modeMatch;
+        });
+
+        curIdx = 0; sessionErrors = 0; 
+        document.getElementById('draw-panel').style.display = 'none';
+
+        // 听写一次练10个词，常规题目练7题
+        let grabCount = Math.min(pool.length, isSpellingMode ? 10 : 7);
+        sessionQs = pool.sort(() => 0.5 - Math.random()).slice(0, grabCount);
+        
+        if(isSpellingMode) { showScreen('spelling-screen'); renderSpelling(); }
+        else { showScreen('quiz-screen'); renderQ(); }
+    }
+
+    function updateProgress(barId) {
+        const bar = document.getElementById(barId);
+        const len = sessionQs.length; const pct = len > 1 ? (curIdx / (len - 1)) * 100 : 100;
+        let activeIcon = isSpellingMode ? '✍️' : (curSub === '华文' ? '🐼' : (curSub === 'Science' ? '🌱' : (curSub === 'Math' ? '🔢' : '🚀')));
+        let html = `<div class="milestone-fill" style="width: ${pct}%"></div>`;
+        for(let i=0; i<len; i++) {
+            let cls = 'milestone' + (i < curIdx ? ' done' : (i === curIdx ? ' active' : ''));
+            html += `<div class="${cls}">${i < curIdx ? '⭐' : (i === curIdx ? activeIcon : '☁️')}</div>`;
+        }
+        bar.innerHTML = html;
+    }
+
+    // --- 全新靶向听写逻辑 ---
+    function renderSpelling() {
+        updateProgress('spell-progress-bar');
+        const q = sessionQs[curIdx];
+        const pinyin = q.Question.trim();
+        const hanziWord = (q['Correct Answer'] || "").toString().trim();
+        
+        document.getElementById('spelling-pinyin').innerText = pinyin;
+        closePractice(); // 隐藏练字板
+
+        const container = document.getElementById('word-cards-container');
+        container.innerHTML = '';
+
+        // 遍历整个句子/词组
+        for (let i = 0; i < hanziWord.length; i++) {
+            let char = hanziWord[i];
+            
+            // 遇到标点符号，直接显示文本，不生成按钮
+            if(/[，。！？、：；（）《》“”]/u.test(char)) {
+                let span = document.createElement('span');
+                span.innerText = char;
+                span.style.fontSize = '30px';
+                span.style.color = '#64748b';
+                span.style.margin = '0 2px';
+                container.appendChild(span);
+                continue;
+            }
+
+            // 生成字卡按钮
+            let btn = document.createElement('button');
+            btn.className = 'word-card-btn';
+            btn.innerText = char;
+            btn.onclick = () => openPractice(char, btn);
+            container.appendChild(btn);
+        }
+    }
+
+    function openPractice(char, btnElement) {
+        document.querySelectorAll('.word-card-btn').forEach(b => b.classList.remove('active'));
+        if(btnElement) btnElement.classList.add('active');
+
+        const padContainer = document.getElementById('practice-pad-container');
+        padContainer.style.display = 'flex';
+        document.getElementById('practice-char-label').innerHTML = `正在练习：<span style="color:#f59e0b;">${char}</span>`;
+
+        const box = document.getElementById('hanzi-practice-box');
+        box.innerHTML = ''; 
+
+        // 取屏幕宽度来响应式设置汉字书写区大小
+        let boxSize = document.body.clientWidth < 400 ? 180 : 260;
+        box.style.width = boxSize + 'px';
+        box.style.height = boxSize + 'px';
+
+        currentWriter = HanziWriter.create('hanzi-practice-box', char, {
+            width: boxSize, height: boxSize, padding: 15,
+            showOutline: true, strokeAnimationSpeed: 1, delayBetweenStrokes: 50,
+            outlineColor: '#cbd5e1', strokeColor: '#1e293b', drawingColor: '#3b82f6',
+            showCharacter: false
+        });
+
+        currentWriter.quiz({
+            onComplete: function() {
+                document.getElementById('practice-char-label').innerHTML = `练习：${char} <span style="color:#10b981;">✅ 完美！</span>`;
+            }
+        });
+    }
+
+    function retryPractice() {
+        if(currentWriter) {
+            document.getElementById('practice-char-label').innerHTML = `正在练习：<span style="color:#f59e0b;">${currentWriter._character}</span>`;
+            currentWriter.quiz(); 
+        }
+    }
+
+    function closePractice() {
+        document.getElementById('practice-pad-container').style.display = 'none';
+        if(currentWriter) { currentWriter.cancelQuiz(); currentWriter = null; }
+        document.querySelectorAll('.word-card-btn').forEach(b => b.classList.remove('active'));
+    }
+
+    function nextSpellQ() {
+        if(curIdx < sessionQs.length - 1) { curIdx++; renderSpelling(); } 
+        else { finishQuiz(); }
+    }
+
+    // --- 常规答题逻辑 ---
+    function renderQ() {
+        updateProgress('progress-bar'); 
+        if(ctx && canvas) clearPad();
+        const q = sessionQs[curIdx]; const isCN = (curSub === '华文');
+        document.getElementById('q-text').innerText = q.Question;
+        const container = document.getElementById('input-container');
+        const qType = (q.Type || "").toString().trim().toUpperCase();
+        
+        if (qType === 'OPEN') {
+            container.innerHTML = `<textarea id="ans-in" class="ans-input" rows="5" placeholder="${isCN ? '在此输入你的完整答案...' : 'Type your full answer here...'}"></textarea>`;
+            setTimeout(() => document.getElementById('ans-in').focus(), 100);
+        } else if (qType === 'MCQ') {
+            const opts = (q.Options || q.options || "").toString().split('/').map(o => o.trim()).filter(o => o);
+            let html = `<div class="mcq-list">`;
+            opts.forEach(opt => { html += `<button class="mcq-btn" onclick="selectMCQ(this, '${opt.replace(/'/g, "\\'").replace(/"/g, "&quot;")}')">${opt}</button>`; });
+            html += `</div><input type="hidden" id="ans-in" value="">`;
+            container.innerHTML = html;
+        } else {
+            container.innerHTML = `<input type="text" id="ans-in" class="ans-input" placeholder="${isCN ? '在此输入答案...' : 'Type answer here...'}" autocomplete="off">`;
+            document.getElementById('ans-in').onkeydown = (e) => { if(e.key === 'Enter' && document.getElementById('sub-btn').style.display !== 'none') { e.preventDefault(); checkAns(); } };
+            setTimeout(() => document.getElementById('ans-in').focus(), 100);
+        }
+        document.getElementById('fb-text').innerText = '';
+        document.getElementById('sub-btn').style.display = 'block'; document.getElementById('next-btn').style.display = 'none';
+    }
+
+    function selectMCQ(btn, val) {
+        if(document.getElementById('sub-btn').style.display === 'none') return; 
+        document.querySelectorAll('.mcq-btn').forEach(b => { b.classList.remove('active'); b.classList.remove('error'); });
+        btn.classList.add('active'); document.getElementById('ans-in').value = val;
+    }
+
+    async function checkAns() {
+        const input = document.getElementById('ans-in');
+        const user = input.value.trim().toLowerCase();
+        const correctRaw = (sessionQs[curIdx]['Correct Answer'] || "").toString().trim();
+        const fb = document.getElementById('fb-text');
+        const qType = (sessionQs[curIdx]['Type'] || "").toString().trim().toUpperCase();
+        const isCN = (curSub === '华文');
+        
+        if(user === "") { if(qType === 'MCQ') alert(isCN ? "请选择一个选项！" : "Please select an option!"); return; }
+
+        const showNextState = () => {
+            input.disabled = true; document.getElementById('sub-btn').style.display = 'none';
+            document.getElementById('next-btn').style.display = 'block';
+            setTimeout(() => document.getElementById('next-btn').focus(), 50); 
+        };
+
+        if (qType === 'OPEN') {
+            if (GEMINI_API_KEY && GEMINI_API_KEY !== "YOUR_API_KEY_HERE") {
+                fb.innerHTML = `<span style="color:#3b82f6; font-size: 16px;">⏳ ${isCN ? "老师正在看你的答案..." : "Teacher is reading your answer..."}</span>`;
+                try {
+                    const promptText = `You are a primary school teacher. Question: ${sessionQs[curIdx].Question}. Standard Answer: ${correctRaw}. Student Answer: ${user}. Evaluate meaning. Reply JSON: {"correct": boolean, "comment": "encouraging feedback in ${isCN ? 'Simplified Chinese' : 'English'}"}`;
+                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
+                    });
+                    const data = await res.json();
+                    let aiRes = data.candidates[0].content.parts[0].text.replace(/```json/g, '').replace(/```/g, '').trim();
+                    const result = JSON.parse(aiRes);
+                    if (result.correct) fb.innerHTML = `<span style="color:#10b981;">✅ ${isCN ? "答对啦！" : "Excellent!"}</span><br><span style="font-size:16px; color:#475569;">${result.comment}</span>`;
+                    else { sessionErrors++; fb.innerHTML = `<span style="color:#ef4444;">❌ ${isCN ? "还差一点点。" : "Not quite right."}</span><br><span style="font-size:16px; color:#475569;">${result.comment}</span><br><br><span style="color:#0f172a; font-size: 15px;"><b>${isCN ? "参考答案：" : "Standard Answer:"}</b> ${correctRaw}</span>`; }
+                } catch (e) { fb.innerHTML = `<span style="color:#0f172a;"><b>${isCN ? "参考答案：" : "Suggested Answer:"}</b></span><br><span style="font-size:18px; color:#10b981;">${correctRaw}</span><br><span style="font-size:14px; color:#64748b;">${isCN ? "(只需意思相近即可)" : "(Check if your meaning is similar)"}</span>`; }
+            } else {
+                fb.innerHTML = `<span style="color:#0f172a;"><b>${isCN ? "参考答案：" : "Suggested Answer:"}</b></span><br><span style="font-size:18px; color:#10b981;">${correctRaw}</span><br><span style="font-size:14px; color:#64748b;">${isCN ? "(只需意思相近即可)" : "(Check if your meaning is similar)"}</span>`;
+            }
+            showNextState(); return;
+        }
+
+        if(user === correctRaw.toLowerCase()) {
+            fb.innerHTML = `<span style="color:#10b981;">${isCN ? "✅ 答对啦！非常棒。" : "✅ Correct! Well done."}</span>`;
+            showNextState();
+            if (qType === 'MCQ') { document.querySelectorAll('.mcq-btn').forEach(b => { if(!b.classList.contains('active')) b.style.opacity = '0.5'; }); } 
+            else { input.className = 'ans-input'; }
+        } else {
+            sessionErrors++; 
+            if (qType === 'MCQ') {
+                fb.innerHTML = `<span style="color:#ef4444;">${isCN ? "❌ 不对哦，试试其他选项！" : "❌ Not quite. Try another option!"}</span>`;
+                const activeBtn = document.querySelector('.mcq-btn.active');
+                if(activeBtn) { activeBtn.classList.remove('active'); activeBtn.classList.add('error'); }
+                input.value = ''; 
+            } else {
+                fb.innerHTML = `<span style="color:#ef4444;">${isCN ? "❌ 拼写不对哦，请检查一下！" : "❌ Not quite. Check your spelling!"}</span><br><span style="font-size:15px; color:#64748b;">${isCN ? "提示：" : "Hint: "}<b>${correctRaw}</b></span>`;
+                input.className = 'ans-input error-shake';
+                setTimeout(() => { input.className = 'ans-input'; input.style.backgroundColor = '#fef2f2'; input.select(); }, 300);
+            }
+        }
+    }
+
+    function nextQ() {
+        if(curIdx < sessionQs.length - 1) { curIdx++; renderQ(); } 
+        else { finishQuiz(); }
+    }
+
+    function finishQuiz() {
+        const isCN = (curSub === '华文');
+        document.querySelectorAll('.milestone-track').forEach(el => el.style.display = 'none');
+        document.getElementById('draw-panel').style.display = 'none';
+        
+        let msg = ""; let magic67 = `<span class="magic-number">6~7</span>`; 
+        if(isSpellingMode) {
+            msg = `🎉 恭喜你完成了今天的练字任务！写得真棒！`;
+        } else {
+            if (sessionErrors <= 1) msg = isCN ? `🎉 恭喜你，今天的${curSub}获得了 ${magic67} 的好成绩！太棒了！` : `🎉 Congratulations, you've got ${magic67} for your ${curSub} today!`;
+            else msg = isCN ? `💪 挑战完成！多练几次，争取下次拿到 ${magic67} 哦！` : `💪 Good effort! Keep practicing to get ${magic67} next time!`;
+        }
+
+        const targetScreen = isSpellingMode ? 'spelling-screen' : 'quiz-screen';
+        document.getElementById(targetScreen).innerHTML = `
+            <div style="text-align:center; padding: 40px 0; font-size: 26px; color: #064e3b; font-weight:bold; line-height: 1.8;">${msg}</div>
+            <button class="btn-action" style="background:#10b981; color:white; width:100%;" onclick="location.reload()">${isCN ? "返回主菜单" : "Back to Menu"}</button>
+        `;
+    }
+
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
+        document.getElementById(id).style.display = 'block';
+    }
+
+    init();
+</script>
+</body>
+</html>
