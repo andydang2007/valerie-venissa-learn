@@ -6,107 +6,163 @@
     <title>Family Learning Hub</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <style>
-        :root { --primary: #10b981; --bg: #f0fdf4; }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 20px; display: flex; justify-content: center; }
-        .container { background: #fff; padding: 35px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); width: 100%; max-width: 600px; text-align: center; }
+        :root { --primary: #10b981; --bg: #f8fafc; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #1e293b; }
+        .container { max-width: 600px; margin: auto; background: #fff; padding: 25px; border-radius: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center; }
         .screen { display: none; }
-        .btn { font-size: 20px; font-weight: bold; padding: 20px; border-radius: 15px; border: none; cursor: pointer; transition: 0.2s; }
-        .btn-subject { background: #3b82f6; color: white; width: 100%; margin-top: 20px; }
-        .question-box { text-align: left; margin: 30px 0; }
-        .q-text { font-size: 26px; font-weight: 500; line-height: 1.5; margin-bottom: 20px; }
-        input.ans-input { font-size: 22px; padding: 15px; width: 100%; border: 2px solid #e5e7eb; border-radius: 12px; box-sizing: border-box; outline: none; }
-        input.ans-input:focus { border-color: var(--primary); }
-        .feedback { font-size: 20px; font-weight: bold; margin: 20px 0; min-height: 30px; }
-        .controls { display: flex; gap: 10px; }
-        .btn-action { flex: 1; background: #111827; color: white; padding: 15px; border-radius: 10px; font-size: 18px; }
+        .name-selector { display: flex; gap: 10px; justify-content: center; margin: 20px 0; }
+        button.name-btn { padding: 10px 20px; border-radius: 12px; border: 2px solid #e2e8f0; background: white; cursor: pointer; font-weight: 600; }
+        button.name-btn.active { border-color: var(--primary); background: #d1fae5; color: #065f46; }
+        .subject-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 30px; }
+        button.sub-btn { padding: 20px; border-radius: 16px; border: none; color: white; font-size: 18px; font-weight: bold; cursor: pointer; }
+        /* 答题区 */
+        .q-text { font-size: 24px; text-align: left; margin: 25px 0; line-height: 1.5; }
+        input.ans-input { font-size: 20px; padding: 15px; width: 100%; border: 2px solid #e2e8f0; border-radius: 12px; box-sizing: border-box; }
+        input.ans-input.error-shake { border-color: #ef4444; animation: shake 0.3s; }
+        .feedback { font-size: 18px; margin: 15px 0; min-height: 25px; font-weight: bold; }
+        .controls { display: flex; gap: 10px; margin-top: 20px; }
+        .btn-action { flex: 1; padding: 15px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
+        /* 资源卡片 */
+        .res-section { border-top: 2px dashed #e2e8f0; margin-top: 20px; padding-top: 20px; text-align: left; }
+        .res-card { background: #f1f5f9; padding: 15px; border-radius: 12px; margin-bottom: 12px; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div id="loading-screen" class="screen" style="display:block;">
-        <p>Loading English Questions...</p>
-    </div>
+    <div id="loading" class="screen" style="display:block;">Syncing Cloud Data...</div>
 
     <div id="menu-screen" class="screen">
-        <h1>Valerie's Practice</h1>
-        <div id="subject-list">
-            </div>
+        <h2 style="margin-top:0;">Practice Hub</h2>
+        <div class="name-selector">
+            <button id="btn-P3" class="name-btn" onclick="switchUser('P3')">Valerie (P3)</button>
+            <button id="btn-P1" class="name-btn" onclick="switchUser('P1')">Venissa (P1)</button>
+        </div>
+        <div id="subject-grid" class="subject-grid"></div>
+        <div class="res-section">
+            <h3 style="margin-top:0;">Resources 📚</h3>
+            <div id="res-list"></div>
+        </div>
     </div>
 
     <div id="quiz-screen" class="screen">
-        <div class="question-box">
-            <div id="q-text" class="q-text"></div>
-            <input type="text" id="ans-in" class="ans-input" placeholder="Type your answer here..." autocomplete="off">
-        </div>
+        <div id="q-text" class="q-text"></div>
+        <input type="text" id="ans-in" class="ans-input" placeholder="Type answer..." autocomplete="off">
         <div id="fb-text" class="feedback"></div>
         <div class="controls">
-            <button class="btn-action" onclick="location.reload()">Exit</button>
-            <button class="btn-action" id="sub-btn" onclick="checkAnswer()">Submit</button>
-            <button class="btn-action" id="next-btn" style="display:none;" onclick="location.reload()">Finish</button>
+            <button class="btn-action" style="background:#f1f5f9;" onclick="location.reload()">Exit</button>
+            <button id="sub-btn" class="btn-action" style="background:#111827; color:white;" onclick="checkAns()">Submit</button>
+            <button id="next-btn" class="btn-action" style="background:#10b981; color:white; display:none;" onclick="nextQ()">Next →</button>
         </div>
     </div>
 </div>
 
 <script>
-    // --- 请确保这里的 GID 是你 English 标签页的 ---
-    const ENGLISH_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQlpdRHnR9ybEHHgX6fouRI-vXOh8KQNLSjsbt0TYh9R3No_9i7QNv_4ELwJZJGQpTe3oZVXaZijaW4/pub?gid=1893311738&single=true&output=csv";
+    const SHEET_ID = "1vQlpdRHnR9ybEHHgX6fouRI-vXOh8KQNLSjsbt0TYh9R3No_9i7QNv_4ELwJZJGQpTe3oZVXaZijaW4";
+    const GIDS = { "English": "1055551329", "Math": "59294467", "Science": "1581471994", "Chinese": "2020673087", "Resources": "469231602" };
+    let db = {}, curUser = 'P3', curSub = '', sessionQs = [], curIdx = 0;
 
-    let questions = [];
-
-    window.onload = function() {
-        Papa.parse(ENGLISH_URL + "&t=" + Date.now(), {
-            download: true,
-            header: true,
-            skipEmptyLines: 'greedy',
-            complete: function(results) {
-                questions = results.data.filter(r => r.Grade === 'P3');
-                if (questions.length > 0) {
-                    showMenu();
-                } else {
-                    document.getElementById('loading-screen').innerText = "No P3 English questions found.";
-                }
-            }
+    async function init() {
+        const loads = Object.entries(GIDS).map(([name, gid]) => {
+            return new Promise(res => {
+                Papa.parse(`https://docs.google.com/spreadsheets/d/e/2PACX-${SHEET_ID}/pub?gid=${gid}&single=true&output=csv&t=${Date.now()}`, {
+                    download: true, header: true, complete: r => res({ name, data: r.data })
+                });
+            });
         });
-    };
-
-    function showMenu() {
-        document.getElementById('loading-screen').style.display = 'none';
-        document.getElementById('menu-screen').style.display = 'block';
-        const list = document.getElementById('subject-list');
-        list.innerHTML = `<button class="btn btn-subject">English (P3)</button>`;
-        list.onclick = startQuiz;
+        const results = await Promise.all(loads);
+        results.forEach(r => {
+            r.data.forEach(row => {
+                let g = (row.Grade || "").trim();
+                if(!g) return;
+                if(!db[g]) db[g] = {};
+                if(!db[g][r.name]) db[g][r.name] = [];
+                db[g][r.name].push(row);
+            });
+        });
+        showScreen('menu-screen'); switchUser('P3');
     }
 
-    function startQuiz() {
-        document.getElementById('menu-screen').style.display = 'none';
-        document.getElementById('quiz-screen').style.display = 'block';
-        const q = questions[0]; // 抓取第一题（你的填空题）
-        document.getElementById('q-text').innerText = q.Question;
-        
-        // 绑定回车键
-        document.getElementById('ans-in').addEventListener("keypress", (e) => {
-            if(e.key === "Enter") checkAnswer();
-        });
-    }
-
-    function checkAnswer() {
-        const userAns = document.getElementById('ans-in').value.trim().toLowerCase();
-        const correctAns = questions[0]['Correct Answer'].toString().trim().toLowerCase();
-        const fb = document.getElementById('fb-text');
-
-        if (userAns === correctAns) {
-            fb.innerText = "✅ Excellent! It's correct.";
-            fb.style.color = "#10b981";
-        } else {
-            fb.innerText = "❌ Not quite. Answer is: " + questions[0]['Correct Answer'];
-            fb.style.color = "#ef4444";
+    function switchUser(g) {
+        curUser = g;
+        document.getElementById('btn-P3').className = g === 'P3' ? 'name-btn active' : 'name-btn';
+        document.getElementById('btn-P1').className = g === 'P1' ? 'name-btn active' : 'name-btn';
+        const grid = document.getElementById('subject-grid'); grid.innerHTML = '';
+        const colors = {"English":"#3b82f6","Math":"#10b981","Science":"#ef4444","Chinese":"#f59e0b"};
+        if(db[g]) {
+            Object.keys(db[g]).forEach(s => {
+                if(s === 'Resources') return;
+                const btn = document.createElement('button');
+                btn.className = 'sub-btn'; btn.style.background = colors[s] || "#64748b";
+                btn.innerText = s; btn.onclick = () => startQuiz(s);
+                grid.appendChild(btn);
+            });
         }
-        
-        document.getElementById('sub-btn').style.display = 'none';
-        document.getElementById('next-btn').style.display = 'block';
-        document.getElementById('ans-in').disabled = true;
+        renderRes(g);
     }
+
+    function renderRes(g) {
+        const list = document.getElementById('res-list'); list.innerHTML = '';
+        if(db[g] && db[g]['Resources']) {
+            db[g]['Resources'].forEach(r => {
+                const div = document.createElement('div'); div.className = 'res-card';
+                if(r.Type === 'IMAGE') div.innerHTML = `<b>${r.Title}</b><img src="${r.Content}" style="width:100%;margin-top:10px;">`;
+                else if(r.Type === 'PDF') div.innerHTML = `<b>${r.Title}</b><br><a href="${r.Content}" target="_blank">🔗 Open PDF</a>`;
+                else div.innerHTML = `<b>${r.Title}</b><p>${r.Content}</p>`;
+                list.appendChild(div);
+            });
+        }
+    }
+
+    function startQuiz(s) {
+        curSub = s; curIdx = 0;
+        sessionQs = db[curUser][s].sort(() => 0.5 - Math.random()).slice(0, 5);
+        showScreen('quiz-screen'); renderQ();
+    }
+
+    function renderQ() {
+        const q = sessionQs[curIdx];
+        document.getElementById('q-text').innerText = q.Question;
+        document.getElementById('ans-in').value = '';
+        document.getElementById('ans-in').disabled = false;
+        document.getElementById('ans-in').className = 'ans-input';
+        document.getElementById('fb-text').innerText = '';
+        document.getElementById('sub-btn').style.display = 'block';
+        document.getElementById('next-btn').style.display = 'none';
+    }
+
+    function checkAns() {
+        const input = document.getElementById('ans-in');
+        const user = input.value.trim().toLowerCase();
+        const correct = sessionQs[curIdx]['Correct Answer'].toString().trim().toLowerCase();
+        const fb = document.getElementById('fb-text');
+        
+        if(user === correct) {
+            fb.innerText = "✅ Excellent! Correct."; fb.style.color = "#10b981";
+            input.disabled = true;
+            document.getElementById('sub-btn').style.display = 'none';
+            document.getElementById('next-btn').style.display = 'block';
+        } else {
+            fb.innerText = "❌ Not quite right. Try again!"; fb.style.color = "#ef4444";
+            input.className = 'ans-input error-shake';
+            setTimeout(() => input.className = 'ans-input', 300);
+            input.value = ''; // 清空让孩子重填
+            input.focus();
+        }
+    }
+
+    function nextQ() {
+        if(curIdx < sessionQs.length - 1) { curIdx++; renderQ(); }
+        else { location.reload(); }
+    }
+
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
+        document.getElementById(id).style.display = 'block';
+    }
+
+    init();
 </script>
 </body>
 </html>
