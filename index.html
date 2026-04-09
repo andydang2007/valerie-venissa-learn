@@ -178,13 +178,14 @@
             input.disabled = true;
             document.getElementById('sub-btn').style.display = 'none';
             document.getElementById('next-btn').style.display = 'block';
-        } else {
-            fb.innerText = "❌ Not quite right. Try again!";
+} else {
+            // 在提示语里直接把正确答案写出来
+            fb.innerHTML = `❌ Try again! <br><span style="font-size:14px; color:#94a3b8;">Hint: ${sessionQs[curIdx]['Correct Answer']}</span>`;
             fb.style.color = "#ef4444";
             input.className = 'ans-input error-shake';
             setTimeout(() => {
                 input.className = 'ans-input';
-                input.value = '';
+                input.value = ''; // 清空让她照着 Hint 练一遍
             }, 400);
         }
     }
