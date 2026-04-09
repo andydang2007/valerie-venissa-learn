@@ -2,60 +2,151 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Connection Test</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Family Learning Hub</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <style>
-        body { font-family: monospace; background: #1a1a1a; color: #00ff00; padding: 20px; line-height: 1.5; }
-        .success { color: #4ade80; font-weight: bold; }
-        .error { color: #f87171; }
-        .data-row { background: #333; margin: 5px 0; padding: 10px; border-left: 5px solid #00ff00; }
+        body { font-family: -apple-system, sans-serif; background: #f0fdf4; margin: 0; padding: 20px; display: flex; justify-content: center; }
+        .container { background: #fff; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 700px; text-align: center; }
+        h1 { color: #064e3b; margin-bottom: 5px; }
+        .name-selector { display: flex; gap: 15px; justify-content: center; margin: 25px 0; }
+        button.name-btn { font-size: 20px; font-weight: bold; padding: 12px 25px; border: 2px solid #e2e8f0; border-radius: 12px; cursor: pointer; background: white; transition: 0.2s; }
+        button.name-btn.active { border-color: #10b981; background: #d1fae5; color: #065f46; }
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        button.subject-btn { font-size: 22px; font-weight: bold; padding: 25px; border: none; border-radius: 15px; cursor: pointer; color: white; transition: 0.2s; }
+        button.subject-btn:hover { transform: translateY(-3px); filter: brightness(1.1); }
+        /* Quiz Styles */
+        .screen { display: none; }
+        .question { font-size: 28px; margin: 30px 0; text-align: left; line-height: 1.4; }
+        input.text-input { font-size: 24px; padding: 12px; width: 100%; box-sizing: border-box; border: 2px solid #e2e8f0; border-radius: 8px; }
+        .feedback { margin: 20px 0; font-weight: bold; font-size: 20px; }
+        .controls { display: flex; gap: 10px; margin-top: 20px; }
+        button.action-btn { flex: 1; padding: 15px; font-size: 18px; border-radius: 10px; border: none; cursor: pointer; font-weight: bold; }
+        .primary { background: #111827; color: white; }
     </style>
 </head>
 <body>
-    <h2>=== CORE CONNECTION DIAGNOSTIC ===</h2>
-    <div id="status">Starting fetch...</div>
-    <div id="raw-output"></div>
+
+<div class="container">
+    <div id="loading-screen" class="screen" style="display:block;">
+        <h2>Syncing 4 Subjects...</h2>
+        <p id="load-status">Connecting...</p>
+    </div>
+
+    <div id="menu-screen" class="screen">
+        <h1>Family Learning Hub</h1>
+        <div class="name-selector">
+            <button id="btn-valerie" class="name-btn" onclick="switchUser('P3', 'Valerie')">Valerie (P3)</button>
+            <button id="btn-venissa" class="name-btn" onclick="selectUser('P1', 'Venissa')">Venissa (P1)</button>
+        </div>
+        <div class="menu-grid" id="subject-grid"></div>
+    </div>
+
+    <div id="quiz-screen" class="screen">
+        <h3 id="quiz-title" style="color:#64748b;">Subject</h3>
+        <div class="question" id="q-text"></div>
+        <div id="q-input-area"></div>
+        <div class="feedback" id="fb-text"></div>
+        <div class="controls">
+            <button class="action-btn" onclick="showScreen('menu-screen')">Exit</button>
+            <button class="action-btn primary" id="sub-btn" onclick="checkAns()">Submit</button>
+            <button class="action-btn primary" id="next-btn" style="display:none;" onclick="nextQ()">Next</button>
+        </div>
+    </div>
+</div>
 
 <script>
-    // 替换成你刚才专门发布 English Tab 得到的 CSV 链接
-    const TEST_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQlpdRHnR9ybEHHgX6fouRI-vXOh8KQNLSjsbt0TYh9R3No_9i7QNv_4ELwJZJGQpTe3oZVXaZijaW4/pub?gid=1893311738&single=true&output=csv"; 
+    // --- 【在这里填入你的 CSV 链接】 ---
+    // 你可以只用一个主链接，只要你发布的是“整个文档”
+    const BASE_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQlpdRHnR9ybEHHgX6fouRI-vXOh8KQNLSjsbt0TYh9R3No_9i7QNv_4ELwJZJGQpTe3oZVXaZijaW4/pub?output=csv"; 
+
+    let db = {}; 
+    let curGrade = 'P3', curSub = '', sessionQs = [], curIdx = 0;
 
     window.onload = function() {
-        console.log("Fetching URL:", TEST_URL);
-        
-        Papa.parse(TEST_URL + "&cache=" + Date.now(), {
-            download: true,
-            header: true,
+        Papa.parse(BASE_URL + "&t=" + Date.now(), {
+            download: true, header: true, skipEmptyLines: true,
             complete: function(results) {
-                const status = document.getElementById('status');
-                const output = document.getElementById('raw-output');
-                
-                if (results.data && results.data.length > 0) {
-                    status.innerHTML = `<span class="success">SUCCESS! Found ${results.data.length} rows.</span>`;
-                    
-                    results.data.forEach((row, i) => {
-                        const div = document.createElement('div');
-                        div.className = 'data-row';
-                        div.innerText = `Row ${i + 1}: ` + JSON.stringify(row);
-                        output.appendChild(div);
-                    });
-
-                    // 检查是否存在 Grade 键
-                    const keys = Object.keys(results.data[0]);
-                    const hasGrade = keys.some(k => k.trim().toLowerCase() === 'grade');
-                    output.innerHTML += `<br><span class="${hasGrade?'success':'error'}">
-                        Column 'Grade' check: ${hasGrade ? 'FOUND ✅' : 'NOT FOUND ❌'}
-                        (Available columns: ${keys.join(', ')})
-                    </span>`;
-                } else {
-                    status.innerHTML = `<span class="error">CONNECTED BUT NO DATA. Check if Sheet is empty.</span>`;
-                }
-            },
-            error: function(err) {
-                status.innerHTML = `<span class="error">CONNECTION FAILED: ${err}</span>`;
+                document.getElementById('load-status').innerText = "Data Received!";
+                processData(results.data);
+                showScreen('menu-screen');
+                switchUser('P3', 'Valerie');
             }
         });
     };
+
+    function processData(data) {
+        db = {};
+        data.forEach(row => {
+            const g = row.Grade?.trim();
+            const s = row.Subject?.trim();
+            if(!g || !s) return;
+            if(!db[g]) db[g] = {};
+            if(!db[g][s]) db[g][s] = [];
+            db[g][s].push(row);
+        });
+    }
+
+    function switchUser(grade, name) {
+        curGrade = grade;
+        document.getElementById('btn-valerie').className = name === 'Valerie' ? 'name-btn active' : 'name-btn';
+        // Venissa 逻辑类似
+        const grid = document.getElementById('subject-grid');
+        grid.innerHTML = '';
+        const colors = ["#2563eb", "#059669", "#e11d48", "#d97706"];
+        
+        if(db[grade]) {
+            Object.keys(db[grade]).forEach((sub, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'subject-btn';
+                btn.style.background = colors[i % colors.length];
+                btn.innerText = sub;
+                btn.onclick = () => startQuiz(sub);
+                grid.appendChild(btn);
+            });
+        }
+    }
+
+    function startQuiz(sub) {
+        curSub = sub; curIdx = 0;
+        sessionQs = db[curGrade][sub].sort(() => 0.5 - Math.random()).slice(0, 5);
+        showScreen('quiz-screen');
+        renderQ();
+    }
+
+    function renderQ() {
+        const q = sessionQs[curIdx];
+        document.getElementById('quiz-title').innerText = `${curSub} - Question ${curIdx + 1}`;
+        document.getElementById('q-text').innerText = q.Question;
+        document.getElementById('fb-text').innerText = '';
+        document.getElementById('sub-btn').style.display = 'block';
+        document.getElementById('next-btn').style.display = 'none';
+        document.getElementById('q-input-area').innerHTML = `<input type="text" id="ans-in" class="text-input" placeholder="Your answer...">`;
+    }
+
+    function checkAns() {
+        const userAns = document.getElementById('ans-in').value.trim().toLowerCase();
+        const correctAns = sessionQs[curIdx]['Correct Answer'].trim().toLowerCase();
+        const fb = document.getElementById('fb-text');
+        if(userAns === correctAns) {
+            fb.innerText = "✅ Correct!"; fb.style.color = "#10b981";
+        } else {
+            fb.innerText = "❌ Keep trying! Answer: " + sessionQs[curIdx]['Correct Answer'];
+            fb.style.color = "#ef4444";
+        }
+        document.getElementById('sub-btn').style.display = 'none';
+        document.getElementById('next-btn').style.display = 'block';
+    }
+
+    function nextQ() {
+        if(curIdx < sessionQs.length - 1) { curIdx++; renderQ(); }
+        else { alert("Amazing! You finished!"); showScreen('menu-screen'); }
+    }
+
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
+        document.getElementById(id).style.display = 'block';
+    }
 </script>
 </body>
 </html>
