@@ -26,15 +26,19 @@
         button.name-btn { padding: 10px 20px; border-radius: 12px; border: 2px solid #e2e8f0; background: white; cursor: pointer; font-weight: 600; transition: 0.2s; }
         button.name-btn.active { border-color: var(--primary); background: #d1fae5; color: #065f46; transform: scale(1.05); }
         
-        /* 进度选择器样式 */
-        .topic-selector { margin-bottom: 25px; }
-        select.topic-drop { padding: 12px 20px; border-radius: 12px; border: 2px solid #e2e8f0; font-size: 16px; outline: none; background: #f8fafc; color: #334155; font-weight: 600; cursor: pointer; width: 80%; max-width: 300px; transition: 0.2s; }
-        select.topic-drop:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.2); }
-
-        .subject-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 30px; }
-        button.sub-btn { padding: 20px; border-radius: 16px; border: none; color: white; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .subject-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin-bottom: 30px; }
+        button.sub-btn { flex: 1 1 40%; max-width: 45%; padding: 20px; border-radius: 16px; border: none; color: white; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.2s; box-sizing: border-box; }
         button.sub-btn:hover { transform: translateY(-2px); filter: brightness(1.05); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         
+        /* 进阶多选器样式 */
+        .checkbox-grid { display: grid; grid-template-columns: 1fr; gap: 10px; text-align: left; margin-bottom: 20px; max-height: 300px; overflow-y: auto; padding-right: 10px; }
+        .checkbox-label { display: flex; align-items: center; padding: 12px 15px; border-radius: 12px; border: 2px solid #e2e8f0; background: #f8fafc; cursor: pointer; transition: 0.2s; font-size: 16px; font-weight: 500; }
+        .checkbox-label:hover { background: #f1f5f9; }
+        .checkbox-label input { margin-right: 12px; width: 20px; height: 20px; accent-color: #3b82f6; cursor: pointer; }
+        .checkbox-label.selected { border-color: #3b82f6; background: #eff6ff; }
+        
+        .action-row { display: flex; gap: 10px; margin-top: 10px; }
+
         .milestone-track { display: flex; justify-content: space-between; position: relative; margin: 15px 0 35px 0; padding: 0 5px; }
         .milestone-track::before { content: ''; position: absolute; top: 50%; left: 15px; right: 15px; height: 6px; background: #e2e8f0; z-index: 1; transform: translateY(-50%); border-radius: 3px; }
         .milestone-fill { position: absolute; top: 50%; left: 15px; height: 6px; background: #10b981; z-index: 1; transform: translateY(-50%); border-radius: 3px; transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
@@ -74,6 +78,8 @@
             .q-text { font-size: 28px; margin: 35px 0; }
             input.ans-input, textarea.ans-input { font-size: 22px; padding: 20px; }
             button.mcq-btn { font-size: 20px; padding: 20px; }
+            /* 大屏上的复选框两列显示 */
+            .checkbox-grid { grid-template-columns: 1fr 1fr; gap: 15px; }
         }
 
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
@@ -93,16 +99,30 @@
             <button id="btn-P1" class="name-btn" onclick="switchUser('P1')">Venissa (P1)</button>
         </div>
         
-        <div class="topic-selector">
-            <select id="topic-dropdown" class="topic-drop">
-                <option value="ALL">🌟 全部进度 (All Topics)</option>
-            </select>
-        </div>
-
         <div id="subject-grid" class="subject-grid"></div>
+        
         <div class="res-section">
             <h3 style="margin-top:0;">Resources 📚</h3>
             <div id="res-list"></div>
+        </div>
+    </div>
+
+    <div id="topic-screen" class="screen">
+        <h2 id="topic-title" style="margin:0 0 10px 0; color:#0f172a;">Select Topics</h2>
+        <p id="topic-desc" style="color:#64748b; margin-bottom: 25px;"></p>
+        
+        <div style="text-align: left; margin-bottom: 15px;">
+            <label class="checkbox-label" id="check-all-label" style="background:#eff6ff; border-color:#3b82f6;">
+                <input type="checkbox" id="check-all" onchange="toggleAllTopics(this)" checked>
+                <b id="check-all-text">🌟 Select All Topics</b>
+            </label>
+        </div>
+
+        <div id="topic-checkboxes" class="checkbox-grid"></div>
+        
+        <div class="action-row">
+            <button class="btn-action" style="background:#f1f5f9; color:#475569; border:2px solid #e2e8f0; flex:0.4;" onclick="showScreen('menu-screen')">← Back</button>
+            <button class="btn-action" style="background:#3b82f6; color:white; flex:0.6; font-size:18px;" onclick="startQuiz()">Start 🚀</button>
         </div>
     </div>
 
@@ -192,37 +212,10 @@
         switchUser('P3');
     }
 
-    // 动态提取当前用户拥有的所有 Topic
-    function updateTopicDropdown(g) {
-        const drop = document.getElementById('topic-dropdown');
-        drop.innerHTML = '<option value="ALL">🌟 全部进度 (All Topics)</option>';
-        let topics = new Set();
-        
-        if(db[g]) {
-            Object.keys(db[g]).forEach(s => {
-                if(s === 'Resources') return;
-                db[g][s].forEach(q => {
-                    let t = (q.Topic || q.topic || q.Lesson || "").toString().trim();
-                    if(t !== "") topics.add(t);
-                });
-            });
-        }
-        
-        // 按字母/数字顺序排序
-        Array.from(topics).sort().forEach(t => {
-            let opt = document.createElement('option');
-            opt.value = t;
-            opt.innerText = `📖 ${t}`;
-            drop.appendChild(opt);
-        });
-    }
-
     function switchUser(g) {
         curUser = g;
         document.getElementById('btn-P3').className = g === 'P3' ? 'name-btn active' : 'name-btn';
         document.getElementById('btn-P1').className = g === 'P1' ? 'name-btn active' : 'name-btn';
-        
-        updateTopicDropdown(g); // 刷新下拉菜单
         
         const grid = document.getElementById('subject-grid'); grid.innerHTML = '';
         const colors = {"English": "#3b82f6", "Math": "#ec4899", "华文": "#a855f7", "Science": "#10b981"};
@@ -235,7 +228,7 @@
                     btn.className = 'sub-btn'; 
                     btn.style.background = colors[s] || "#64748b";
                     btn.innerText = s; 
-                    btn.onclick = () => startQuiz(s);
+                    btn.onclick = () => showTopicSelection(s);
                     grid.appendChild(btn);
                 }
             });
@@ -254,6 +247,111 @@
                 list.appendChild(div);
             });
         } else { list.innerHTML = `<p style="color:#94a3b8;">No resources yet.</p>`; }
+    }
+
+    // 显示多选界面
+    function showTopicSelection(s) {
+        curSub = s;
+        const pool = db[curUser][s];
+        if (!pool || pool.length === 0) return;
+
+        let topics = new Set();
+        pool.forEach(q => {
+            let t = (q.Topic || q.topic || q.Lesson || "").toString().trim();
+            if (t !== "") topics.add(t);
+        });
+
+        const isCN = (s === '华文');
+        document.getElementById('topic-title').innerText = isCN ? `复习进度` : `Select Topics`;
+        document.getElementById('topic-desc').innerText = isCN ? `你要复习哪些内容？可以多选哦！` : `Choose the topics you want to practice. You can select multiple!`;
+        
+        document.getElementById('check-all-text').innerText = isCN ? '🌟 全选 (Select All)' : '🌟 Select All Topics';
+        document.getElementById('check-all').checked = true;
+        document.getElementById('check-all-label').className = 'checkbox-label selected';
+
+        // 如果没有分配 Topic，直接开始，不弹出界面
+        if (topics.size === 0) {
+            startQuiz('ALL_NO_TOPIC');
+            return;
+        }
+
+        const boxGrid = document.getElementById('topic-checkboxes');
+        boxGrid.innerHTML = '';
+
+        Array.from(topics).sort().forEach(t => {
+            const label = document.createElement('label');
+            label.className = 'checkbox-label selected'; // 默认全选
+            
+            const cb = document.createElement('input');
+            cb.type = 'checkbox';
+            cb.value = t;
+            cb.checked = true;
+            cb.className = 'topic-cb';
+            cb.onchange = () => {
+                label.className = cb.checked ? 'checkbox-label selected' : 'checkbox-label';
+                syncCheckAll(); // 检查是否需要取消“全选”状态
+            };
+            
+            label.appendChild(cb);
+            label.appendChild(document.createTextNode(`📖 ${t}`));
+            boxGrid.appendChild(label);
+        });
+
+        showScreen('topic-screen');
+    }
+
+    // 全选/取消全选逻辑
+    function toggleAllTopics(masterCheckbox) {
+        const isChecked = masterCheckbox.checked;
+        document.getElementById('check-all-label').className = isChecked ? 'checkbox-label selected' : 'checkbox-label';
+        
+        const cbs = document.querySelectorAll('.topic-cb');
+        cbs.forEach(cb => {
+            cb.checked = isChecked;
+            cb.parentElement.className = isChecked ? 'checkbox-label selected' : 'checkbox-label';
+        });
+    }
+
+    // 联动逻辑：如果手动取消了某一个，全选框也要取消
+    function syncCheckAll() {
+        const cbs = document.querySelectorAll('.topic-cb');
+        const allChecked = Array.from(cbs).every(cb => cb.checked);
+        const master = document.getElementById('check-all');
+        master.checked = allChecked;
+        document.getElementById('check-all-label').className = allChecked ? 'checkbox-label selected' : 'checkbox-label';
+    }
+
+    // 提取所选主题并开始组卷
+    function startQuiz(forceMode = null) {
+        let pool = db[curUser][curSub];
+        
+        if (forceMode !== 'ALL_NO_TOPIC') {
+            const selectedTopics = Array.from(document.querySelectorAll('.topic-cb:checked')).map(cb => cb.value);
+            
+            if (selectedTopics.length === 0) {
+                alert(curSub === '华文' ? "请至少选择一个知识点！" : "Please select at least one topic!");
+                return;
+            }
+
+            // 智能题池：过滤出属于所选 Topic 的所有题目
+            pool = pool.filter(q => {
+                let t = (q.Topic || q.topic || q.Lesson || "").toString().trim();
+                return selectedTopics.includes(t);
+            });
+        }
+
+        curIdx = 0; sessionErrors = 0; 
+        
+        const exitBtn = document.getElementById('exit-btn');
+        exitBtn.innerText = "Exit";
+        exitBtn.style.background = "#f1f5f9";
+        exitBtn.style.color = "#475569";
+
+        // 从大题池中随机抽取最多7题
+        let grabCount = Math.min(pool.length, 7);
+        sessionQs = pool.sort(() => 0.5 - Math.random()).slice(0, grabCount);
+        
+        showScreen('quiz-screen'); renderQ();
     }
 
     function updateProgress() {
@@ -276,36 +374,6 @@
             html += `<div class="${cls}">${content}</div>`;
         }
         bar.innerHTML = html;
-    }
-
-    function startQuiz(s) {
-        curSub = s; curIdx = 0; sessionErrors = 0; 
-        
-        let targetTopic = document.getElementById('topic-dropdown').value;
-        let pool = db[curUser][s];
-        
-        // 核心过滤逻辑：如果选择了特定课题，就只抽取该课题的题目
-        if (targetTopic !== "ALL") {
-            pool = pool.filter(q => {
-                let t = (q.Topic || q.topic || q.Lesson || "").toString().trim();
-                return t === targetTopic;
-            });
-        }
-
-        if (!pool || pool.length === 0) {
-            alert(`Oops! 题库里还没有属于 [${targetTopic}] 的 ${s} 题目哦！\n请重新选择进度，或者在 Google Sheet 里补充数据。`);
-            return;
-        }
-
-        const exitBtn = document.getElementById('exit-btn');
-        exitBtn.innerText = "Exit";
-        exitBtn.style.background = "#f1f5f9";
-        exitBtn.style.color = "#475569";
-
-        // 从过滤后的题库中抽取最多7题
-        let grabCount = Math.min(pool.length, 7);
-        sessionQs = pool.sort(() => 0.5 - Math.random()).slice(0, grabCount);
-        showScreen('quiz-screen'); renderQ();
     }
 
     function renderQ() {
