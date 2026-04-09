@@ -20,8 +20,8 @@
         @keyframes popPulse { 0% { transform: scale(1); text-shadow: 0 0 5px rgba(253, 224, 71, 0.5); } 100% { transform: scale(1.2) translateY(-3px); text-shadow: 0 0 15px rgba(234, 179, 8, 0.8), 0 0 30px rgba(234, 179, 8, 0.4); } }
 
         .date-badge { display: inline-block; background: #f1f5f9; color: #475569; padding: 6px 14px; border-radius: 20px; font-size: 14px; font-weight: 600; margin-bottom: 20px; border: 1px solid #e2e8f0; }
-        .name-selector { display: flex; gap: 10px; justify-content: center; margin: 20px 0; }
-        button.name-btn { padding: 10px 20px; border-radius: 12px; border: 2px solid #e2e8f0; background: white; cursor: pointer; font-weight: 600; transition: 0.2s; color: #475569; }
+        .name-selector { display: flex; gap: 15px; justify-content: center; margin: 25px 0; }
+        button.name-btn { padding: 15px 30px; border-radius: 16px; border: 2px solid #e2e8f0; background: white; cursor: pointer; font-weight: 700; font-size: 18px; transition: 0.2s; color: #475569; }
         button.name-btn:hover { background: #f1f5f9; }
         button.name-btn.active { border-color: var(--primary); background: #d1fae5; color: #065f46; transform: scale(1.05); }
         
@@ -38,6 +38,7 @@
         .bundle-label.selected { border-style: solid; }
         
         .action-row { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
+        .action-buttons-group { display: flex; gap: 10px; }
 
         .milestone-track { display: flex; justify-content: space-between; position: relative; margin: 15px 0 35px 0; padding: 0 5px; }
         .milestone-track::before { content: ''; position: absolute; top: 50%; left: 15px; right: 15px; height: 6px; background: #e2e8f0; z-index: 1; transform: translateY(-50%); border-radius: 3px; }
@@ -107,11 +108,19 @@
     <div id="menu-screen" class="screen">
         <h2 style="margin:0 0 10px 0; color:#0f172a;">Did you <span class="magic-number" style="font-size:1em;">6~7</span> today?</h2>
         <div id="school-term-display" class="date-badge">Loading Date...</div>
+        
         <div class="name-selector">
             <button id="btn-P3" class="name-btn" onclick="switchUser('P3')">Valerie (P3)</button>
-            <button id="btn-P1" class="name-btn" onclick="switchUser('P1')">Venissa (P1)</button>
+            <button id="btn-P1" class="name-btn" onclick="switchUser('P1')">Venessa (P1)</button>
         </div>
-        <div id="subject-grid" class="subject-grid"></div>
+        
+        <div id="subject-grid" class="subject-grid">
+            <button class="sub-btn" style="background:#3b82f6;" onclick="handleSubjectClick('English')">English</button>
+            <button class="sub-btn" style="background:#ec4899;" onclick="handleSubjectClick('Math')">Math</button>
+            <button class="sub-btn" style="background:#a855f7;" onclick="handleSubjectClick('华文')">华文</button>
+            <button class="sub-btn" style="background:#10b981;" onclick="handleSubjectClick('Science')">Science</button>
+        </div>
+
         <div class="res-section">
             <h3 style="margin-top:0;">Resources 📚</h3>
             <div id="res-list"></div>
@@ -199,7 +208,6 @@
     let currentSpellCharIdx = 0;
     const synth = window.speechSynthesis;
 
-    // --- 强制优选语音引擎初始化 ---
     let bestEnglishVoice = null;
     function loadVoices() {
         const voices = synth.getVoices();
@@ -220,7 +228,6 @@
         synth.speak(utterThis);
     }
 
-    // --- 草稿板 ---
     let canvas, ctx, drawing = false;
     function initDrawPad() {
         canvas = document.getElementById('pad'); ctx = canvas.getContext('2d');
@@ -281,20 +288,7 @@
         document.getElementById('btn-P3').className = g === 'P3' ? 'name-btn active' : 'name-btn';
         document.getElementById('btn-P1').className = g === 'P1' ? 'name-btn active' : 'name-btn';
         
-        const grid = document.getElementById('subject-grid'); grid.innerHTML = '';
-        const colors = {"English": "#3b82f6", "Math": "#ec4899", "华文": "#a855f7", "Science": "#10b981"};
-        const orderedSubjects = ["English", "Math", "华文", "Science"];
-        
-        orderedSubjects.forEach(s => {
-            const btn = document.createElement('button');
-            btn.className = 'sub-btn'; btn.style.background = colors[s]; btn.innerText = s; 
-            btn.onclick = () => handleSubjectClick(s);
-            grid.appendChild(btn);
-        });
-        renderRes(g);
-    }
-
-    function renderRes(g) {
+        // 渲染资源
         const list = document.getElementById('res-list'); list.innerHTML = '';
         if(db[g] && db[g]['Resources']) {
             db[g]['Resources'].forEach(r => {
@@ -314,10 +308,16 @@
         return 999;
     }
 
-    // 🌟 核心逻辑：科目点击后判断去哪里
     function handleSubjectClick(s) {
+        // 关键：点击科目时检查是否选了名字
+        if (!curUser) {
+            alert("请先在上面选择是 Valerie 还是 Venissa 哦！\nPlease select a name first!");
+            return;
+        }
+
         curSub = s;
         let pool = db[curUser][s];
+        
         if (!pool || pool.length === 0) {
             alert(s === '华文' ? "题库里暂时还没有这科的题目哦！" : "No questions available for this subject yet!");
             return;
@@ -326,7 +326,6 @@
         let hasNormal = pool.some(q => (q.Type||"").toUpperCase() !== 'SPELLING');
         let hasSpelling = pool.some(q => (q.Type||"").toUpperCase() === 'SPELLING');
 
-        // 如果既有常规题又有听写题，进入“模式选择页”
         if (hasNormal && hasSpelling) {
             const isCN = (s === '华文');
             document.getElementById('mode-title').innerText = isCN ? '请选择练习模式' : 'Select Practice Mode';
@@ -335,7 +334,6 @@
             document.getElementById('btn-mode-back').innerText = isCN ? '← 返回主页' : '← Back';
             showScreen('mode-screen');
         } 
-        // 否则直接进入对应的 Topic 选择页
         else if (hasSpelling) {
             showTopicSelection(s, true);
         } else {
@@ -343,13 +341,11 @@
         }
     }
 
-    // 🌟 根据选定的模式，仅展示相关的 Topic
     function showTopicSelection(s, spellingMode) {
         curSub = s;
         isSpellingMode = spellingMode;
         let pool = db[curUser][s];
         
-        // 关键过滤：只提取当前模式下的题目
         pool = pool.filter(q => {
             let type = (q.Type || "").toString().trim().toUpperCase();
             return isSpellingMode ? (type === 'SPELLING') : (type !== 'SPELLING');
@@ -383,7 +379,6 @@
             let baseClass = item.isBundle ? 'checkbox-label bundle-label' : 'checkbox-label';
             const label = document.createElement('label'); label.className = baseClass;
             const cb = document.createElement('input'); cb.type = 'checkbox'; cb.value = JSON.stringify(item.values); cb.className = 'topic-cb';
-            // 默认全部选中
             cb.checked = true;
             label.className = baseClass + ' selected';
             
@@ -404,7 +399,6 @@
         document.getElementById('check-all').checked = allChecked; document.getElementById('check-all-label').className = allChecked ? 'checkbox-label selected' : 'checkbox-label';
     }
 
-    // 🌟 返回逻辑：根据是否有双模式决定返回哪里
     function goBackFromTopic() {
         let pool = db[curUser][curSub];
         let hasNormal = pool.some(q => (q.Type||"").toUpperCase() !== 'SPELLING');
@@ -417,7 +411,6 @@
         }
     }
 
-    // 🌟 只有一个开始按钮
     function startQuiz() {
         let pool = db[curUser][curSub];
         const selectedJSONs = Array.from(document.querySelectorAll('.topic-cb:checked')).map(cb => cb.value);
