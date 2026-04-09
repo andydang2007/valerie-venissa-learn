@@ -60,7 +60,13 @@
 
 <script>
     const SHEET_ID = "1vQlpdRHnR9ybEHHgX6fouRI-vXOh8KQNLSjsbt0TYh9R3No_9i7QNv_4ELwJZJGQpTe3oZVXaZijaW4";
-    const GIDS = { "English": "1055551329", "Math": "59294467", "Science": "1581471994", "Chinese": "2020673087", "Resources": "469231602" };
+const GIDS = { 
+        "English": "1055551329", 
+        "Math": "59294467", 
+        "Science": "1581471994", 
+        "华文": "2020673087", 
+        "Resources": "469231602" 
+    };
     let db = {}, curUser = 'P3', curSub = '', sessionQs = [], curIdx = 0;
 
     async function init() {
