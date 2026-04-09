@@ -15,14 +15,12 @@
         button.name-btn.active { border-color: var(--primary); background: #d1fae5; color: #065f46; }
         .subject-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 30px; }
         button.sub-btn { padding: 20px; border-radius: 16px; border: none; color: white; font-size: 18px; font-weight: bold; cursor: pointer; }
-        /* 答题区 */
         .q-text { font-size: 24px; text-align: left; margin: 25px 0; line-height: 1.5; }
-        input.ans-input { font-size: 20px; padding: 15px; width: 100%; border: 2px solid #e2e8f0; border-radius: 12px; box-sizing: border-box; }
+        input.ans-input { font-size: 20px; padding: 15px; width: 100%; border: 2px solid #e2e8f0; border-radius: 12px; box-sizing: border-box; outline: none; }
         input.ans-input.error-shake { border-color: #ef4444; animation: shake 0.3s; }
         .feedback { font-size: 18px; margin: 15px 0; min-height: 25px; font-weight: bold; }
         .controls { display: flex; gap: 10px; margin-top: 20px; }
         .btn-action { flex: 1; padding: 15px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
-        /* 资源卡片 */
         .res-section { border-top: 2px dashed #e2e8f0; margin-top: 20px; padding-top: 20px; text-align: left; }
         .res-card { background: #f1f5f9; padding: 15px; border-radius: 12px; margin-bottom: 12px; }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
@@ -31,7 +29,7 @@
 <body>
 
 <div class="container">
-    <div id="loading" class="screen" style="display:block;">Syncing Cloud Data...</div>
+    <div id="loading" class="screen" style="display:block;">Connecting to Subjects...</div>
 
     <div id="menu-screen" class="screen">
         <h2 style="margin-top:0;">Practice Hub</h2>
@@ -59,49 +57,66 @@
 </div>
 
 <script>
+    // 配置信息
     const SHEET_ID = "1vQlpdRHnR9ybEHHgX6fouRI-vXOh8KQNLSjsbt0TYh9R3No_9i7QNv_4ELwJZJGQpTe3oZVXaZijaW4";
-const GIDS = { 
+    const GIDS = { 
         "English": "1055551329", 
         "Math": "59294467", 
         "Science": "1581471994", 
         "华文": "2020673087", 
         "Resources": "469231602" 
     };
+
     let db = {}, curUser = 'P3', curSub = '', sessionQs = [], curIdx = 0;
 
     async function init() {
+        const loadingMsg = document.getElementById('loading');
         const loads = Object.entries(GIDS).map(([name, gid]) => {
             return new Promise(res => {
-                Papa.parse(`https://docs.google.com/spreadsheets/d/e/2PACX-${SHEET_ID}/pub?gid=${gid}&single=true&output=csv&t=${Date.now()}`, {
-                    download: true, header: true, complete: r => res({ name, data: r.data })
+                const url = `https://docs.google.com/spreadsheets/d/e/2PACX-${SHEET_ID}/pub?gid=${gid}&single=true&output=csv&t=${Date.now()}`;
+                Papa.parse(url, {
+                    download: true, header: true, skipEmptyLines: 'greedy',
+                    complete: r => res({ name, data: r.data }),
+                    error: () => res(null)
                 });
             });
         });
+
         const results = await Promise.all(loads);
+        db = {};
         results.forEach(r => {
+            if(!r || !r.data) return;
             r.data.forEach(row => {
-                let g = (row.Grade || "").trim();
+                let g = (row.Grade || "").trim().toUpperCase();
                 if(!g) return;
                 if(!db[g]) db[g] = {};
                 if(!db[g][r.name]) db[g][r.name] = [];
                 db[g][r.name].push(row);
             });
         });
-        showScreen('menu-screen'); switchUser('P3');
+
+        loadingMsg.style.display = 'none';
+        showScreen('menu-screen');
+        switchUser('P3');
     }
 
     function switchUser(g) {
         curUser = g;
         document.getElementById('btn-P3').className = g === 'P3' ? 'name-btn active' : 'name-btn';
         document.getElementById('btn-P1').className = g === 'P1' ? 'name-btn active' : 'name-btn';
-        const grid = document.getElementById('subject-grid'); grid.innerHTML = '';
-        const colors = {"English":"#3b82f6","Math":"#10b981","Science":"#ef4444","Chinese":"#f59e0b"};
+        
+        const grid = document.getElementById('subject-grid');
+        grid.innerHTML = '';
+        const colors = {"English":"#3b82f6","Math":"#10b981","Science":"#ef4444","华文":"#f59e0b"};
+        
         if(db[g]) {
             Object.keys(db[g]).forEach(s => {
                 if(s === 'Resources') return;
                 const btn = document.createElement('button');
-                btn.className = 'sub-btn'; btn.style.background = colors[s] || "#64748b";
-                btn.innerText = s; btn.onclick = () => startQuiz(s);
+                btn.className = 'sub-btn';
+                btn.style.background = colors[s] || "#64748b";
+                btn.innerText = s;
+                btn.onclick = () => startQuiz(s);
                 grid.appendChild(btn);
             });
         }
@@ -109,33 +124,44 @@ const GIDS = {
     }
 
     function renderRes(g) {
-        const list = document.getElementById('res-list'); list.innerHTML = '';
+        const list = document.getElementById('res-list');
+        list.innerHTML = '';
         if(db[g] && db[g]['Resources']) {
             db[g]['Resources'].forEach(r => {
-                const div = document.createElement('div'); div.className = 'res-card';
-                if(r.Type === 'IMAGE') div.innerHTML = `<b>${r.Title}</b><img src="${r.Content}" style="width:100%;margin-top:10px;">`;
-                else if(r.Type === 'PDF') div.innerHTML = `<b>${r.Title}</b><br><a href="${r.Content}" target="_blank">🔗 Open PDF</a>`;
-                else div.innerHTML = `<b>${r.Title}</b><p>${r.Content}</p>`;
+                const div = document.createElement('div');
+                div.className = 'res-card';
+                if(r.Type === 'IMAGE') div.innerHTML = `<b>${r.Title}</b><img src="${r.Content}" style="width:100%;margin-top:10px;border-radius:8px;">`;
+                else if(r.Type === 'PDF') div.innerHTML = `<b>${r.Title}</b><br><a href="${r.Content}" target="_blank" style="color:#2563eb;text-decoration:none;display:block;margin-top:8px;">🔗 Open PDF Resource</a>`;
+                else div.innerHTML = `<b>${r.Title}</b><p style="margin:8px 0 0 0;">${r.Content}</p>`;
                 list.appendChild(div);
             });
+        } else {
+            list.innerHTML = `<p style="color:#94a3b8;">No resources yet.</p>`;
         }
     }
 
     function startQuiz(s) {
         curSub = s; curIdx = 0;
         sessionQs = db[curUser][s].sort(() => 0.5 - Math.random()).slice(0, 5);
-        showScreen('quiz-screen'); renderQ();
+        showScreen('quiz-screen');
+        renderQ();
     }
 
     function renderQ() {
         const q = sessionQs[curIdx];
         document.getElementById('q-text').innerText = q.Question;
-        document.getElementById('ans-in').value = '';
-        document.getElementById('ans-in').disabled = false;
-        document.getElementById('ans-in').className = 'ans-input';
+        const input = document.getElementById('ans-in');
+        input.value = '';
+        input.disabled = false;
+        input.className = 'ans-input';
         document.getElementById('fb-text').innerText = '';
         document.getElementById('sub-btn').style.display = 'block';
         document.getElementById('next-btn').style.display = 'none';
+        
+        // 自动聚焦
+        setTimeout(() => input.focus(), 100);
+        // 回车监听
+        input.onkeypress = (e) => { if(e.key === 'Enter') checkAns(); };
     }
 
     function checkAns() {
@@ -144,23 +170,33 @@ const GIDS = {
         const correct = sessionQs[curIdx]['Correct Answer'].toString().trim().toLowerCase();
         const fb = document.getElementById('fb-text');
         
+        if(user === "") return;
+
         if(user === correct) {
-            fb.innerText = "✅ Excellent! Correct."; fb.style.color = "#10b981";
+            fb.innerText = "✅ Excellent! Correct Answer.";
+            fb.style.color = "#10b981";
             input.disabled = true;
             document.getElementById('sub-btn').style.display = 'none';
             document.getElementById('next-btn').style.display = 'block';
         } else {
-            fb.innerText = "❌ Not quite right. Try again!"; fb.style.color = "#ef4444";
+            fb.innerText = "❌ Not quite right. Try again!";
+            fb.style.color = "#ef4444";
             input.className = 'ans-input error-shake';
-            setTimeout(() => input.className = 'ans-input', 300);
-            input.value = ''; // 清空让孩子重填
-            input.focus();
+            setTimeout(() => {
+                input.className = 'ans-input';
+                input.value = '';
+            }, 400);
         }
     }
 
     function nextQ() {
-        if(curIdx < sessionQs.length - 1) { curIdx++; renderQ(); }
-        else { location.reload(); }
+        if(curIdx < sessionQs.length - 1) {
+            curIdx++;
+            renderQ();
+        } else {
+            alert("Practice Complete! Great job!");
+            location.reload();
+        }
     }
 
     function showScreen(id) {
