@@ -21,10 +21,11 @@
 
         .date-badge { display: inline-block; background: #f1f5f9; color: #475569; padding: 6px 14px; border-radius: 20px; font-size: 14px; font-weight: 600; margin-bottom: 20px; border: 1px solid #e2e8f0; }
         .name-selector { display: flex; gap: 10px; justify-content: center; margin: 20px 0; }
-        button.name-btn { padding: 10px 20px; border-radius: 12px; border: 2px solid #e2e8f0; background: white; cursor: pointer; font-weight: 600; transition: 0.2s; }
+        button.name-btn { padding: 10px 20px; border-radius: 12px; border: 2px solid #e2e8f0; background: white; cursor: pointer; font-weight: 600; transition: 0.2s; color: #475569; }
+        button.name-btn:hover { background: #f1f5f9; }
         button.name-btn.active { border-color: var(--primary); background: #d1fae5; color: #065f46; transform: scale(1.05); }
         
-        .subject-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin-bottom: 30px; }
+        .subject-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin-bottom: 15px; }
         button.sub-btn { flex: 1 1 40%; max-width: 45%; padding: 20px; border-radius: 16px; border: none; color: white; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.2s; box-sizing: border-box; }
         button.sub-btn:hover { transform: translateY(-2px); filter: brightness(1.05); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         
@@ -60,27 +61,27 @@
         .controls { display: flex; gap: 10px; margin-top: 20px; }
         .btn-action { flex: 1; padding: 15px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; outline: none; transition: 0.2s; font-size: 16px; }
         
-        /* 听写区域新样式 */
         .pinyin-display { font-size: 32px; font-weight: bold; color: #0f172a; margin: 10px 0 20px 0; letter-spacing: 2px; }
-        
-        .practice-pad-container { display: flex; flex-direction: column; align-items: center; background: #f8fafc; padding: 25px; border-radius: 20px; border: 2px dashed #cbd5e1; margin-bottom: 20px; box-shadow: inset 0 2px 10px rgba(0,0,0,0.02); }
+        .practice-pad-container { display: flex; flex-direction: column; align-items: center; background: #f8fafc; padding: 25px; border-radius: 20px; border: 2px dashed #cbd5e1; margin-bottom: 20px; box-shadow: inset 0 2px 10px rgba(0,0,0,0.02); width:100%; box-sizing: border-box; }
         .practice-char-label { font-size: 20px; font-weight: bold; margin-bottom: 15px; color: #64748b; }
         
-        /* 连续听写的汉字展示区（小格子） */
+        /* 华文听写样式 */
         .word-progress-container { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; align-items: center; min-height: 50px; }
         .mini-char-box { width: 45px; height: 45px; border: 2px solid #e2e8f0; border-radius: 8px; background: white; display: flex; justify-content: center; align-items: center; font-size: 24px; font-weight: bold; color: #1e293b; }
         .mini-char-box.active { border-color: #f59e0b; background: #fffbeb; box-shadow: 0 0 10px rgba(245, 158, 11, 0.2); }
         .mini-char-box.done { border-color: #10b981; background: #d1fae5; color: #065f46; }
 
         .hanzi-practice-box { width: 250px; height: 250px; border: 3px solid #cbd5e1; border-radius: 16px; background: white; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); position: relative; }
-        /* 田字格背景线 */
         .hanzi-practice-box::before { content: ''; position: absolute; top: 50%; left: 0; width: 100%; height: 1px; background: #e2e8f0; border-top: 1px dashed #cbd5e1; }
         .hanzi-practice-box::after { content: ''; position: absolute; left: 50%; top: 0; height: 100%; width: 1px; background: #e2e8f0; border-left: 1px dashed #cbd5e1; }
 
+        /* 英文听写样式 */
+        .word-card-btn { width: 55px; height: 65px; font-size: 32px; font-weight: bold; border: 2px solid #e2e8f0; border-radius: 12px; background: white; color: #1e293b; cursor: pointer; transition: 0.2s; display: flex; justify-content: center; align-items: center; padding: 0; outline: none; text-transform: lowercase; }
+        .word-card-btn:hover { border-color: #3b82f6; transform: translateY(-3px); box-shadow: 0 4px 10px rgba(59, 130, 246, 0.2); }
+        
         .tool-btn { background: white; border: 2px solid #e2e8f0; padding: 10px 20px; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; color: #475569; transition: 0.2s; }
         .tool-btn:hover { background: #f1f5f9; border-color: #cbd5e1; }
 
-        /* 画板 */
         .draw-panel { display: none; flex-direction: column; align-items: center; margin-top: 15px; background: #f8fafc; padding: 15px; border-radius: 16px; border: 2px dashed #cbd5e1; }
         canvas { background: white; border-radius: 12px; border: 1px solid #e2e8f0; touch-action: none; cursor: crosshair; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
         .draw-tools { display: flex; justify-content: space-between; width: 100%; margin-top: 10px; }
@@ -95,6 +96,7 @@
             .pinyin-display { font-size: 40px; }
             .btn-action { font-size: 18px; padding: 18px; }
             .mini-char-box { width: 55px; height: 55px; font-size: 28px; }
+            .word-card-btn { width: 70px; height: 80px; font-size: 40px; }
         }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
     </style>
@@ -107,14 +109,11 @@
     <div id="menu-screen" class="screen">
         <h2 style="margin:0 0 10px 0; color:#0f172a;">Did you <span class="magic-number" style="font-size:1em;">6~7</span> today?</h2>
         <div id="school-term-display" class="date-badge">Loading Date...</div>
-        
         <div class="name-selector">
             <button id="btn-P3" class="name-btn" onclick="switchUser('P3')">Valerie (P3)</button>
             <button id="btn-P1" class="name-btn" onclick="switchUser('P1')">Venissa (P1)</button>
         </div>
-        
         <div id="subject-grid" class="subject-grid"></div>
-        
         <div class="res-section">
             <h3 style="margin-top:0;">Resources 📚</h3>
             <div id="res-list"></div>
@@ -124,16 +123,7 @@
     <div id="topic-screen" class="screen">
         <h2 id="topic-title" style="margin:0 0 5px 0; color:#0f172a;">Select Topics</h2>
         <p id="topic-desc" style="color:#64748b; margin-bottom: 20px; font-size:14px;"></p>
-        
-        <div style="text-align: center; margin-bottom: 15px;">
-            <label class="checkbox-label" id="check-all-label" style="display:inline-flex; background:#eff6ff; border-color:#3b82f6;">
-                <input type="checkbox" id="check-all" onchange="toggleAllTopics(this)" checked>
-                <b id="check-all-text">🌟 全选所有 (Select All)</b>
-            </label>
-        </div>
-
         <div id="topic-checkboxes" class="checkbox-grid"></div>
-        
         <div class="action-row">
             <div id="mode-buttons" class="action-buttons-group"></div>
             <button class="btn-action" style="background:#f8fafc; color:#64748b; border:2px solid #e2e8f0;" onclick="showScreen('menu-screen')">← 返回主页 (Back)</button>
@@ -165,25 +155,20 @@
 
     <div id="spelling-screen" class="screen">
         <div id="spell-progress-bar" class="milestone-track"></div>
-        
-        <h3 style="color:#64748b; margin-top:0; font-size: 16px;">请听写出这个词语：</h3>
         <div id="spelling-pinyin" class="pinyin-display"></div>
         
         <div id="practice-pad-container" class="practice-pad-container">
             <div id="word-progress-container" class="word-progress-container"></div>
-            
             <div id="practice-char-label" class="practice-char-label"></div>
-            
             <div id="hanzi-practice-box" class="hanzi-practice-box"></div>
-            
-            <div style="display: flex; gap: 15px; width: 100%; justify-content: center;">
+            <div id="hanzi-retry-btn" style="display: flex; gap: 15px; width: 100%; justify-content: center;">
                 <button class="tool-btn" onclick="retryPractice()">🔄 重写本字</button>
             </div>
         </div>
 
         <div class="controls">
             <button class="btn-action" style="background:#f1f5f9; color:#475569; flex:0.3;" onclick="location.reload()">Exit</button>
-            <button id="spell-next-btn" class="btn-action" style="background:#e2e8f0; color:#94a3b8; flex:0.7; pointer-events:none;" onclick="nextSpellQ()">下一个词 (Next) →</button>
+            <button id="spell-next-btn" class="btn-action" style="background:#e2e8f0; color:#94a3b8; flex:0.7; pointer-events:none;" onclick="nextSpellQ()">下一个 (Next) →</button>
         </div>
     </div>
 
@@ -194,13 +179,14 @@
     const SHEET_ID = "1vQlpdRHnR9ybEHHgX6fouRI-vXOh8KQNLSjsbt0TYh9R3No_9i7QNv_4ELwJZJGQpTe3oZVXaZijaW4";
     const GIDS = { "English": "1893311738", "Math": "59294467", "Science": "1581471994", "华文": "2020673087", "Resources": "469231602" };
 
-    let db = {}, curUser = 'P3', curSub = '', sessionQs = [], curIdx = 0, sessionErrors = 0;
+    let db = {}, curUser = '', curSub = '', sessionQs = [], curIdx = 0, sessionErrors = 0;
     let isSpellingMode = false;
     let currentWriter = null;
     let currentSpellWord = "";
     let currentSpellCharIdx = 0;
+    const synth = window.speechSynthesis;
 
-    // --- 画板 ---
+    // --- 草稿板 ---
     let canvas, ctx, drawing = false;
     function initDrawPad() {
         canvas = document.getElementById('pad'); ctx = canvas.getContext('2d');
@@ -254,7 +240,6 @@
         });
         document.getElementById('loading').style.display = 'none';
         showScreen('menu-screen');
-        switchUser('P3');
     }
 
     function switchUser(g) {
@@ -316,27 +301,25 @@
         });
 
         const isCN = (s === '华文');
-        document.getElementById('topic-title').innerText = isCN ? `复习进度` : `Select Topics`;
-        document.getElementById('topic-desc').innerText = isCN ? `你想练习哪里的内容？（可多选）` : `Choose the topics you want to practice.`;
-        document.getElementById('check-all-text').innerText = isCN ? '🌟 全选 (Select All)' : '🌟 Select All';
-        document.getElementById('check-all').checked = true;
-        document.getElementById('check-all-label').className = 'checkbox-label selected';
+        document.getElementById('topic-title').innerText = isCN ? `你想练习哪里的内容？` : `Select Topics`;
+        document.getElementById('topic-desc').innerText = isCN ? `（可多选组合）` : `Choose the topics you want to practice.`;
         
         let topicsArr = Array.from(topics).sort((a, b) => getSortWeight(a) - getSortWeight(b));
         let maxWeight = 0; topicsArr.forEach(t => { let w = getSortWeight(t); if(w < 999 && w > maxWeight) maxWeight = w; });
 
         let renderItems = []; let bundledTopics = new Set();
-        if (maxWeight > 5) { let t1 = topicsArr.filter(t => getSortWeight(t) >= 1 && getSortWeight(t) <= 5); if (t1.length > 0) { renderItems.push({ label: isCN ? "🎒 第一学段 (第1-5课)" : "🎒 Term 1", values: t1, isBundle: true }); t1.forEach(t => bundledTopics.add(t)); } }
-        if (maxWeight > 10) { let t2 = topicsArr.filter(t => getSortWeight(t) >= 6 && getSortWeight(t) <= 10); if (t2.length > 0) { renderItems.push({ label: isCN ? "🎒 第二学段 (第6-10课)" : "🎒 Term 2", values: t2, isBundle: true }); t2.forEach(t => bundledTopics.add(t)); } }
-
+        if (isCN) {
+            if (maxWeight > 5) { let t1 = topicsArr.filter(t => getSortWeight(t) >= 1 && getSortWeight(t) <= 5); if (t1.length > 0) { renderItems.push({ label: "🎒 第一学段 (第1-5课)", values: t1, isBundle: true }); t1.forEach(t => bundledTopics.add(t)); } }
+            if (maxWeight > 10) { let t2 = topicsArr.filter(t => getSortWeight(t) >= 6 && getSortWeight(t) <= 10); if (t2.length > 0) { renderItems.push({ label: "🎒 第二学段 (第6-10课)", values: t2, isBundle: true }); t2.forEach(t => bundledTopics.add(t)); } }
+        }
         topicsArr.forEach(t => { if (!bundledTopics.has(t)) { renderItems.push({ label: `${t}`, values: [t], isBundle: false }); } });
 
         const boxGrid = document.getElementById('topic-checkboxes'); boxGrid.innerHTML = '';
         renderItems.forEach(item => {
-            let baseClass = item.isBundle ? 'checkbox-label selected bundle-label' : 'checkbox-label selected';
+            let baseClass = item.isBundle ? 'checkbox-label bundle-label' : 'checkbox-label';
             const label = document.createElement('label'); label.className = baseClass;
-            const cb = document.createElement('input'); cb.type = 'checkbox'; cb.value = JSON.stringify(item.values); cb.checked = true; cb.className = 'topic-cb';
-            cb.onchange = () => { label.className = cb.checked ? baseClass : baseClass.replace('selected', '').trim(); syncCheckAll(); };
+            const cb = document.createElement('input'); cb.type = 'checkbox'; cb.value = JSON.stringify(item.values); cb.className = 'topic-cb';
+            cb.onchange = () => { label.className = cb.checked ? baseClass + ' selected' : baseClass.replace('selected', '').trim(); };
             label.appendChild(cb); label.appendChild(document.createTextNode(item.label));
             boxGrid.appendChild(label);
         });
@@ -348,7 +331,7 @@
             let btnNormal = document.createElement('button');
             btnNormal.className = 'btn-action';
             btnNormal.style.background = '#3b82f6'; btnNormal.style.color = 'white';
-            btnNormal.innerHTML = isCN ? '🚀 开始 6~7 闯关' : '🚀 Start Practice';
+            btnNormal.innerHTML = isCN ? '🚀 随机过关 (Practice)' : '🚀 Start Practice';
             btnNormal.onclick = () => startQuiz(false); 
             btnGroup.appendChild(btnNormal);
         }
@@ -357,21 +340,12 @@
             let btnSpell = document.createElement('button');
             btnSpell.className = 'btn-action';
             btnSpell.style.background = 'linear-gradient(135deg, #f59e0b, #ea580c)'; btnSpell.style.color = 'white';
-            btnSpell.innerHTML = isCN ? '✍️ 完整听写' : '✍️ Full Spelling';
+            btnSpell.innerHTML = isCN ? '✍️ 听写模式 (Spelling)' : '✍️ Spelling Game';
             btnSpell.onclick = () => startQuiz(true); 
             btnGroup.appendChild(btnSpell);
         }
 
         showScreen('topic-screen');
-    }
-
-    function toggleAllTopics(master) {
-        document.querySelectorAll('.topic-cb').forEach(cb => { cb.checked = master.checked; let p = cb.parentElement.className; cb.parentElement.className = master.checked ? (p.includes('selected') ? p : p + ' selected') : p.replace('selected', '').trim(); });
-    }
-    
-    function syncCheckAll() {
-        const allChecked = Array.from(document.querySelectorAll('.topic-cb')).every(cb => cb.checked);
-        document.getElementById('check-all').checked = allChecked; document.getElementById('check-all-label').className = allChecked ? 'checkbox-label selected' : 'checkbox-label';
     }
 
     function startQuiz(spellModeRequested) {
@@ -390,16 +364,18 @@
             return selectedTopics.includes(t) && modeMatch;
         });
 
-        if (pool.length === 0) {
-            alert(isSpellingMode ? "选中的课文里没有听写词汇哦！" : "选中的课文里没有常规练习题哦！");
-            return;
-        }
+        if (pool.length === 0) { alert("选中的范围里没有这类题目哦！"); return; }
 
         curIdx = 0; sessionErrors = 0; 
         document.getElementById('draw-panel').style.display = 'none';
 
         if (isSpellingMode) {
-            sessionQs = pool;
+            // 英文听写随机打乱（因为不是课文），华文保持原有顺序听写
+            if (curSub === 'English') {
+                sessionQs = pool.sort(() => 0.5 - Math.random());
+            } else {
+                sessionQs = pool;
+            }
             showScreen('spelling-screen'); 
             renderSpelling();
         } else {
@@ -429,56 +405,123 @@
         bar.innerHTML = html;
     }
 
-    // --- 连续隐形听写逻辑 ---
+    // --- 语音合成引擎 ---
+    function playWordAudio(text) {
+        if (synth.speaking) synth.cancel();
+        const utterThis = new SpeechSynthesisUtterance(text);
+        utterThis.lang = 'en-US'; utterThis.rate = 0.85;
+        synth.speak(utterThis);
+    }
+
+    // --- 听写分发引擎 (华文笔顺盲写 or 英文拼字游戏) ---
     function renderSpelling() {
         updateProgress('spell-progress-bar');
         const q = sessionQs[curIdx];
-        document.getElementById('spelling-pinyin').innerText = q.Question.trim();
+        
+        const nextBtn = document.getElementById('spell-next-btn');
+        nextBtn.style.background = '#e2e8f0'; nextBtn.style.color = '#94a3b8'; nextBtn.style.pointerEvents = 'none';
+
+        if (curSub === 'English') {
+            renderEnglishSpelling(q);
+        } else {
+            renderChineseSpelling(q);
+        }
+    }
+
+    // --- 英文拼字游戏逻辑 ---
+    function renderEnglishSpelling(q) {
+        currentSpellWord = (q['Correct Answer'] || "").toString().trim().toLowerCase();
+        currentSpellCharIdx = 0;
+        
+        document.getElementById('spelling-pinyin').innerHTML = `
+            <button class="tool-btn" style="font-size:24px; padding:12px 25px; border-color:#3b82f6; color:#3b82f6; background:#eff6ff; border-radius:16px; box-shadow:0 4px 6px rgba(59,130,246,0.2);" onclick="playWordAudio('${currentSpellWord}')">
+                🔊 Listen & Spell
+            </button>`;
+        
+        let slotsHtml = '<div style="display:flex; gap:8px; justify-content:center; margin-bottom:40px; flex-wrap:wrap; width:100%;">';
+        for(let i=0; i<currentSpellWord.length; i++) {
+            slotsHtml += `<div id="eng-slot-${i}" style="width:45px; height:55px; border-bottom:4px solid #cbd5e1; font-size:36px; font-weight:bold; display:flex; justify-content:center; align-items:center; color:#1e293b; text-transform: lowercase;"></div>`;
+        }
+        slotsHtml += '</div>';
+        
+        let letters = currentSpellWord.split('');
+        const alpha = "abcdefghijklmnopqrstuvwxyz";
+        letters.push(alpha[Math.floor(Math.random() * alpha.length)]);
+        letters.push(alpha[Math.floor(Math.random() * alpha.length)]);
+        letters.sort(() => Math.random() - 0.5);
+        
+        let btnsHtml = '<div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap; width:100%;">';
+        letters.forEach((l, idx) => {
+            btnsHtml += `<button id="eng-btn-${idx}" class="word-card-btn" onclick="checkEngLetter('${l}', this)">${l}</button>`;
+        });
+        btnsHtml += '</div>';
+        
+        const container = document.getElementById('practice-pad-container');
+        container.style.display = 'flex';
+        container.innerHTML = slotsHtml + btnsHtml;
+        
+        setTimeout(() => playWordAudio(currentSpellWord), 600);
+    }
+
+    function checkEngLetter(char, btn) {
+        if (char === currentSpellWord[currentSpellCharIdx]) {
+            document.getElementById(`eng-slot-${currentSpellCharIdx}`).innerText = char;
+            document.getElementById(`eng-slot-${currentSpellCharIdx}`).style.borderColor = '#10b981';
+            document.getElementById(`eng-slot-${currentSpellCharIdx}`).style.color = '#10b981';
+            btn.style.visibility = 'hidden'; 
+            currentSpellCharIdx++;
+            
+            if (currentSpellCharIdx === currentSpellWord.length) {
+                playWordAudio("Excellent!");
+                const nextBtn = document.getElementById('spell-next-btn');
+                nextBtn.style.background = '#10b981'; nextBtn.style.color = 'white'; nextBtn.style.pointerEvents = 'auto';
+            }
+        } else {
+            btn.classList.add('error-shake');
+            btn.style.borderColor = '#ef4444'; btn.style.color = '#ef4444'; btn.style.background = '#fef2f2';
+            setTimeout(() => {
+                btn.classList.remove('error-shake');
+                btn.style.borderColor = '#e2e8f0'; btn.style.color = '#1e293b'; btn.style.background = 'white';
+            }, 400);
+        }
+    }
+
+    // --- 华文连续盲写逻辑 ---
+    function renderChineseSpelling(q) {
+        document.getElementById('spelling-pinyin').innerHTML = `<div style="font-size:28px; color:#64748b; font-weight:normal; margin-bottom:5px;">请听写出这个词语：</div>${q.Question.trim()}`;
         currentSpellWord = (q['Correct Answer'] || "").toString().trim();
         currentSpellCharIdx = 0;
         
-        // 锁定“下一题”按钮，必须写完才能点
-        const nextBtn = document.getElementById('spell-next-btn');
-        nextBtn.style.background = '#e2e8f0';
-        nextBtn.style.color = '#94a3b8';
-        nextBtn.style.pointerEvents = 'none';
+        const container = document.getElementById('practice-pad-container');
+        container.style.display = 'flex';
+        container.innerHTML = `
+            <div id="word-progress-container" class="word-progress-container"></div>
+            <div id="practice-char-label" class="practice-char-label"></div>
+            <div id="hanzi-practice-box" class="hanzi-practice-box"></div>
+            <div id="hanzi-retry-btn" style="display: flex; gap: 15px; width: 100%; justify-content: center;">
+                <button class="tool-btn" onclick="retryPractice()">🔄 没写好，重写一次</button>
+            </div>
+        `;
 
-        initSpellingProgressBox();
-        startNextChar();
-    }
-
-    function initSpellingProgressBox() {
-        const container = document.getElementById('word-progress-container');
-        container.innerHTML = '';
+        const progContainer = document.getElementById('word-progress-container');
         for (let i = 0; i < currentSpellWord.length; i++) {
             let char = currentSpellWord[i];
             if(/[，。！？、：；（）《》“”]/u.test(char)) {
-                let span = document.createElement('span');
-                span.innerText = char;
-                span.style.fontSize = '24px'; span.style.color = '#64748b';
-                container.appendChild(span);
-                continue;
+                let span = document.createElement('span'); span.innerText = char; span.style.fontSize = '24px'; span.style.color = '#64748b'; progContainer.appendChild(span); continue;
             }
-            let box = document.createElement('div');
-            box.id = 'mini-char-' + i;
-            box.className = 'mini-char-box';
-            container.appendChild(box);
+            let box = document.createElement('div'); box.id = 'mini-char-' + i; box.className = 'mini-char-box'; progContainer.appendChild(box);
         }
+        startNextChar();
     }
 
     function startNextChar() {
-        // 如果遇到了标点符号，直接跳过并显示
-        while(currentSpellCharIdx < currentSpellWord.length && /[，。！？、：；（）《》“”]/u.test(currentSpellWord[currentSpellCharIdx])) {
-            currentSpellCharIdx++;
-        }
+        while(currentSpellCharIdx < currentSpellWord.length && /[，。！？、：；（）《》“”]/u.test(currentSpellWord[currentSpellCharIdx])) { currentSpellCharIdx++; }
 
         if (currentSpellCharIdx >= currentSpellWord.length) {
-            // 整个词写完了解锁按钮
-            document.getElementById('practice-char-label').innerHTML = `<span style="color:#10b981;">🎉 太棒了！整个词写完了！</span>`;
+            document.getElementById('practice-char-label').innerHTML = `<span style="color:#10b981;">🎉 太棒了！完全正确！</span>`;
+            document.getElementById('hanzi-retry-btn').style.display = 'none';
             const nextBtn = document.getElementById('spell-next-btn');
-            nextBtn.style.background = '#10b981';
-            nextBtn.style.color = 'white';
-            nextBtn.style.pointerEvents = 'auto';
+            nextBtn.style.background = '#10b981'; nextBtn.style.color = 'white'; nextBtn.style.pointerEvents = 'auto';
             if (currentWriter) { currentWriter.cancelQuiz(); currentWriter = null; }
             return;
         }
@@ -490,17 +533,16 @@
             else b.className = 'mini-char-box';
         });
 
-        document.getElementById('practice-char-label').innerHTML = `正在写第 <span style="color:#f59e0b; font-size:24px;">${currentSpellCharIdx + 1}</span> 个字`;
+        document.getElementById('practice-char-label').innerHTML = `请在格子里写出第 <span style="color:#f59e0b; font-size:24px;">${currentSpellCharIdx + 1}</span> 个字`;
 
         const box = document.getElementById('hanzi-practice-box');
         box.innerHTML = ''; 
-        let boxSize = document.body.clientWidth < 400 ? 220 : 300;
+        let boxSize = document.body.clientWidth < 400 ? 220 : 280;
         
         currentWriter = HanziWriter.create('hanzi-practice-box', char, {
             width: boxSize, height: boxSize, padding: 15,
-            showOutline: true, strokeAnimationSpeed: 1, delayBetweenStrokes: 50,
-            // 🌟 核心：极淡的辅助线
-            outlineColor: '#f1f5f9', // 非常淡的灰色
+            showOutline: false, // 彻底关闭底层字提示，变成纯盲写！
+            strokeAnimationSpeed: 1, delayBetweenStrokes: 50,
             strokeColor: '#1e293b', drawingColor: '#3b82f6',
             showCharacter: false
         });
@@ -509,16 +551,15 @@
             onComplete: function() { 
                 document.getElementById('mini-char-' + currentSpellCharIdx).innerText = char;
                 currentSpellCharIdx++;
-                setTimeout(() => startNextChar(), 500); // 延迟半秒自动跳下一个字
+                setTimeout(() => startNextChar(), 500); 
             }
         });
     }
 
-    function retryPractice() {
-        if(currentWriter) currentWriter.quiz(); 
-    }
+    function retryPractice() { if(currentWriter) currentWriter.quiz(); }
 
     function nextSpellQ() {
+        if(synth.speaking) synth.cancel();
         if(curIdx < sessionQs.length - 1) { curIdx++; renderSpelling(); } 
         else { finishQuiz(); }
     }
@@ -624,7 +665,7 @@
         
         let msg = ""; let magic67 = `<span class="magic-number">6~7</span>`; 
         if(isSpellingMode) {
-            msg = `🎉 恭喜你完成了听写任务！写得真棒！`;
+            msg = `🎉 恭喜你完成了听写任务！表现太棒了！`;
         } else {
             if (sessionErrors <= 1) msg = isCN ? `🎉 恭喜你，今天的${curSub}获得了 ${magic67} 的好成绩！太棒了！` : `🎉 Congratulations, you've got ${magic67} for your ${curSub} today!`;
             else msg = isCN ? `💪 挑战完成！多练几次，争取下次拿到 ${magic67} 哦！` : `💪 Good effort! Keep practicing to get ${magic67} next time!`;
