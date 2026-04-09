@@ -8,7 +8,6 @@
     <style>
         :root { --primary: #10b981; --bg: #f8fafc; }
         
-        /* 基础布局 */
         body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #1e293b; display: flex; flex-direction: column; align-items: center; min-height: 100vh; box-sizing: border-box; }
         .container { width: 100%; max-width: 600px; background: #fff; padding: 25px; border-radius: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center; }
         .screen { display: none; width: 100%; }
@@ -21,14 +20,14 @@
         button.sub-btn { padding: 20px; border-radius: 16px; border: none; color: white; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         button.sub-btn:hover { transform: translateY(-2px); filter: brightness(1.05); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         
-        /* 卡通闯关进度条 */
-        .milestone-track { display: flex; justify-content: space-between; position: relative; margin: 15px 0 35px 0; padding: 0 10px; }
-        .milestone-track::before { content: ''; position: absolute; top: 50%; left: 20px; right: 20px; height: 6px; background: #e2e8f0; z-index: 1; transform: translateY(-50%); border-radius: 3px; }
-        .milestone-fill { position: absolute; top: 50%; left: 20px; height: 6px; background: #10b981; z-index: 1; transform: translateY(-50%); border-radius: 3px; transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
-        .milestone { width: 40px; height: 40px; background: #f8fafc; border: 3px solid #cbd5e1; border-radius: 50%; z-index: 2; display: flex; align-items: center; justify-content: center; font-size: 18px; transition: 0.4s; box-sizing: border-box; }
+        /* 卡通闯关进度条（针对 7 题微调了间距） */
+        .milestone-track { display: flex; justify-content: space-between; position: relative; margin: 15px 0 35px 0; padding: 0 5px; }
+        .milestone-track::before { content: ''; position: absolute; top: 50%; left: 15px; right: 15px; height: 6px; background: #e2e8f0; z-index: 1; transform: translateY(-50%); border-radius: 3px; }
+        .milestone-fill { position: absolute; top: 50%; left: 15px; height: 6px; background: #10b981; z-index: 1; transform: translateY(-50%); border-radius: 3px; transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .milestone { width: 36px; height: 36px; background: #f8fafc; border: 3px solid #cbd5e1; border-radius: 50%; z-index: 2; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: 0.4s; box-sizing: border-box; }
         .milestone.done { border-color: #10b981; background: #d1fae5; }
-        .milestone.active { border-color: #3b82f6; background: #eff6ff; font-size: 24px; transform: scale(1.2); box-shadow: 0 0 15px rgba(59,130,246,0.3); animation: bounce 1s infinite alternate; }
-        @keyframes bounce { from { transform: scale(1.1) translateY(0); } to { transform: scale(1.1) translateY(-6px); } }
+        .milestone.active { border-color: #3b82f6; background: #eff6ff; font-size: 20px; transform: scale(1.2); box-shadow: 0 0 15px rgba(59,130,246,0.3); animation: bounce 1s infinite alternate; }
+        @keyframes bounce { from { transform: scale(1.1) translateY(0); } to { transform: scale(1.1) translateY(-5px); } }
 
         .q-text { font-size: 24px; text-align: left; margin: 25px 0; line-height: 1.5; font-weight: 500; }
         input.ans-input, textarea.ans-input { font-size: 20px; padding: 15px; width: 100%; border: 2px solid #e2e8f0; border-radius: 12px; box-sizing: border-box; outline: none; font-family: inherit; }
@@ -72,7 +71,7 @@
     <div id="loading" class="screen" style="display:block;">Syncing Lessons...</div>
 
     <div id="menu-screen" class="screen">
-        <h2 style="margin:0 0 10px 0; color:#0f172a;">Practice Hub</h2>
+        <h2 style="margin:0 0 10px 0; color:#0f172a;">Did you 6~7 today?</h2>
         <div id="school-term-display" class="date-badge">Loading Date...</div>
         
         <div class="name-selector">
@@ -111,7 +110,7 @@
     };
 
     let db = {}, curUser = 'P3', curSub = '', sessionQs = [], curIdx = 0;
-    let sessionErrors = 0; // 新增：错误追踪器
+    let sessionErrors = 0;
 
     function updateSchoolTerm() {
         const now = new Date();
@@ -232,15 +231,15 @@
     }
 
     function startQuiz(s) {
-        curSub = s; curIdx = 0; sessionErrors = 0; // 重置错误追踪
+        curSub = s; curIdx = 0; sessionErrors = 0; 
         
-        // 恢复退出按钮原始样式
         const exitBtn = document.getElementById('exit-btn');
         exitBtn.innerText = "Exit";
         exitBtn.style.background = "#f1f5f9";
         exitBtn.style.color = "#475569";
 
-        sessionQs = db[curUser][s].sort(() => 0.5 - Math.random()).slice(0, 5);
+        // 将题目数量修改为抽取 7 题
+        sessionQs = db[curUser][s].sort(() => 0.5 - Math.random()).slice(0, 7);
         showScreen('quiz-screen'); renderQ();
     }
 
@@ -345,7 +344,7 @@
                 input.className = 'ans-input'; 
             }
         } else {
-            sessionErrors++; // 记录错误次数
+            sessionErrors++; 
             
             if (qType === 'MCQ') {
                 fb.innerHTML = `<span style="color:#ef4444;">${isCN ? "❌ 不对哦，试试其他选项！" : "❌ Not quite. Try another option!"}</span>`;
@@ -373,27 +372,32 @@
             curIdx++; 
             renderQ(); 
         } else { 
-            // 练习完成，展示动态结算画面
             const isCN = (curSub === '华文');
             document.getElementById('progress-bar').style.display = 'none';
             document.getElementById('progress-text').innerText = isCN ? "练习完成！" : "Completed!";
             
             let msg = "";
-            if (sessionErrors === 0) {
-                msg = isCN ? "🏆 完美通关！全对无错，你太棒了！" : "🏆 Perfect Score! You are amazing!";
-            } else if (sessionErrors <= 2) {
-                msg = isCN ? "🌟 闯关成功！做得很好，继续保持！" : "🌟 Great job! You finished strong!";
+            // 如果错误数是 0 或 1，也就是对了 7 题或 6 题
+            if (sessionErrors <= 1) {
+                if (isCN) {
+                    msg = `🎉 恭喜你，今天的${curSub}获得了 6~7 的好成绩！太棒了！`;
+                } else {
+                    msg = `🎉 Congratulations, you've got 6~7 for your ${curSub} today!`;
+                }
             } else {
-                msg = isCN ? "💪 挑战完成！多练几次会越来越厉害！" : "💪 Good effort! Keep practicing and you will get even better!";
+                if (isCN) {
+                    msg = `💪 挑战完成！多练几次，争取下次拿到 6~7 哦！`;
+                } else {
+                    msg = `💪 Good effort! Keep practicing to get 6~7 next time!`;
+                }
             }
 
-            document.getElementById('q-text').innerHTML = `<div style="text-align:center; padding: 40px 0; font-size: 26px; color: #064e3b; font-weight:bold;">${msg}</div>`;
+            document.getElementById('q-text').innerHTML = `<div style="text-align:center; padding: 40px 0; font-size: 26px; color: #064e3b; font-weight:bold; line-height: 1.5;">${msg}</div>`;
             document.getElementById('input-container').innerHTML = '';
             document.getElementById('fb-text').innerText = '';
             document.getElementById('sub-btn').style.display = 'none';
             document.getElementById('next-btn').style.display = 'none';
             
-            // 将退出按钮变为返回主菜单
             const exitBtn = document.getElementById('exit-btn');
             exitBtn.innerText = isCN ? "返回主菜单" : "Back to Menu";
             exitBtn.style.background = "#10b981";
