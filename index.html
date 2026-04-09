@@ -69,18 +69,72 @@
 
     let db = {}, curUser = 'P3', curSub = '', sessionQs = [], curIdx = 0;
 
+// ... 前面的 HTML 和 Style 保持不变 ...
+
     async function init() {
         const loadingMsg = document.getElementById('loading');
+        // 增加一点延时，确保数据读取不被浏览器缓存卡住
         const loads = Object.entries(GIDS).map(([name, gid]) => {
             return new Promise(res => {
-                const url = `https://docs.google.com/spreadsheets/d/e/2PACX-${SHEET_ID}/pub?gid=${gid}&single=true&output=csv&t=${Date.now()}`;
+                const url = `https://docs.google.com/spreadsheets/d/e/${SHEET_ID}/pub?gid=${gid}&single=true&output=csv&t=${Date.now()}`;
                 Papa.parse(url, {
                     download: true, header: true, skipEmptyLines: 'greedy',
-                    complete: r => res({ name, data: r.data }),
+                    complete: r => {
+                        console.log(`Loaded ${name}:`, r.data.length, "rows"); // 调试日志
+                        res({ name, data: r.data });
+                    },
                     error: () => res(null)
                 });
             });
         });
+
+        const results = await Promise.all(loads);
+        db = {};
+        results.forEach(r => {
+            if(!r || !r.data || r.data.length === 0) return;
+            r.data.forEach(row => {
+                let g = (row.Grade || row.grade || "").trim().toUpperCase(); 
+                if(!g) return;
+                if(!db[g]) db[g] = {};
+                // 确保科目名统一
+                if(!db[g][r.name]) db[g][r.name] = [];
+                db[g][r.name].push(row);
+            });
+        });
+
+        loadingMsg.style.display = 'none';
+        showScreen('menu-screen');
+        switchUser('P3'); // 默认展示 Valerie
+    }
+
+    function checkAns() {
+        const input = document.getElementById('ans-in');
+        const user = input.value.trim().toLowerCase();
+        const correctRaw = sessionQs[curIdx]['Correct Answer'].toString().trim();
+        const correct = correctRaw.toLowerCase();
+        const fb = document.getElementById('fb-text');
+        
+        if(user === "") return;
+
+        if(user === correct) {
+            fb.innerHTML = `<span style="color:#10b981;">✅ Excellent! Correct Answer.</span>`;
+            input.disabled = true;
+            document.getElementById('sub-btn').style.display = 'none';
+            document.getElementById('next-btn').style.display = 'block';
+        } else {
+            // 这里加上了答案提示
+            fb.innerHTML = `<span style="color:#ef4444;">❌ Try again!</span><br>
+                            <span style="font-size:14px; color:#94a3b8; font-weight:normal;">
+                               Hint: The answer is "${correctRaw}"
+                            </span>`;
+            input.className = 'ans-input error-shake';
+            setTimeout(() => {
+                input.className = 'ans-input';
+                input.value = ''; // 清空，让孩子根据上面的 Hint 重新输入
+                input.focus();
+            }, 600);
+        }
+    }
 
         const results = await Promise.all(loads);
         db = {};
