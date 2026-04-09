@@ -2,140 +2,60 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Family Learning Hub - DEBUG MODE</title>
+    <title>Connection Test</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <style>
-        body { font-family: sans-serif; background: #f0fdf4; margin: 0; padding: 20px; text-align: center; }
-        .container { background: #fff; padding: 30px; border-radius: 20px; max-width: 600px; margin: auto; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .name-btn { font-size: 20px; padding: 15px 30px; margin: 10px; cursor: pointer; border-radius: 10px; border: 2px solid #ddd; background: white; }
-        .name-btn.active { background: #d1fae5; border-color: #059669; }
-        .subject-btn { font-size: 22px; padding: 20px; margin: 10px; color: white; border: none; border-radius: 12px; cursor: pointer; min-width: 150px; }
-        
-        /* 调试窗口样式 */
-        #debug-panel {
-            position: fixed; bottom: 0; left: 0; right: 0; 
-            background: #1e293b; color: #38bdf8; 
-            padding: 15px; font-family: monospace; font-size: 12px; 
-            text-align: left; max-height: 150px; overflow-y: auto; border-top: 3px solid #0ea5e9;
-        }
-        .log-error { color: #f87171; }
-        .log-success { color: #4ade80; font-weight: bold; }
+        body { font-family: monospace; background: #1a1a1a; color: #00ff00; padding: 20px; line-height: 1.5; }
+        .success { color: #4ade80; font-weight: bold; }
+        .error { color: #f87171; }
+        .data-row { background: #333; margin: 5px 0; padding: 10px; border-left: 5px solid #00ff00; }
     </style>
 </head>
 <body>
-
-<div class="container">
-    <h1>Family Practice Hub</h1>
-    <div id="status-display" style="font-weight: bold; margin-bottom: 20px; color: #64748b;">Checking connection...</div>
-    
-    <div id="name-selector">
-        <button class="name-btn" id="btn-P3" onclick="switchChild('P3')">Valerie (P3)</button>
-        <button class="name-btn" id="btn-P1" onclick="switchChild('P1')">Venissa (P1)</button>
-    </div>
-
-    <div id="subject-grid" style="margin-top: 20px;">
-        </div>
-</div>
-
-<div id="debug-panel">
-    <div>[SYSTEM START] Waiting for data...</div>
-</div>
+    <h2>=== CORE CONNECTION DIAGNOSTIC ===</h2>
+    <div id="status">Starting fetch...</div>
+    <div id="raw-output"></div>
 
 <script>
-    // 你的 CSV 链接
-    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQlpdRHnR9ybEHHgX6fouRI-vXOh8KQNLSjsbt0TYh9R3No_9i7QNv_4ELwJZJGQpTe3oZVXaZijaW4/pub?output=csv";
-
-    let db = {};
-    const debugPanel = document.getElementById('debug-panel');
-
-    function addLog(msg, type = '') {
-        const line = document.createElement('div');
-        if(type) line.className = 'log-' + type;
-        line.innerText = `[${new Date().toLocaleTimeString()}] ${msg}`;
-        debugPanel.appendChild(line);
-        debugPanel.scrollTop = debugPanel.scrollHeight;
-    }
+    // 替换成你刚才专门发布 English Tab 得到的 CSV 链接
+    const TEST_URL = "你的新链接"; 
 
     window.onload = function() {
-        addLog("Attempting to fetch Google Sheet...");
+        console.log("Fetching URL:", TEST_URL);
         
-        Papa.parse(CSV_URL + "&cache=" + Date.now(), {
+        Papa.parse(TEST_URL + "&cache=" + Date.now(), {
             download: true,
             header: true,
             complete: function(results) {
-                addLog(`Success! Found ${results.data.length} rows of data.`, 'success');
-                processData(results.data);
+                const status = document.getElementById('status');
+                const output = document.getElementById('raw-output');
+                
+                if (results.data && results.data.length > 0) {
+                    status.innerHTML = `<span class="success">SUCCESS! Found ${results.data.length} rows.</span>`;
+                    
+                    results.data.forEach((row, i) => {
+                        const div = document.createElement('div');
+                        div.className = 'data-row';
+                        div.innerText = `Row ${i + 1}: ` + JSON.stringify(row);
+                        output.appendChild(div);
+                    });
+
+                    // 检查是否存在 Grade 键
+                    const keys = Object.keys(results.data[0]);
+                    const hasGrade = keys.some(k => k.trim().toLowerCase() === 'grade');
+                    output.innerHTML += `<br><span class="${hasGrade?'success':'error'}">
+                        Column 'Grade' check: ${hasGrade ? 'FOUND ✅' : 'NOT FOUND ❌'}
+                        (Available columns: ${keys.join(', ')})
+                    </span>`;
+                } else {
+                    status.innerHTML = `<span class="error">CONNECTED BUT NO DATA. Check if Sheet is empty.</span>`;
+                }
             },
             error: function(err) {
-                addLog(`FAILED: Could not connect to Google Sheet. Check 'Publish to Web' settings.`, 'error');
-                document.getElementById('status-display').innerText = "❌ Connection Failed";
-                document.getElementById('status-display').style.color = "red";
+                status.innerHTML = `<span class="error">CONNECTION FAILED: ${err}</span>`;
             }
         });
     };
-
-    function processData(rows) {
-        db = {};
-        if (rows.length === 0) {
-            addLog("The spreadsheet seems to be empty.", "error");
-            return;
-        }
-
-        // 获取列名并清理
-        const rawKeys = Object.keys(rows[0]);
-        addLog("Detected Columns: " + rawKeys.join(' | '));
-
-        const findKey = (name) => rawKeys.find(k => k.trim().toLowerCase() === name.toLowerCase());
-
-        rows.forEach((row, index) => {
-            let g = (row[findKey('Grade')] || "").toString().trim();
-            let s = (row[findKey('Subject')] || "").toString().trim();
-            
-            if (!g || !s) return;
-
-            if (!db[g]) db[g] = {};
-            if (!db[g][s]) db[g][s] = [];
-            db[g][s].push(row);
-        });
-
-        const grades = Object.keys(db);
-        addLog("Mapped Grades: " + grades.join(', '), 'success');
-
-        if (grades.length > 0) {
-            document.getElementById('status-display').innerText = "✅ Cloud Synced";
-            document.getElementById('status-display').style.color = "#059669";
-            switchChild(grades.includes('P3') ? 'P3' : grades[0]);
-        } else {
-            addLog("No valid data found. Check if your column names match 'Grade' and 'Subject'.", 'error');
-            document.getElementById('status-display').innerText = "⚠️ Data Mapping Error";
-        }
-    }
-
-    function switchChild(grade) {
-        document.getElementById('btn-P3').classList.toggle('active', grade === 'P3');
-        document.getElementById('btn-P1').classList.toggle('active', grade === 'P1');
-        
-        const grid = document.getElementById('subject-grid');
-        grid.innerHTML = '';
-
-        if (!db[grade]) {
-            addLog(`No subjects found for grade: ${grade}`, 'error');
-            grid.innerHTML = `<p style="color:red;">No questions for ${grade} yet.</p>`;
-            return;
-        }
-
-        const colors = ["#2563eb", "#059669", "#e11d48", "#d97706"];
-        Object.keys(db[grade]).forEach((sub, i) => {
-            let btn = document.createElement('button');
-            btn.className = 'subject-btn';
-            btn.style.background = colors[i % colors.length];
-            btn.innerText = sub;
-            btn.onclick = () => alert(`Starting ${sub} quiz... (Logic for questions is ready, first sync subjects!)`);
-            grid.appendChild(btn);
-        });
-        addLog(`Displayed ${Object.keys(db[grade]).length} subjects for ${grade}.`);
-    }
 </script>
 </body>
 </html>
