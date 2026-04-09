@@ -36,6 +36,8 @@
         .checkbox-label:hover { background: #f1f5f9; }
         .checkbox-label input { margin-right: 12px; width: 20px; height: 20px; accent-color: #3b82f6; cursor: pointer; }
         .checkbox-label.selected { border-color: #3b82f6; background: #eff6ff; }
+        /* 强化打包组的样式 */
+        .bundle-label { border-width: 3px; font-weight: bold; }
         
         .action-row { display: flex; gap: 10px; margin-top: 10px; }
 
@@ -78,7 +80,6 @@
             .q-text { font-size: 28px; margin: 35px 0; }
             input.ans-input, textarea.ans-input { font-size: 22px; padding: 20px; }
             button.mcq-btn { font-size: 20px; padding: 20px; }
-            /* 大屏上的复选框两列显示 */
             .checkbox-grid { grid-template-columns: 1fr 1fr; gap: 15px; }
         }
 
@@ -249,7 +250,27 @@
         } else { list.innerHTML = `<p style="color:#94a3b8;">No resources yet.</p>`; }
     }
 
-    // 显示多选界面
+    // 🌟 智能排序与课数字识别
+    function getSortWeight(str) {
+        const numMatch = str.match(/\d+/);
+        if (numMatch) return parseInt(numMatch[0]);
+        if (str.includes("二十")) return 20;
+        if (str.includes("十九")) return 19;
+        if (str.includes("十八")) return 18;
+        if (str.includes("十七")) return 17;
+        if (str.includes("十六")) return 16;
+        if (str.includes("十五")) return 15;
+        if (str.includes("十四")) return 14;
+        if (str.includes("十三")) return 13;
+        if (str.includes("十二")) return 12;
+        if (str.includes("十一")) return 11;
+        const cnNums = { "一": 1, "二": 2, "三": 3, "四": 4, "五": 5, "六": 6, "七": 7, "八": 8, "九": 9, "十": 10 };
+        for (let key in cnNums) {
+            if (str.includes(key)) return cnNums[key];
+        }
+        return 999;
+    }
+
     function showTopicSelection(s) {
         curSub = s;
         const pool = db[curUser][s];
@@ -263,44 +284,89 @@
 
         const isCN = (s === '华文');
         document.getElementById('topic-title').innerText = isCN ? `复习进度` : `Select Topics`;
-        document.getElementById('topic-desc').innerText = isCN ? `你要复习哪些内容？可以多选哦！` : `Choose the topics you want to practice. You can select multiple!`;
+        document.getElementById('topic-desc').innerText = isCN ? `你要复习哪些内容？可以多选组合哦！` : `Choose the topics you want to practice. You can select multiple!`;
         
-        document.getElementById('check-all-text').innerText = isCN ? '🌟 全选 (Select All)' : '🌟 Select All Topics';
+        document.getElementById('check-all-text').innerText = isCN ? '🌟 全选所有 (Select All)' : '🌟 Select All Topics';
         document.getElementById('check-all').checked = true;
         document.getElementById('check-all-label').className = 'checkbox-label selected';
 
-        // 如果没有分配 Topic，直接开始，不弹出界面
         if (topics.size === 0) {
             startQuiz('ALL_NO_TOPIC');
             return;
         }
 
+        let topicsArr = Array.from(topics).sort((a, b) => getSortWeight(a) - getSortWeight(b));
+        
+        // 🌟 核心：智能折叠引擎 (Auto-Bundling)
+        let maxWeight = 0;
+        topicsArr.forEach(t => {
+            let w = getSortWeight(t);
+            if(w < 999 && w > maxWeight) maxWeight = w;
+        });
+
+        let renderItems = [];
+        let bundledTopics = new Set();
+
+        // 探测并折叠第一学段 (1-5课)
+        if (maxWeight > 5) {
+            let t1Topics = topicsArr.filter(t => getSortWeight(t) >= 1 && getSortWeight(t) <= 5);
+            if (t1Topics.length > 0) {
+                renderItems.push({ label: isCN ? "🎒 第一学段 (第1-5课)" : "🎒 Term 1 (Topics 1-5)", values: t1Topics, isBundle: true });
+                t1Topics.forEach(t => bundledTopics.add(t));
+            }
+        }
+        // 探测并折叠第二学段 (6-10课)
+        if (maxWeight > 10) {
+            let t2Topics = topicsArr.filter(t => getSortWeight(t) >= 6 && getSortWeight(t) <= 10);
+            if (t2Topics.length > 0) {
+                renderItems.push({ label: isCN ? "🎒 第二学段 (第6-10课)" : "🎒 Term 2 (Topics 6-10)", values: t2Topics, isBundle: true });
+                t2Topics.forEach(t => bundledTopics.add(t));
+            }
+        }
+        // 探测并折叠第三学段 (11-15课)
+        if (maxWeight > 15) {
+            let t3Topics = topicsArr.filter(t => getSortWeight(t) >= 11 && getSortWeight(t) <= 15);
+            if (t3Topics.length > 0) {
+                renderItems.push({ label: isCN ? "🎒 第三学段 (第11-15课)" : "🎒 Term 3 (Topics 11-15)", values: t3Topics, isBundle: true });
+                t3Topics.forEach(t => bundledTopics.add(t));
+            }
+        }
+
+        // 把没有被折叠的课文（比如当前的第6、7课，或者英文/数学里的独立知识点）单独放出来
+        topicsArr.forEach(t => {
+            if (!bundledTopics.has(t)) {
+                renderItems.push({ label: `📖 ${t}`, values: [t], isBundle: false });
+            }
+        });
+
+        // 渲染复选框
         const boxGrid = document.getElementById('topic-checkboxes');
         boxGrid.innerHTML = '';
 
-        Array.from(topics).sort().forEach(t => {
+        renderItems.forEach(item => {
+            let baseClass = item.isBundle ? 'checkbox-label selected bundle-label' : 'checkbox-label selected';
             const label = document.createElement('label');
-            label.className = 'checkbox-label selected'; // 默认全选
+            label.className = baseClass;
             
             const cb = document.createElement('input');
             cb.type = 'checkbox';
-            cb.value = t;
+            // 将包含的所有 topics 转成 JSON 字符串存入 value
+            cb.value = JSON.stringify(item.values);
             cb.checked = true;
             cb.className = 'topic-cb';
             cb.onchange = () => {
-                label.className = cb.checked ? 'checkbox-label selected' : 'checkbox-label';
-                syncCheckAll(); // 检查是否需要取消“全选”状态
+                label.className = cb.checked ? baseClass : baseClass.replace('selected', '').trim();
+                syncCheckAll(); 
             };
             
             label.appendChild(cb);
-            label.appendChild(document.createTextNode(`📖 ${t}`));
+            label.appendChild(document.createTextNode(` ${item.label}`));
             boxGrid.appendChild(label);
         });
 
         showScreen('topic-screen');
     }
 
-    // 全选/取消全选逻辑
     function toggleAllTopics(masterCheckbox) {
         const isChecked = masterCheckbox.checked;
         document.getElementById('check-all-label').className = isChecked ? 'checkbox-label selected' : 'checkbox-label';
@@ -308,11 +374,15 @@
         const cbs = document.querySelectorAll('.topic-cb');
         cbs.forEach(cb => {
             cb.checked = isChecked;
-            cb.parentElement.className = isChecked ? 'checkbox-label selected' : 'checkbox-label';
+            let pClass = cb.parentElement.className;
+            if(isChecked) {
+                if(!pClass.includes('selected')) cb.parentElement.className = pClass + ' selected';
+            } else {
+                cb.parentElement.className = pClass.replace('selected', '').trim();
+            }
         });
     }
 
-    // 联动逻辑：如果手动取消了某一个，全选框也要取消
     function syncCheckAll() {
         const cbs = document.querySelectorAll('.topic-cb');
         const allChecked = Array.from(cbs).every(cb => cb.checked);
@@ -321,19 +391,25 @@
         document.getElementById('check-all-label').className = allChecked ? 'checkbox-label selected' : 'checkbox-label';
     }
 
-    // 提取所选主题并开始组卷
     function startQuiz(forceMode = null) {
         let pool = db[curUser][curSub];
         
         if (forceMode !== 'ALL_NO_TOPIC') {
-            const selectedTopics = Array.from(document.querySelectorAll('.topic-cb:checked')).map(cb => cb.value);
+            // 获取所有被勾选的框的 JSON 字符串
+            const selectedJSONs = Array.from(document.querySelectorAll('.topic-cb:checked')).map(cb => cb.value);
             
-            if (selectedTopics.length === 0) {
+            if (selectedJSONs.length === 0) {
                 alert(curSub === '华文' ? "请至少选择一个知识点！" : "Please select at least one topic!");
                 return;
             }
 
-            // 智能题池：过滤出属于所选 Topic 的所有题目
+            // 把所有的 JSON 数组解析并合并成一个扁平的 Topic 名单
+            let selectedTopics = [];
+            selectedJSONs.forEach(jsonStr => {
+                selectedTopics = selectedTopics.concat(JSON.parse(jsonStr));
+            });
+
+            // 在大题库里精准过滤出属于这些 Topic 的题目
             pool = pool.filter(q => {
                 let t = (q.Topic || q.topic || q.Lesson || "").toString().trim();
                 return selectedTopics.includes(t);
@@ -347,7 +423,6 @@
         exitBtn.style.background = "#f1f5f9";
         exitBtn.style.color = "#475569";
 
-        // 从大题池中随机抽取最多7题
         let grabCount = Math.min(pool.length, 7);
         sessionQs = pool.sort(() => 0.5 - Math.random()).slice(0, grabCount);
         
