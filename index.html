@@ -10,52 +10,57 @@
         body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #1e293b; }
         .container { max-width: 600px; margin: auto; background: #fff; padding: 25px; border-radius: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center; }
         .screen { display: none; }
+        
+        /* 智能日历样式 */
+        .date-badge { display: inline-block; background: #f1f5f9; color: #475569; padding: 6px 14px; border-radius: 20px; font-size: 14px; font-weight: 600; margin-bottom: 20px; border: 1px solid #e2e8f0; }
+
         .name-selector { display: flex; gap: 10px; justify-content: center; margin: 20px 0; }
-        button.name-btn { padding: 10px 20px; border-radius: 12px; border: 2px solid #e2e8f0; background: white; cursor: pointer; font-weight: 600; font-size: 16px; }
+        button.name-btn { padding: 10px 20px; border-radius: 12px; border: 2px solid #e2e8f0; background: white; cursor: pointer; font-weight: 600; transition: 0.2s; }
         button.name-btn.active { border-color: var(--primary); background: #d1fae5; color: #065f46; transform: scale(1.05); }
         .subject-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 30px; }
         button.sub-btn { padding: 20px; border-radius: 16px; border: none; color: white; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        button.sub-btn:active { transform: scale(0.95); }
+        button.sub-btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
+        
         .q-text { font-size: 24px; text-align: left; margin: 25px 0; line-height: 1.5; font-weight: 500; }
-        input.ans-input { font-size: 20px; padding: 15px; width: 100%; border: 2px solid #e2e8f0; border-radius: 12px; box-sizing: border-box; outline: none; transition: 0.3s; }
-        input.ans-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(16,185,129,0.1); }
-        input.ans-input.error-shake { border-color: #ef4444; animation: shake 0.4s; }
-        .feedback { font-size: 18px; margin: 15px 0; min-height: 50px; font-weight: bold; line-height: 1.4; }
-        .controls { display: flex; gap: 10px; margin-top: 10px; }
-        .btn-action { flex: 1; padding: 16px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; font-size: 18px; }
-        .res-section { border-top: 2px dashed #e2e8f0; margin-top: 30px; padding-top: 20px; text-align: left; }
-        .res-card { background: #f1f5f9; padding: 15px; border-radius: 12px; margin-bottom: 12px; border-left: 5px solid var(--primary); }
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-8px); } 40% { transform: translateX(8px); } 60% { transform: translateX(-8px); } 80% { transform: translateX(8px); } }
+        input.ans-input { font-size: 20px; padding: 15px; width: 100%; border: 2px solid #e2e8f0; border-radius: 12px; box-sizing: border-box; outline: none; }
+        input.ans-input.error-shake { border-color: #ef4444; animation: shake 0.3s; background-color: #fef2f2; }
+        .feedback { font-size: 18px; margin: 15px 0; min-height: 50px; font-weight: bold; }
+        .controls { display: flex; gap: 10px; margin-top: 20px; }
+        .btn-action { flex: 1; padding: 15px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
+        .res-section { border-top: 2px dashed #e2e8f0; margin-top: 20px; padding-top: 20px; text-align: left; }
+        .res-card { background: #f1f5f9; padding: 15px; border-radius: 12px; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div id="loading" class="screen" style="display:block;">
-        <p style="font-size:18px; color:#64748b;">Connecting to Cloud Subjects...</p>
-    </div>
+    <div id="loading" class="screen" style="display:block;">Syncing Lessons...</div>
 
     <div id="menu-screen" class="screen">
         <h2 style="margin:0 0 10px 0; color:#064e3b;">Practice Hub</h2>
+        <div id="school-term-display" class="date-badge">Loading Date...</div>
+        
         <div class="name-selector">
             <button id="btn-P3" class="name-btn" onclick="switchUser('P3')">Valerie (P3)</button>
             <button id="btn-P1" class="name-btn" onclick="switchUser('P1')">Venissa (P1)</button>
         </div>
         <div id="subject-grid" class="subject-grid"></div>
         <div class="res-section">
-            <h3 style="margin:0 0 15px 0; font-size:18px;">Learning Toolbox 📚</h3>
+            <h3 style="margin-top:0;">Resources 📚</h3>
             <div id="res-list"></div>
         </div>
     </div>
 
     <div id="quiz-screen" class="screen">
+        <div style="text-align:right; font-size:14px; color:#94a3b8;" id="progress-text"></div>
         <div id="q-text" class="q-text"></div>
-        <input type="text" id="ans-in" class="ans-input" placeholder="Type your answer..." autocomplete="off">
+        <input type="text" id="ans-in" class="ans-input" placeholder="Type answer here..." autocomplete="off">
         <div id="fb-text" class="feedback"></div>
         <div class="controls">
-            <button class="btn-action" style="background:#f1f5f9; color:#475569;" onclick="location.reload()">Exit</button>
-            <button id="sub-btn" class="btn-action" style="background:#111827; color:white;" onclick="checkAns()">Submit Answer</button>
-            <button id="next-btn" class="btn-action" style="background:#10b981; color:white; display:none;" onclick="nextQ()">Next Question →</button>
+            <button class="btn-action" style="background:#f1f5f9;" onclick="location.reload()">Exit</button>
+            <button id="sub-btn" class="btn-action" style="background:#111827; color:white;" onclick="checkAns()">Submit</button>
+            <button id="next-btn" class="btn-action" style="background:#10b981; color:white; display:none;" onclick="nextQ()">Next →</button>
         </div>
     </div>
 </div>
@@ -72,13 +77,49 @@
 
     let db = {}, curUser = 'P3', curSub = '', sessionQs = [], curIdx = 0;
 
+    // --- 新加坡 MOE 校历推算系统 ---
+    function updateSchoolTerm() {
+        const now = new Date();
+        // 关键时间节点 (月份从 0 开始算，所以 2=March, 5=June, 8=September)
+        const t2Start = new Date(2026, 2, 23); // 假设 Term 2 从 3月23日开始
+        const t3Start = new Date(2026, 5, 28); // Term 3: June 28
+        const t4Start = new Date(2026, 8, 13); // Term 4: Sept 13
+        
+        const daysDiff = (d1, d2) => Math.floor((d1 - d2) / (1000 * 60 * 60 * 24));
+        let termStr = "";
+
+        if (now >= t4Start) {
+            const w = Math.floor(daysDiff(now, t4Start) / 7) + 1;
+            termStr = w <= 10 ? `Term 4 Week ${w}` : "December Holiday";
+        } else if (now >= t3Start) {
+            const w = Math.floor(daysDiff(now, t3Start) / 7) + 1;
+            termStr = w <= 10 ? `Term 3 Week ${w}` : "September Holiday";
+        } else if (now >= t2Start) {
+            const w = Math.floor(daysDiff(now, t2Start) / 7) + 1;
+            termStr = w <= 10 ? `Term 2 Week ${w}` : "June Holiday";
+        } else {
+            termStr = "Term 1"; // 简化显示
+        }
+
+        const dateOptions = { weekday: 'short', month: 'short', day: 'numeric' };
+        const dateString = now.toLocaleDateString('en-SG', dateOptions);
+        document.getElementById('school-term-display').innerText = `📅 ${dateString} | ${termStr}`;
+    }
+
     async function init() {
+        updateSchoolTerm(); // 初始化校历
+
         const loads = Object.entries(GIDS).map(([name, gid]) => {
             return new Promise(res => {
                 const url = `https://docs.google.com/spreadsheets/d/e/2PACX-${SHEET_ID}/pub?gid=${gid}&single=true&output=csv&t=${Date.now()}`;
                 Papa.parse(url, {
                     download: true, header: true, skipEmptyLines: 'greedy',
-                    complete: r => res({ name, data: r.data }),
+                    complete: r => {
+                        const cleaned = r.data.map(row => {
+                            let n = {}; Object.keys(row).forEach(k => n[k.trim()] = row[k]); return n;
+                        });
+                        res({ name, data: cleaned });
+                    },
                     error: () => res(null)
                 });
             });
@@ -86,23 +127,13 @@
 
         const results = await Promise.all(loads);
         db = {};
-        
         results.forEach(r => {
-            if(!r || !r.data || r.data.length === 0) return;
-            
-            // 找到正确的列名（忽略大小写和空格）
-            const keys = Object.keys(r.data[0]);
-            const getK = (target) => keys.find(k => k.trim().toLowerCase() === target.toLowerCase());
-            const kGrade = getK('Grade');
-            const kAns = getK('Correct Answer');
-
+            if(!r || !r.data) return;
             r.data.forEach(row => {
-                let g = (row[kGrade] || "").trim().toUpperCase();
+                let g = (row.Grade || row.grade || "").trim().toUpperCase();
                 if(!g) return;
                 if(!db[g]) db[g] = {};
                 if(!db[g][r.name]) db[g][r.name] = [];
-                // 统一存储
-                row._ans = (row[kAns] || "").toString().trim(); 
                 db[g][r.name].push(row);
             });
         });
@@ -117,19 +148,15 @@
         document.getElementById('btn-P3').className = g === 'P3' ? 'name-btn active' : 'name-btn';
         document.getElementById('btn-P1').className = g === 'P1' ? 'name-btn active' : 'name-btn';
         
-        const grid = document.getElementById('subject-grid');
-        grid.innerHTML = '';
-       // 检查这里的 "English" 是否拼写正确，有没有多余的空格
-const colors = {"English":"#3b82f6", "Math":"#10b981", "Science":"#ef4444", "华文":"#f59e0b"};
+        const grid = document.getElementById('subject-grid'); grid.innerHTML = '';
+        const colors = {"English":"#3b82f6","Math":"#10b981","Science":"#ef4444","华文":"#f59e0b"};
         
         if(db[g]) {
             Object.keys(db[g]).forEach(s => {
                 if(s === 'Resources') return;
                 const btn = document.createElement('button');
-                btn.className = 'sub-btn';
-                btn.style.background = colors[s] || "#64748b";
-                btn.innerText = s;
-                btn.onclick = () => startQuiz(s);
+                btn.className = 'sub-btn'; btn.style.background = colors[s] || "#64748b";
+                btn.innerText = s; btn.onclick = () => startQuiz(s);
                 grid.appendChild(btn);
             });
         }
@@ -137,47 +164,42 @@ const colors = {"English":"#3b82f6", "Math":"#10b981", "Science":"#ef4444", "华
     }
 
     function renderRes(g) {
-        const list = document.getElementById('res-list');
-        list.innerHTML = '';
+        const list = document.getElementById('res-list'); list.innerHTML = '';
         if(db[g] && db[g]['Resources']) {
             db[g]['Resources'].forEach(r => {
-                const div = document.createElement('div');
-                div.className = 'res-card';
+                const div = document.createElement('div'); div.className = 'res-card';
                 if(r.Type === 'IMAGE') div.innerHTML = `<b>${r.Title}</b><img src="${r.Content}" style="width:100%;margin-top:10px;border-radius:8px;">`;
-                else if(r.Type === 'PDF') div.innerHTML = `<b>${r.Title}</b><br><a href="${r.Content}" target="_blank" style="color:#2563eb;text-decoration:none;display:block;margin-top:8px;">📄 Open PDF Resource</a>`;
-                else div.innerHTML = `<b>${r.Title}</b><p style="margin:8px 0 0 0; color:#475569;">${r.Content}</p>`;
+                else if(r.Type === 'PDF') div.innerHTML = `<b>${r.Title}</b><br><a href="${r.Content}" target="_blank" style="color:#2563eb;display:block;margin-top:8px;">🔗 Open Reference</a>`;
+                else div.innerHTML = `<b>${r.Title}</b><p style="margin-top:8px;">${r.Content}</p>`;
                 list.appendChild(div);
             });
-        } else {
-            list.innerHTML = `<p style="color:#94a3b8; font-size:14px;">No study materials yet for ${g}.</p>`;
-        }
+        } else { list.innerHTML = `<p style="color:#94a3b8;">No resources yet.</p>`; }
     }
 
     function startQuiz(s) {
         curSub = s; curIdx = 0;
         sessionQs = db[curUser][s].sort(() => 0.5 - Math.random()).slice(0, 5);
-        showScreen('quiz-screen');
-        renderQ();
+        showScreen('quiz-screen'); renderQ();
     }
 
     function renderQ() {
         const q = sessionQs[curIdx];
         document.getElementById('q-text').innerText = q.Question;
+        document.getElementById('progress-text').innerText = `${curIdx + 1} / ${sessionQs.length}`;
         const input = document.getElementById('ans-in');
-        input.value = ''; input.disabled = false;
-        input.className = 'ans-input';
-        document.getElementById('fb-text').innerHTML = '';
+        input.value = ''; input.disabled = false; input.className = 'ans-input';
+        document.getElementById('fb-text').innerText = '';
         document.getElementById('sub-btn').style.display = 'block';
         document.getElementById('next-btn').style.display = 'none';
-        setTimeout(() => input.focus(), 200);
+        setTimeout(() => input.focus(), 100);
         input.onkeypress = (e) => { if(e.key === 'Enter') checkAns(); };
     }
 
     function checkAns() {
         const input = document.getElementById('ans-in');
         const user = input.value.trim().toLowerCase();
-        const correctStr = sessionQs[curIdx]._ans;
-        const correct = correctStr.toLowerCase();
+        const correctRaw = (sessionQs[curIdx]['Correct Answer'] || "").toString().trim();
+        const correct = correctRaw.toLowerCase();
         const fb = document.getElementById('fb-text');
         
         if(user === "") return;
@@ -187,23 +209,24 @@ const colors = {"English":"#3b82f6", "Math":"#10b981", "Science":"#ef4444", "华
             input.disabled = true;
             document.getElementById('sub-btn').style.display = 'none';
             document.getElementById('next-btn').style.display = 'block';
+            input.className = 'ans-input'; // 取消可能的红框
         } else {
-            fb.innerHTML = `<span style="color:#ef4444;">❌ Not quite. Try again!</span><br>
-                            <span style="font-size:15px; color:#64748b; font-weight:normal;">
-                               Hint: The answer is "${correctStr}"
-                            </span>`;
+            // 答错逻辑：红框闪烁、显示答案、但不清空输入框
+            fb.innerHTML = `<span style="color:#ef4444;">❌ Not quite. Check your spelling!</span><br>
+                            <span style="font-size:15px; color:#64748b; font-weight:normal;">Hint: The answer is <b>${correctRaw}</b></span>`;
             input.className = 'ans-input error-shake';
-            setTimeout(() => {
-                input.className = 'ans-input';
-                input.value = '';
-                input.focus();
-            }, 500);
+            setTimeout(() => { 
+                input.className = 'ans-input'; // 停止抖动，保留红底色提醒
+                input.style.backgroundColor = '#fef2f2';
+                // 不清空 value，而是全选文字，方便她一键修改
+                input.select(); 
+            }, 300);
         }
     }
 
     function nextQ() {
         if(curIdx < sessionQs.length - 1) { curIdx++; renderQ(); }
-        else { alert("Amazing! You finished the practice."); location.reload(); }
+        else { alert("Amazing job! You finished!"); location.reload(); }
     }
 
     function showScreen(id) {
