@@ -11,16 +11,31 @@
         
         * { box-sizing: border-box; }
 
-        /* 🌟 核心适配：使用 dynamic viewport (dvh) 解决软键盘弹出遮挡问题 */
-        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #1e293b; display: flex; flex-direction: column; align-items: center; min-height: 100dvh; }
-        .container { width: 100%; max-width: 600px; background: #fff; padding: 25px; border-radius: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center; position: relative; overflow: hidden; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #1e293b; display: flex; flex-direction: column; align-items: center; min-height: 100dvh; position: relative; }
+        
+        /* 🌟 右下角的悬浮日期微标 */
+        #school-term-display {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            font-size: 12px;
+            color: #94a3b8;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 5px 10px;
+            border-radius: 10px;
+            pointer-events: none;
+            backdrop-filter: blur(5px);
+        }
+
+        .container { width: 100%; max-width: 600px; background: #fff; padding: 25px; border-radius: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center; position: relative; overflow: hidden; margin-bottom: 40px; }
         .screen { display: none; width: 100%; }
         
         .magic-number { display: inline-block; font-size: 1.4em; color: #f59e0b; font-weight: 900; padding: 0 5px; animation: popPulse 1s infinite alternate cubic-bezier(0.4, 0, 0.2, 1); }
         @keyframes popPulse { 0% { transform: scale(1); } 100% { transform: scale(1.2) translateY(-3px); } }
-
-        .date-badge { display: inline-block; background: #f1f5f9; color: #475569; padding: 6px 14px; border-radius: 20px; font-size: 14px; font-weight: 600; margin-bottom: 20px; border: 1px solid #e2e8f0; }
         
+        /* 🌟 新增的副标题标语样式 */
+        .subtitle-instruction { font-size: 14px; color: #64748b; margin-top: -5px; margin-bottom: 25px; font-weight: 500; }
+
         .name-selector { display: flex; gap: 15px; justify-content: center; margin: 25px 0; height: 60px; }
         button.name-btn { padding: 0 30px; height: 55px; border-radius: 16px; border: 3px solid #e2e8f0; background: white; cursor: pointer; font-weight: 700; font-size: 18px; transition: 0.2s; color: #475569; display: flex; align-items: center; justify-content: center; }
         button.name-btn.active { border-color: var(--primary); background: #d1fae5; color: #065f46; }
@@ -38,7 +53,6 @@
         .bundle-label { width: 100%; justify-content: center; border-radius: 12px; border-width: 2px; border-style: dashed; padding: 10px; margin-top: 5px; }
         .bundle-label.selected { border-style: solid; }
         
-        /* 🌟 核心恢复：去掉了强制高度，让 Start/Back 按钮恢复饱满原貌 */
         .action-row { display: flex; gap: 10px; margin-top: 15px; flex-direction: row; }
 
         .milestone-track { display: flex; justify-content: space-between; position: relative; margin: 15px 0 35px 0; padding: 0 5px; height: 40px; }
@@ -58,7 +72,6 @@
 
         .feedback { font-size: 18px; margin: 15px 0; min-height: 24px; font-weight: bold; }
         
-        /* 🌟 核心更新：修复跳动，同时更新为糖果色系 */
         .controls { display: flex; gap: 10px; margin-top: 20px; height: 60px; align-items: stretch; }
         .btn-action { flex: 1; padding: 0 20px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 18px; display: flex; align-items: center; justify-content: center; }
         .btn-action:active { transform: scale(0.98); }
@@ -81,30 +94,38 @@
             button.name-btn { padding: 0 45px; height: 65px; font-size: 24px; }
             .hanzi-practice-box { width: 320px; height: 320px; }
             .word-card-btn { width: 65px; height: 75px; font-size: 36px; }
+            #school-term-display { font-size: 14px; bottom: 20px; right: 20px; padding: 8px 15px; }
         }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
     </style>
 </head>
 <body>
 
+<div id="school-term-display">Loading...</div>
+
 <div class="container">
-    <div id="loading" class="screen" style="display:block;">Syncing...</div>
+    <div id="loading" class="screen" style="display:block; padding: 50px 0; font-size: 18px; color: #64748b;">
+        Syncing with Google Sheets... ⏳
+    </div>
 
     <div id="menu-screen" class="screen">
-        <h2 style="margin:0 0 10px 0; color:#0f172a;">Did you <span class="magic-number">6~7</span> today?</h2>
-        <div id="school-term-display" class="date-badge">Loading...</div>
+        <h2 style="margin:0 0 5px 0; color:#0f172a;">Did you <span class="magic-number">6~7</span> today?</h2>
+        <div class="subtitle-instruction">Get all questions correct or only 1 mistake to 6~7</div>
+        
         <div class="name-selector">
             <button id="btn-P3" class="name-btn" onclick="switchUser('P3')">Valerie (P3)</button>
             <button id="btn-P1" class="name-btn" onclick="switchUser('P1')">Venessa (P1)</button>
         </div>
+        
         <div id="subject-grid" class="subject-grid">
             <button class="sub-btn" style="background:#3b82f6;" onclick="handleSubjectClick('English')">English</button>
             <button class="sub-btn" style="background:#ec4899;" onclick="handleSubjectClick('Math')">Math</button>
             <button class="sub-btn" style="background:#a855f7;" onclick="handleSubjectClick('华文')">华文</button>
             <button class="sub-btn" style="background:#10b981;" onclick="handleSubjectClick('Science')">Science</button>
         </div>
+
         <div class="res-section" style="text-align:left; border-top: 2px dashed #e2e8f0; margin-top:20px; padding-top:10px;">
-            <h3>Resources 📚</h3>
+            <h3 style="color:#0f172a; margin-bottom: 10px;">Resources 📚</h3>
             <div id="res-list"></div>
         </div>
     </div>
@@ -120,6 +141,7 @@
 
     <div id="topic-screen" class="screen">
         <h2 id="topic-title">Select Topics</h2>
+        <p id="topic-desc" style="color:#64748b; margin-bottom: 20px; font-size:14px;"></p>
         <div style="text-align: center; margin-bottom: 15px;">
             <label class="checkbox-label" id="check-all-label" style="display:inline-flex;">
                 <input type="checkbox" id="check-all" onchange="toggleAllTopics(this)"> 🌟 Select All
@@ -156,11 +178,8 @@
 
     <div id="spelling-screen" class="screen">
         <div id="spell-progress-bar" class="milestone-track"></div>
-        
         <div id="spelling-pinyin" class="pinyin-display"></div>
-        
         <div id="practice-pad-container" style="width:100%; display:flex; flex-direction:column; align-items:center;"></div>
-        
         <div id="spell-fb" class="feedback"></div>
         <div class="controls">
             <button class="btn-action" style="background:#f1f5f9; color:#475569; flex:0.3;" onclick="location.reload()">Exit</button>
@@ -172,12 +191,11 @@
 
 <script>
     // ==========================================
-    // 🎵 终极武器：内置 Base64 永久录音！永不失效！
+    // 🎵 专属欢呼语音 Base64 配置区
     // ==========================================
-    // Valerie: "AAAAGGZ0eXBtcDQyAAAAAGlzb21tcDQ..."
-    const BASE64_VALERIE = "data:audio/mp4;base64,AAAAGGZ0eXBtcDQyAAAAAGlzb21tcDQyAAAAAW1kYXQAAAAAAAD5fiERRQAUUAFG//EKWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpd5cIUtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLwhEUUAFFABRv/xClpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpd5cIUtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLwhEUUAFFABRv/xClpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWl3l4hS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLwhEUUAFFABRv/xClpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWl3lwhS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0vCERRQAUUAFG//EKWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaXeXCFLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS8IRuToQg+1Q/dboQg+1TWlGCoCA+AnlLUNJ+sd/+IUtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0u8bEKWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaXgIRuTnRxIHyNYowprSzEwC/wH/PKx0l9hqHKuLs4TFUe9q3YZqDko5UViB8yUVQukqlt36yS5a118JWzcN9jXCsMm//EKWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaXGIUtLwhG5OVpYiGEwREIDS1ZJlFFJVANaW0jEcjk8rSeVELIINk0FTn7D+3WIT5C1AexzXI2qHV5xoyMTOFPhTcWmSSu9Zl8cYDxe5fpY/EOsqMVKPTYQoowc6lyklWLqNBOLrTESJQiIQEvTcSsiqIoqUF0na/z+9mqPK4/93x79JcDDKXgtcFqXok6M6criySYwghHWZwmKysAFf7g/SAik8KFpeA155XP+3wKXvQMWtSoKLjfJiFLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t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";
-    // Venessa: "AAAAGGZ0eXBtcDQyAAAAAGlzb21tcDQ..."
-    const BASE64_VENESSA = "data:audio/mp4;base64,AAAAGGZ0eXBtcDQyAAAAAGlzb21tcDQyAAAAAW1kYXQAAAAAAACysyERRQAUUAFG//EKWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaXeXCFLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS8IRFFABRQAUb/8QpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpd5cIUtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLwhEUUAFFABRv/xClpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWl3l4hS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLwhEUUAFFABRv/xClpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWl3lwhS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0vCERRQAUUAFG//EKWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaXeXCFLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS8IRuTmhA+tVGtMY3yDwPzymIPE+p6MYbdRCH3GtMLJQDwAQ/zylqGEjv/xClpaWlpaWlpaWlp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";
+    // 请把你转换好的 "data:audio/mp3;base64,AAAA..." 字符串完整填入下面的双引号中！
+    const BASE64_VALERIE = ""; 
+    const BASE64_VENESSA = ""; 
     // ==========================================
 
     const SHEET_ID = "1vQlpdRHnR9ybEHHgX6fouRI-vXOh8KQNLSjsbt0TYh9R3No_9i7QNv_4ELwJZJGQpTe3oZVXaZijaW4";
@@ -237,6 +255,7 @@
         if (p.style.display === 'flex' && !canvas) initDrawPad();
     }
 
+    // 🌟 核心：更强壮的数据拉取与重试机制
     async function init() {
         const now = new Date();
         const t2 = new Date(2026, 2, 23), t3 = new Date(2026, 5, 29), t4 = new Date(2026, 8, 14);
@@ -245,23 +264,46 @@
         if (now >= t4) { const w = Math.floor(diff(now, t4)/7) + 1; term = w <= 10 ? `Term 4 Week ${w}` : "December Holiday"; }
         else if (now >= t3) { const w = Math.floor(diff(now, t3)/7) + 1; term = w <= 10 ? `Term 3 Week ${w}` : "September Holiday"; }
         else if (now >= t2) { const w = Math.floor(diff(now, t2)/7) + 1; term = w <= 10 ? `Term 2 Week ${w}` : "June Holiday"; }
-        document.getElementById('school-term-display').innerText = `📅 ${now.toLocaleDateString('en-SG', {weekday:'short', month:'short', day:'numeric'})} | ${term}`;
+        
+        const dateStr = now.toLocaleDateString('en-SG', {weekday:'short', month:'short', day:'numeric'});
+        document.getElementById('school-term-display').innerText = `📅 ${dateStr} | ${term}`;
 
-        const loads = Object.entries(GIDS).map(([name, gid]) => new Promise(res => {
-            Papa.parse(`https://docs.google.com/spreadsheets/d/e/2PACX-${SHEET_ID}/pub?gid=${gid}&single=true&output=csv&t=${Date.now()}`, {
-                download: true, header: true, skipEmptyLines: 'greedy',
-                complete: r => res({ name, data: r.data.map(row => { let n = {}; Object.keys(row).forEach(k => n[k.trim()] = row[k]); return n; }) }),
-                error: () => res(null)
+        try {
+            const loads = Object.entries(GIDS).map(([name, gid]) => new Promise((res, rej) => {
+                Papa.parse(`https://docs.google.com/spreadsheets/d/e/2PACX-${SHEET_ID}/pub?gid=${gid}&single=true&output=csv&t=${Date.now()}`, {
+                    download: true, header: true, skipEmptyLines: 'greedy',
+                    complete: r => res({ name, data: r.data.map(row => { let n = {}; Object.keys(row).forEach(k => n[k.trim()] = row[k]); return n; }) }),
+                    error: (err) => { console.error(`Failed loading ${name}:`, err); res(null); }
+                });
+            }));
+            
+            const results = await Promise.all(loads);
+            db = {};
+            let hasData = false;
+            
+            results.forEach(r => { 
+                if(r && r.data) {
+                    r.data.forEach(row => { 
+                        let g = (row.Grade || "").toUpperCase(); if(!g) return;
+                        if(!db[g]) db[g] = {}; if(!db[g][r.name]) db[g][r.name] = []; db[g][r.name].push(row);
+                        hasData = true;
+                    }); 
+                }
             });
-        }));
-        const results = await Promise.all(loads);
-        db = {};
-        results.forEach(r => { if(r) r.data.forEach(row => { 
-            let g = (row.Grade || "").toUpperCase(); if(!g) return;
-            if(!db[g]) db[g] = {}; if(!db[g][r.name]) db[g][r.name] = []; db[g][r.name].push(row);
-        }); });
-        document.getElementById('loading').style.display = 'none';
-        showScreen('menu-screen');
+            
+            if (!hasData) throw new Error("No data parsed from Google Sheets");
+            
+            document.getElementById('loading').style.display = 'none';
+            showScreen('menu-screen');
+            
+        } catch (error) {
+            console.error("Initialization error:", error);
+            document.getElementById('loading').innerHTML = `
+                <div style="color:#ef4444; margin-bottom:10px;">⚠️ Connection Error</div>
+                <div style="font-size:14px; color:#64748b;">Please check your internet connection and refresh the page.</div>
+                <button class="tool-btn" style="margin-top:15px;" onclick="location.reload()">🔄 Refresh</button>
+            `;
+        }
     }
 
     function switchUser(g) {
@@ -271,7 +313,7 @@
         const list = document.getElementById('res-list'); list.innerHTML = '';
         if(db[g] && db[g]['Resources']) db[g]['Resources'].forEach(r => {
             const div = document.createElement('div'); div.className = 'res-card';
-            div.innerHTML = r.Type === 'IMAGE' ? `<b>${r.Title}</b><img src="${r.Content}" style="width:100%;margin-top:10px;border-radius:8px;">` : `<b>${r.Title}</b><p>${r.Content}</p>`;
+            div.innerHTML = r.Type === 'IMAGE' ? `<b>${r.Title}</b><img src="${r.Content}" style="width:100%;margin-top:10px;border-radius:8px;">` : `<b>${r.Title}</b><p style="margin:5px 0 0 0;">${r.Content}</p>`;
             list.appendChild(div);
         });
     }
@@ -285,19 +327,21 @@
 
     function handleSubjectClick(s) {
         if (!curUser) { alert("Please select Valerie or Venessa first!"); return; }
+        
+        if (!db[curUser] || !db[curUser][s] || db[curUser][s].length === 0) { 
+            alert(s === '华文' ? "题库里暂时还没有这科的题目哦！" : "No questions available for this subject yet!"); 
+            return; 
+        }
+        
         curSub = s; let pool = db[curUser][s];
-        if (!pool || pool.length === 0) { alert(s === '华文' ? "题库里暂时还没有这科的题目哦！" : "No questions available for this subject yet!"); return; }
-
         let hasNormal = pool.some(q => (q.Type||"").toUpperCase() !== 'SPELLING');
         let hasSpelling = pool.some(q => (q.Type||"").toUpperCase() === 'SPELLING');
 
         if (hasNormal && hasSpelling) {
             const isCN = (s === '华文');
             document.getElementById('mode-title').innerText = isCN ? '请选择练习模式' : 'Select Practice Mode';
-            document.getElementById('btn-mode-normal').innerText = isCN ? '🚀 随机过关 (Practice)' : '🚀 Start Practice';
-            document.getElementById('btn-mode-spell').innerText = isCN ? '✍️ 听写模式 (Spelling)' : '✍️ Spelling Game';
-            document.getElementById('btn-mode-back').innerText = isCN ? '← 返回主页' : '← Back';
-            showScreen('mode-screen');
+            document.getElementById('mode-screen').style.display = 'block';
+            document.getElementById('menu-screen').style.display = 'none';
         } 
         else if (hasSpelling) showTopicSelection(s, true);
         else showTopicSelection(s, false);
@@ -318,7 +362,6 @@
         document.getElementById('topic-desc').innerText = isCN ? `（至少选择一项）` : `Choose the topics you want to practice.`;
         document.getElementById('check-all-text').innerText = isCN ? '🌟 全选 (Select All)' : '🌟 Select All';
         document.getElementById('check-all').checked = false;
-        document.getElementById('check-all-label').className = 'checkbox-label';
         
         let topicsArr = Array.from(topics).sort((a, b) => getSortWeight(a) - getSortWeight(b));
         let maxWeight = 0; topicsArr.forEach(t => { let w = getSortWeight(t); if(w < 999 && w > maxWeight) maxWeight = w; });
@@ -384,7 +427,7 @@
 
         curIdx = 0; sessionErrors = 0; document.getElementById('draw-panel').style.display = 'none';
 
-        // 🌟 根据科目显示或隐藏草稿板
+        // 根据科目显示或隐藏草稿板
         const padToggle = document.getElementById('pad-toggle-container');
         if (padToggle) padToggle.style.display = (curSub === 'Math') ? 'none' : 'flex';
 
@@ -450,7 +493,7 @@
         
         const container = document.getElementById('practice-pad-container');
         container.style.display = 'flex';
-        // 🌟 核心防挡：将输入区域整体上移，并加入 auto-scroll 机制
+        // 防挡设计：上移输入框
         container.innerHTML = `
             <input type="text" id="eng-spell-input" class="ans-input" style="text-align:center; font-size:32px; text-transform:lowercase; font-weight:bold; letter-spacing:2px; padding:20px; width:100%; max-width:350px;" autocomplete="off" spellcheck="false" placeholder="Type here..." onfocus="this.scrollIntoView({behavior: 'smooth', block: 'center'})" />
             <div style="display:flex; gap:10px; width:100%; max-width:350px; margin-top:15px; height:55px;">
@@ -463,14 +506,13 @@
         `;
         
         setTimeout(() => playTTS(currentSpellWord), 600);
-        // 🌟 防弹键盘：取消平板的自动强制聚焦
+        // 在宽屏设备上才自动聚焦，防止平板键盘乱弹
         if(window.innerWidth > 800) { setTimeout(() => document.getElementById('eng-spell-input').focus(), 700); }
     }
 
     function showEngHint() {
         document.getElementById('eng-hint-area').style.display = 'flex';
         document.getElementById('eng-hint-btn').style.display = 'none';
-        // 🌟 防弹键盘：点击 Hint 时不强制聚焦输入框
     }
 
     function checkEngTyping() {
@@ -587,7 +629,6 @@
         }
         document.getElementById('fb-text').innerText = '';
         document.getElementById('sub-btn').style.display = 'flex'; document.getElementById('next-btn').style.display = 'none';
-        // 🌟 防弹键盘：取消非 MCQ 的强制自动聚焦
         if(window.innerWidth > 800) { setTimeout(() => { if(document.getElementById('ans-in')) document.getElementById('ans-in').focus(); }, 100); }
     }
 
@@ -597,6 +638,7 @@
         btn.classList.add('active'); document.getElementById('ans-in').value = val;
     }
 
+    // 这里包含 Gemini API 判断，确保功能完整
     async function checkAns() {
         const input = document.getElementById('ans-in');
         const user = input.value.trim().toLowerCase();
@@ -612,6 +654,7 @@
             document.getElementById('next-btn').style.display = 'flex';
         };
 
+        // 处理开放题 AI 判卷
         if (qType === 'OPEN') {
             if (GEMINI_API_KEY && GEMINI_API_KEY !== "YOUR_API_KEY_HERE") {
                 fb.innerHTML = `<span style="color:#3b82f6; font-size: 16px;">⏳ ${isCN ? "老师正在看你的答案..." : "Teacher is reading your answer..."}</span>`;
@@ -632,6 +675,7 @@
             showNextState(); return;
         }
 
+        // 常规题判断
         if(user === correctRaw.toLowerCase()) {
             fb.innerHTML = `<span style="color:#10b981;">${isCN ? "✅ 答对啦！非常棒。" : "✅ Correct! Well done."}</span>`;
             showNextState();
@@ -657,6 +701,7 @@
         else { finishQuiz(); }
     }
 
+    // 🌟 终极音频触发点
     function finishQuiz() {
         const isCN = (curSub === '华文');
         document.querySelectorAll('.milestone-track').forEach(el => el.style.display = 'none');
@@ -667,11 +712,11 @@
         if (sessionErrors <= 1) {
             msg = isCN ? `🎉 恭喜你，获得了 ${magic67} 的好成绩！太棒了！` : `🎉 Congratulations, you've got ${magic67} today!`;
             
-            // 🌟 触发内置 Base64 欢呼声！
+            // 播放 Base64 声音
             let audioData = curUser === 'P1' ? BASE64_VENESSA : BASE64_VALERIE;
-            if (audioData) {
+            if (audioData && audioData.trim() !== "") {
                 let successAudio = new Audio(audioData);
-                successAudio.play().catch(e => console.warn("Success audio play failed", e));
+                successAudio.play().catch(e => console.warn("Base64 audio play failed", e));
             }
         } else {
             msg = isCN ? `💪 挑战完成！多练几次，争取下次拿到 ${magic67} 哦！` : `💪 Good effort! Keep practicing to get ${magic67} next time!`;
