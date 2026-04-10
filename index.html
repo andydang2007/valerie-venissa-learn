@@ -2,106 +2,85 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Family Learning Hub</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5/dist/hanzi-writer.min.js"></script>
     <style>
         :root { --primary: #10b981; --bg: #f8fafc; }
         
-        /* 保持原版的盒模型，只在必要的地方加 box-sizing */
-        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #1e293b; display: flex; flex-direction: column; align-items: center; min-height: 100vh; box-sizing: border-box; }
-        .container { width: 100%; max-width: 600px; background: #fff; padding: 25px; border-radius: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center; position: relative; }
+        * { box-sizing: border-box; }
+
+        /* 🌟 核心适配：使用 dynamic viewport (dvh) 解决软键盘弹出遮挡问题 */
+        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #1e293b; display: flex; flex-direction: column; align-items: center; min-height: 100dvh; }
+        .container { width: 100%; max-width: 600px; background: #fff; padding: 25px; border-radius: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center; position: relative; overflow: hidden; }
         .screen { display: none; width: 100%; }
         
-        .magic-number {
-            display: inline-block; font-size: 1.4em; color: #f59e0b; font-weight: 900; padding: 0 5px;
-            animation: popPulse 1s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        @keyframes popPulse { 0% { transform: scale(1); text-shadow: 0 0 5px rgba(253, 224, 71, 0.5); } 100% { transform: scale(1.2) translateY(-3px); text-shadow: 0 0 15px rgba(234, 179, 8, 0.8), 0 0 30px rgba(234, 179, 8, 0.4); } }
+        .magic-number { display: inline-block; font-size: 1.4em; color: #f59e0b; font-weight: 900; padding: 0 5px; animation: popPulse 1s infinite alternate cubic-bezier(0.4, 0, 0.2, 1); }
+        @keyframes popPulse { 0% { transform: scale(1); } 100% { transform: scale(1.2) translateY(-3px); } }
 
         .date-badge { display: inline-block; background: #f1f5f9; color: #475569; padding: 6px 14px; border-radius: 20px; font-size: 14px; font-weight: 600; margin-bottom: 20px; border: 1px solid #e2e8f0; }
         
-        /* 退回你喜欢的原版选人按钮样式 */
-        .name-selector { display: flex; gap: 15px; justify-content: center; margin: 25px 0; }
-        button.name-btn { padding: 15px 30px; border-radius: 16px; border: 2px solid #e2e8f0; background: white; cursor: pointer; font-weight: 700; font-size: 18px; transition: 0.2s; color: #475569; }
-        button.name-btn:hover { background: #f1f5f9; }
-        /* 略微调整选中状态，不再用 scale 放大，改为加粗边框和变色，解决主页跳动 */
-        button.name-btn.active { border-color: var(--primary); background: #d1fae5; color: #065f46; border-width: 3px; margin: -1px; }
+        .name-selector { display: flex; gap: 15px; justify-content: center; margin: 25px 0; height: 60px; }
+        button.name-btn { padding: 0 30px; height: 55px; border-radius: 16px; border: 3px solid #e2e8f0; background: white; cursor: pointer; font-weight: 700; font-size: 18px; transition: 0.2s; color: #475569; display: flex; align-items: center; justify-content: center; }
+        button.name-btn.active { border-color: var(--primary); background: #d1fae5; color: #065f46; }
         
         .subject-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin-bottom: 15px; }
-        button.sub-btn { flex: 1 1 40%; max-width: 45%; padding: 20px; border-radius: 16px; border: none; color: white; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.2s; box-sizing: border-box; }
-        button.sub-btn:hover { transform: translateY(-2px); filter: brightness(1.05); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        button.sub-btn { flex: 1 1 40%; max-width: 45%; padding: 20px; border-radius: 16px; border: none; color: white; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        button.sub-btn:hover { transform: translateY(-2px); filter: brightness(1.05); }
         
         .checkbox-grid { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 20px; max-height: 250px; overflow-y: auto; padding: 5px; }
         .checkbox-label { display: flex; align-items: center; padding: 8px 12px; border-radius: 20px; border: 2px solid #e2e8f0; background: white; cursor: pointer; transition: 0.2s; font-size: 15px; font-weight: 500; color: #475569; user-select: none; }
-        .checkbox-label:hover { background: #f8fafc; border-color: #cbd5e1; }
-        .checkbox-label input { display: none; }
-        .checkbox-label.selected { border-color: #3b82f6; background: #eff6ff; color: #1d4ed8; font-weight: bold; box-shadow: 0 2px 5px rgba(59, 130, 246, 0.1); }
-        
+        .checkbox-label.selected { border-color: #3b82f6; background: #eff6ff; color: #1d4ed8; font-weight: bold; }
         .checkbox-label.vocab-list { border-color: #d8b4fe; background: #faf5ff; color: #7e22ce; }
-        .checkbox-label.vocab-list:hover { background: #f3e8ff; border-color: #a855f7; }
-        .checkbox-label.vocab-list.selected { border-color: #9333ea; background: #e9d5ff; color: #6b21a8; box-shadow: 0 2px 5px rgba(147, 51, 234, 0.2); font-weight: bold; }
+        .checkbox-label.vocab-list.selected { border-color: #9333ea; background: #e9d5ff; color: #6b21a8; }
 
         .bundle-label { width: 100%; justify-content: center; border-radius: 12px; border-width: 2px; border-style: dashed; padding: 10px; margin-top: 5px; }
         .bundle-label.selected { border-style: solid; }
         
-        .action-row { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
-        .action-buttons-group { display: flex; gap: 10px; }
+        /* 🌟 核心恢复：去掉了强制高度，让 Start/Back 按钮恢复饱满原貌 */
+        .action-row { display: flex; gap: 10px; margin-top: 15px; flex-direction: row; }
 
-        .milestone-track { display: flex; justify-content: space-between; position: relative; margin: 15px 0 25px 0; padding: 0 5px; }
-        .milestone-track::before { content: ''; position: absolute; top: 50%; left: 15px; right: 15px; height: 6px; background: #e2e8f0; z-index: 1; transform: translateY(-50%); border-radius: 3px; }
-        .milestone-fill { position: absolute; top: 50%; left: 15px; height: 6px; background: #10b981; z-index: 1; transform: translateY(-50%); border-radius: 3px; transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
-        .milestone { width: 36px; height: 36px; background: #f8fafc; border: 3px solid #cbd5e1; border-radius: 50%; z-index: 2; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: 0.4s; box-sizing: border-box; }
+        .milestone-track { display: flex; justify-content: space-between; position: relative; margin: 15px 0 35px 0; padding: 0 5px; height: 40px; }
+        .milestone-track::before { content: ''; position: absolute; top: 50%; left: 15px; right: 15px; height: 6px; background: #e2e8f0; transform: translateY(-50%); border-radius: 3px; }
+        .milestone-fill { position: absolute; top: 50%; left: 15px; height: 6px; background: #10b981; transform: translateY(-50%); border-radius: 3px; transition: width 0.5s; }
+        .milestone { width: 36px; height: 36px; background: #f8fafc; border: 3px solid #cbd5e1; border-radius: 50%; z-index: 2; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: 0.4s; }
         .milestone.done { border-color: #10b981; background: #d1fae5; }
-        .milestone.active { border-color: #3b82f6; background: #eff6ff; font-size: 20px; transform: scale(1.2); box-shadow: 0 0 15px rgba(59,130,246,0.3); animation: bounceActive 1s infinite alternate; }
+        .milestone.active { border-color: #3b82f6; background: #eff6ff; font-size: 20px; transform: scale(1.2); }
 
-        .q-text { font-size: 24px; text-align: left; margin: 25px 0; line-height: 1.5; font-weight: 500; }
-        input.ans-input, textarea.ans-input { font-size: 20px; padding: 15px; width: 100%; border: 2px solid #e2e8f0; border-radius: 12px; box-sizing: border-box; outline: none; font-family: inherit; }
-        textarea.ans-input { resize: vertical; line-height: 1.4; }
-        input.ans-input.error-shake { border-color: #ef4444; animation: shake 0.3s; background-color: #fef2f2; }
+        .q-text { font-size: 24px; text-align: left; margin: 25px 0; min-height: 36px; }
+        input.ans-input { font-size: 26px; padding: 18px; width: 100%; border: 2px solid #e2e8f0; border-radius: 12px; outline: none; transition: 0.2s; text-align: center; font-weight: bold; letter-spacing: 1px; }
+        input.ans-input:focus { border-color: #3b82f6; background: #f8faff; box-shadow: 0 0 10px rgba(59,130,246,0.1); }
         
         .mcq-list { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
-        button.mcq-btn { padding: 16px; border-radius: 12px; border: 2px solid #e2e8f0; background: white; font-size: 18px; cursor: pointer; text-align: left; transition: 0.2s; font-family: inherit; color: #1e293b; outline: none; }
+        button.mcq-btn { padding: 18px; border-radius: 12px; border: 2px solid #e2e8f0; background: white; font-size: 18px; cursor: pointer; text-align: left; transition: 0.2s; color: #1e293b; }
         button.mcq-btn.active { border-color: var(--primary); background: #d1fae5; font-weight: bold; color: #065f46; }
-        button.mcq-btn.error { border-color: #ef4444; background: #fef2f2; color: #b91c1c; animation: shake 0.3s; }
 
         .feedback { font-size: 18px; margin: 15px 0; min-height: 24px; font-weight: bold; }
         
-        /* 🌟 核心修复：精准锁定控制区高度，解决 Submit 到 Next 的跳动 */
-        .controls { display: flex; gap: 10px; margin-top: 20px; height: 55px; align-items: stretch; box-sizing: border-box; }
-        .btn-action { flex: 1; padding: 0 15px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; outline: none; transition: 0.2s; font-size: 18px; display: flex; align-items: center; justify-content: center; box-sizing: border-box; }
+        /* 🌟 核心更新：修复跳动，同时更新为糖果色系 */
+        .controls { display: flex; gap: 10px; margin-top: 20px; height: 60px; align-items: stretch; }
+        .btn-action { flex: 1; padding: 0 20px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 18px; display: flex; align-items: center; justify-content: center; }
         .btn-action:active { transform: scale(0.98); }
         
-        .pinyin-display { font-size: 36px; font-weight: bold; color: #64748b; margin: 5px 0 15px 0; }
+        /* 糖果蓝 Submit 按钮 */
+        #sub-btn, #eng-sub-btn { background: #3b82f6; color: white; box-shadow: 0 4px 10px rgba(59,130,246,0.2); }
+        #sub-btn:hover, #eng-sub-btn:hover { background: #2563eb; }
+
+        .pinyin-display { font-size: 36px; font-weight: bold; color: #64748b; margin: 5px 0 15px 0; min-height: 50px; display: flex; justify-content: center; align-items: center; flex-wrap: wrap; }
         .pinyin-unit { margin: 0 8px; transition: 0.3s; }
-        .pinyin-unit.active { color: #ea580c; transform: scale(1.2); text-decoration: underline; }
+        .pinyin-unit.active { color: #ea580c; transform: scale(1.1); text-decoration: underline; }
         
-        .practice-pad-container { display: flex; flex-direction: column; align-items: center; background: #f8fafc; padding: 25px; border-radius: 20px; border: 2px dashed #cbd5e1; margin-bottom: 20px; box-shadow: inset 0 2px 10px rgba(0,0,0,0.02); width:100%; box-sizing: border-box; }
-        
-        .hanzi-practice-box { width: 250px; height: 250px; border: 3px solid #cbd5e1; border-radius: 16px; background: white; margin: 0 auto 15px auto; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        .hanzi-practice-box::before { content: ''; position: absolute; top: 50%; left: 0; width: 100%; height: 1px; background: #e2e8f0; border-top: 1px dashed #cbd5e1; }
-        .hanzi-practice-box::after { content: ''; position: absolute; left: 50%; top: 0; height: 100%; width: 1px; background: #e2e8f0; border-left: 1px dashed #cbd5e1; }
-
-        .word-card-btn { width: 50px; height: 60px; font-size: 28px; font-weight: bold; border: 2px solid #e2e8f0; border-radius: 12px; background: white; color: #1e293b; cursor: pointer; transition: 0.2s; display: flex; justify-content: center; align-items: center; padding: 0; outline: none; text-transform: lowercase; }
-        .word-card-btn:hover { border-color: #3b82f6; transform: translateY(-3px); box-shadow: 0 4px 10px rgba(59, 130, 246, 0.2); }
-        
-        .tool-btn { background: white; border: 2px solid #e2e8f0; padding: 8px 15px; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; color: #475569; transition: 0.2s; }
-        .tool-btn:hover { background: #f1f5f9; border-color: #cbd5e1; }
-
-        .draw-panel { display: none; flex-direction: column; align-items: center; margin-top: 15px; background: #f8fafc; padding: 15px; border-radius: 16px; border: 2px dashed #cbd5e1; }
-        canvas { background: white; border-radius: 12px; border: 1px solid #e2e8f0; touch-action: none; cursor: crosshair; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
-        .draw-tools { display: flex; justify-content: space-between; width: 100%; margin-top: 10px; }
-
-        .res-section { border-top: 2px dashed #e2e8f0; margin-top: 20px; padding-top: 20px; text-align: left; }
-        .res-card { background: #f1f5f9; padding: 15px; border-radius: 12px; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .hanzi-practice-box { width: 280px; height: 280px; border: 3px solid #cbd5e1; border-radius: 16px; background: white; margin: 0 auto 15px auto; position: relative; }
+        .word-card-btn { width: 55px; height: 65px; font-size: 30px; font-weight: bold; border: 2px solid #e2e8f0; border-radius: 12px; background: white; cursor: pointer; color: #1e293b; transition: 0.2s; }
+        .word-card-btn:hover { border-color: #3b82f6; transform: translateY(-2px); }
+        .tool-btn { background: white; border: 2px solid #e2e8f0; padding: 8px 15px; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; color: #475569; }
         
         @media (min-width: 768px) {
-            body { justify-content: center; padding: 40px; background: #e2e8f0; }
-            .container { max-width: 750px; padding: 40px; border-radius: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); }
-            /* 原版的桌面端名字按钮大小 */
-            button.name-btn { padding: 20px 45px; font-size: 24px; border-radius: 20px; }
-            .hanzi-practice-box { width: 300px; height: 300px; }
+            .container { max-width: 750px; padding: 40px; }
+            button.name-btn { padding: 0 45px; height: 65px; font-size: 24px; }
+            .hanzi-practice-box { width: 320px; height: 320px; }
+            .word-card-btn { width: 65px; height: 75px; font-size: 36px; }
         }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
     </style>
@@ -109,93 +88,83 @@
 <body>
 
 <div class="container">
-    <div id="loading" class="screen" style="display:block;">Syncing Lessons...</div>
+    <div id="loading" class="screen" style="display:block;">Syncing...</div>
 
     <div id="menu-screen" class="screen">
-        <h2 style="margin:0 0 10px 0; color:#0f172a;">Did you <span class="magic-number" style="font-size:1em;">6~7</span> today?</h2>
-        <div id="school-term-display" class="date-badge">Loading Date...</div>
-        
-        <div style="text-align: center; margin-bottom: 20px;">
-            <button class="tool-btn" style="background: #fffbeb; border-color: #fde68a; color: #d97706; width: 100%; max-width: 300px; padding: 12px; font-size: 16px;" onclick="testSuccessAudio()">
-                🎵 播放测试：点击这里听录音
-            </button>
-            <div id="audio-test-log" style="font-size: 12px; color: #94a3b8; margin-top: 5px;"></div>
-        </div>
-
+        <h2 style="margin:0 0 10px 0; color:#0f172a;">Did you <span class="magic-number">6~7</span> today?</h2>
+        <div id="school-term-display" class="date-badge">Loading...</div>
         <div class="name-selector">
             <button id="btn-P3" class="name-btn" onclick="switchUser('P3')">Valerie (P3)</button>
             <button id="btn-P1" class="name-btn" onclick="switchUser('P1')">Venessa (P1)</button>
         </div>
-        
         <div id="subject-grid" class="subject-grid">
             <button class="sub-btn" style="background:#3b82f6;" onclick="handleSubjectClick('English')">English</button>
             <button class="sub-btn" style="background:#ec4899;" onclick="handleSubjectClick('Math')">Math</button>
             <button class="sub-btn" style="background:#a855f7;" onclick="handleSubjectClick('华文')">华文</button>
             <button class="sub-btn" style="background:#10b981;" onclick="handleSubjectClick('Science')">Science</button>
         </div>
-
-        <div class="res-section">
-            <h3 style="margin-top:0;">Resources 📚</h3>
+        <div class="res-section" style="text-align:left; border-top: 2px dashed #e2e8f0; margin-top:20px; padding-top:10px;">
+            <h3>Resources 📚</h3>
             <div id="res-list"></div>
         </div>
     </div>
 
     <div id="mode-screen" class="screen">
-        <h2 id="mode-title" style="margin:0 0 25px 0; color:#0f172a;">Select Practice Mode</h2>
+        <h2 style="margin-bottom:25px;">Select Mode</h2>
         <div style="display:flex; flex-direction:column; gap:15px;">
-            <button id="btn-mode-normal" class="btn-action" style="background:#3b82f6; color:white; padding:20px;" onclick="showTopicSelection(curSub, false)">🚀 Start Practice</button>
-            <button id="btn-mode-spell" class="btn-action" style="background:linear-gradient(135deg, #f59e0b, #ea580c); color:white; padding:20px;" onclick="showTopicSelection(curSub, true)">✍️ Spelling Game</button>
-            <button id="btn-mode-back" class="btn-action" style="background:#f8fafc; color:#64748b; border:2px solid #e2e8f0; margin-top:15px;" onclick="showScreen('menu-screen')">← Back</button>
+            <button class="btn-action" style="background:#3b82f6; color:white; height:70px;" onclick="showTopicSelection(curSub, false)">🚀 Start Practice</button>
+            <button class="btn-action" style="background:linear-gradient(135deg, #f59e0b, #ea580c); color:white; height:70px;" onclick="showTopicSelection(curSub, true)">✍️ Spelling Game</button>
+            <button class="btn-action" style="background:#f8fafc; color:#64748b; border:2px solid #e2e8f0; margin-top:10px; height:60px;" onclick="showScreen('menu-screen')">← Back</button>
         </div>
     </div>
 
     <div id="topic-screen" class="screen">
-        <h2 id="topic-title" style="margin:0 0 5px 0; color:#0f172a;">Select Topics</h2>
-        <p id="topic-desc" style="color:#64748b; margin-bottom: 20px; font-size:14px;"></p>
+        <h2 id="topic-title">Select Topics</h2>
         <div style="text-align: center; margin-bottom: 15px;">
-            <label class="checkbox-label" id="check-all-label" style="display:inline-flex; background:#eff6ff; border-color:#3b82f6;">
-                <input type="checkbox" id="check-all" onchange="toggleAllTopics(this)">
-                <b id="check-all-text">🌟 全选所有 (Select All)</b>
+            <label class="checkbox-label" id="check-all-label" style="display:inline-flex;">
+                <input type="checkbox" id="check-all" onchange="toggleAllTopics(this)"> 🌟 Select All
             </label>
         </div>
         <div id="topic-checkboxes" class="checkbox-grid"></div>
-        <div class="action-row" style="display:flex; gap:10px; flex-direction: row;">
-            <button class="btn-action" style="background:#f8fafc; color:#64748b; border:2px solid #e2e8f0; flex:0.4;" onclick="goBackFromTopic()">← Back</button>
-            <button class="btn-action" style="background:#10b981; color:white; flex:0.6;" onclick="startQuiz()">Start 🚀</button>
+        <div class="action-row">
+            <button class="btn-action" style="background:#f8fafc; color:#64748b; border:2px solid #e2e8f0; flex:0.4; height:60px;" onclick="goBackFromTopic()">← Back</button>
+            <button class="btn-action" style="background:#10b981; color:white; flex:0.6; height:60px;" onclick="startQuiz()">Start 🚀</button>
         </div>
     </div>
 
     <div id="quiz-screen" class="screen">
         <div id="progress-bar" class="milestone-track"></div>
-        <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom:15px;">
-            <button class="tool-btn" style="color:#10b981; border-color:#10b981; padding: 6px 12px; font-size:14px;" onclick="toggleDrawPad()">✍️ 草稿板</button>
-            <div style="font-size:14px; color:#94a3b8;" id="progress-text"></div>
+        
+        <div id="pad-toggle-container" style="display:flex; justify-content: space-between; align-items: center; margin-bottom:10px;">
+            <button class="tool-btn" id="pad-btn" onclick="toggleDrawPad()">✍️ Pad</button>
+            <div id="progress-text" style="font-size:14px; color:#94a3b8;"></div>
         </div>
+
         <div id="q-text" class="q-text"></div>
-        <div id="draw-panel" style="display:none; flex-direction: column; align-items: center; margin-bottom:15px; background:#f8fafc; padding:10px; border-radius:12px; border:2px dashed #cbd5e1;">
-            <canvas id="pad" width="300" height="200" style="background:white; border-radius:8px; border:1px solid #e2e8f0; touch-action:none;"></canvas>
-            <div style="display:flex; justify-content: space-between; width:100%; margin-top:8px;">
-                <button class="tool-btn" onclick="clearPad()">🗑️ Clear</button>
-                <button class="tool-btn" onclick="toggleDrawPad()">❌ Close</button>
-            </div>
+        <div id="draw-panel" style="display:none; flex-direction: column; align-items: center; margin-bottom:15px;">
+            <canvas id="pad" width="300" height="200" style="background:#fff; border:1px solid #ddd; touch-action:none;"></canvas>
+            <button class="tool-btn" style="margin-top:5px; width:100%;" onclick="ctx.clearRect(0,0,300,200)">Clear</button>
         </div>
-        <div id="input-container"></div>
+        <div id="input-container" style="min-height: 100px;"></div>
         <div id="fb-text" class="feedback"></div>
         <div class="controls">
-            <button id="exit-btn" class="btn-action" style="background:#f1f5f9; color:#475569;" onclick="location.reload()">Exit</button>
-            <button id="sub-btn" class="btn-action" style="background:#1e293b; color:white;" onclick="checkAns()">Submit (Enter)</button>
-            <button id="next-btn" class="btn-action" style="background:#10b981; color:white; display:none;" onclick="nextQ()">Next (Enter) →</button>
+            <button class="btn-action" style="background:#f1f5f9; color:#475569;" onclick="location.reload()">Exit</button>
+            <button id="sub-btn" class="btn-action" onclick="checkAns()">Submit</button>
+            <button id="next-btn" class="btn-action" style="background:#10b981; color:white; display:none;" onclick="nextQ()">Next →</button>
         </div>
     </div>
 
     <div id="spelling-screen" class="screen">
         <div id="spell-progress-bar" class="milestone-track"></div>
-        <div id="spelling-pinyin" class="pinyin-display" style="display:flex; justify-content:center; align-items:center; flex-wrap:wrap;"></div>
-        <div id="practice-pad-container" class="practice-pad-container"></div>
+        
+        <div id="spelling-pinyin" class="pinyin-display"></div>
+        
+        <div id="practice-pad-container" style="width:100%; display:flex; flex-direction:column; align-items:center;"></div>
+        
         <div id="spell-fb" class="feedback"></div>
         <div class="controls">
             <button class="btn-action" style="background:#f1f5f9; color:#475569; flex:0.3;" onclick="location.reload()">Exit</button>
-            <button id="spell-next-btn" class="btn-action" style="background:#e2e8f0; color:#94a3b8; flex:0.7; pointer-events:none;" onclick="nextSpellQ()">Next (Enter) →</button>
+            <button id="spell-next-btn" class="btn-action" style="background:#e2e8f0; color:#94a3b8; flex:0.7; pointer-events:none;" onclick="nextSpellQ()">Next →</button>
         </div>
     </div>
 
@@ -203,10 +172,13 @@
 
 <script>
     // ==========================================
-    // 🎵 专属欢呼语音设置区
+    // 🎵 终极武器：内置 Base64 永久录音！永不失效！
     // ==========================================
-    const SUCCESS_AUDIO_VALERIE = "https://drive.google.com/file/d/1StoRXMJqWPegTr5Cu6oxlyIvL0iVgFwH/view?usp=sharing"; 
-    const SUCCESS_AUDIO_VENESSA = "https://drive.google.com/file/d/1dMcI2VhKCzCKzTnAn570yyTGF0R_MJPh/view?usp=sharing"; 
+    // Valerie: "AAAAGGZ0eXBtcDQyAAAAAGlzb21tcDQ..."
+    const BASE64_VALERIE = "data:audio/mp4;base64,AAAAGGZ0eXBtcDQyAAAAAGlzb21tcDQyAAAAAW1kYXQAAAAAAAD5fiERRQAUUAFG//EKWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpd5cIUtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLwhEUUAFFABRv/xClpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpd5cIUtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLwhEUUAFFABRv/xClpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWl3l4hS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLwhEUUAFFABRv/xClpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWl3lwhS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0vCERRQAUUAFG//EKWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaXeXCFLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS8IRuToQg+1Q/dboQg+1TWlGCoCA+AnlLUNJ+sd/+IUtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0u8bEKWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaXgIRuTnRxIHyNYowprSzEwC/wH/PKx0l9hqHKuLs4TFUe9q3YZqDko5UViB8yUVQukqlt36yS5a118JWzcN9jXCsMm//EKWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaXGIUtLwhG5OVpYiGEwREIDS1ZJlFFJVANaW0jEcjk8rSeVELIINk0FTn7D+3WIT5C1AexzXI2qHV5xoyMTOFPhTcWmSSu9Zl8cYDxe5fpY/EOsqMVKPTYQoowc6lyklWLqNBOLrTESJQiIQEvTcSsiqIoqUF0na/z+9mqPK4/93x79JcDDKXgtcFqXok6M6criySYwghHWZwmKysAFf7g/SAik8KFpeA155XP+3wKXvQMWtSoKLjfJiFLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t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";
+    // Venessa: "AAAAGGZ0eXBtcDQyAAAAAGlzb21tcDQ..."
+    const BASE64_VENESSA = "data:audio/mp4;base64,AAAAGGZ0eXBtcDQyAAAAAGlzb21tcDQyAAAAAW1kYXQAAAAAAACysyERRQAUUAFG//EKWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaXeXCFLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS8IRFFABRQAUb/8QpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpd5cIUtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLwhEUUAFFABRv/xClpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWl3l4hS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLwhEUUAFFABRv/xClpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWl3lwhS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0vCERRQAUUAFG//EKWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaXeXCFLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS8IRuTmhA+tVGtMY3yDwPzymIPE+p6MYbdRCH3GtMLJQDwAQ/zylqGEjv/xClpaWlpaWlpaWlp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";
+    // ==========================================
 
     const SHEET_ID = "1vQlpdRHnR9ybEHHgX6fouRI-vXOh8KQNLSjsbt0TYh9R3No_9i7QNv_4ELwJZJGQpTe3oZVXaZijaW4";
     const GIDS = { "English": "1893311738", "Math": "59294467", "Science": "1581471994", "华文": "2020673087", "Resources": "469231602" };
@@ -217,56 +189,19 @@
     
     const synth = window.speechSynthesis;
     let bestEngVoice = null;
-    let bestCNVoice = null;
 
     function loadVoices() {
         const vs = synth.getVoices();
         bestEngVoice = vs.find(v => v.name.includes('Google') && v.lang.startsWith('en')) || vs.find(v => v.lang.startsWith('en')) || vs[0];
-        bestCNVoice = vs.find(v => (v.name.includes('Google') || v.name.includes('Ting-Ting')) && v.lang.includes('zh')) || vs.find(v => v.lang.includes('zh')) || vs[0];
     }
     if (speechSynthesis.onvoiceschanged !== undefined) speechSynthesis.onvoiceschanged = loadVoices;
     loadVoices();
 
-    // 终极直链解析器
-    function getDriveDirectLink(link) {
-        if (!link) return "";
-        let m = link.match(/\/d\/([a-zA-Z0-9_-]+)/);
-        return m ? `https://drive.usercontent.google.com/download?id=${m[1]}` : link;
-    }
-
-    // 🎵 主页的音频测试功能
-    function testSuccessAudio() {
-        const log = document.getElementById('audio-test-log');
-        let testUrl = curUser === 'P1' ? SUCCESS_AUDIO_VENESSA : SUCCESS_AUDIO_VALERIE;
-        
-        if (!testUrl || testUrl.trim() === "") {
-            log.innerText = "⚠️ 请先在代码底部填入录音链接！";
-            return;
-        }
-        
-        log.innerText = "⏳ 正在尝试解析并播放...";
-        let directUrl = getDriveDirectLink(testUrl);
-        
-        let testAudio = new Audio(directUrl);
-        testAudio.oncanplaythrough = () => { log.innerText = "✅ 音频加载成功，正在播放..."; testAudio.play(); };
-        testAudio.onerror = (e) => { 
-            console.error(e);
-            log.innerHTML = `<span style="color:#ef4444;">❌ 播放失败。可能原因：1. Google Drive 未设置为'任何人可见'；2. 浏览器拦截了跨域音频。</span>`; 
-        };
-        // 强制触发加载
-        testAudio.load();
-    }
-
-    function playTTS(text, lang) {
+    function playTTS(text) {
         if (synth.speaking) synth.cancel();
         const u = new SpeechSynthesisUtterance(text);
-        if (lang === 'zh') {
-            if (bestCNVoice) u.voice = bestCNVoice;
-            u.lang = 'zh-CN'; 
-        } else {
-            if (bestEngVoice) u.voice = bestEngVoice;
-            u.lang = 'en-US'; 
-        }
+        if (bestEngVoice) u.voice = bestEngVoice;
+        u.lang = 'en-US'; 
         u.rate = 0.8; u.volume = 1;
         synth.speak(u);
     }
@@ -333,7 +268,6 @@
         curUser = g;
         document.getElementById('btn-P3').className = g === 'P3' ? 'name-btn active' : 'name-btn';
         document.getElementById('btn-P1').className = g === 'P1' ? 'name-btn active' : 'name-btn';
-        document.getElementById('audio-test-log').innerText = ""; // 重置测试日志
         const list = document.getElementById('res-list'); list.innerHTML = '';
         if(db[g] && db[g]['Resources']) db[g]['Resources'].forEach(r => {
             const div = document.createElement('div'); div.className = 'res-card';
@@ -450,6 +384,10 @@
 
         curIdx = 0; sessionErrors = 0; document.getElementById('draw-panel').style.display = 'none';
 
+        // 🌟 根据科目显示或隐藏草稿板
+        const padToggle = document.getElementById('pad-toggle-container');
+        if (padToggle) padToggle.style.display = (curSub === 'Math') ? 'none' : 'flex';
+
         if (isSpellingMode) {
             if (curSub === 'English') sessionQs = pool.sort(() => 0.5 - Math.random());
             else sessionQs = pool;
@@ -495,7 +433,7 @@
         currentSpellWord = (q['Correct Answer'] || "").toString().trim().toLowerCase();
         
         document.getElementById('spelling-pinyin').innerHTML = `
-            <button class="tool-btn" style="font-size:24px; padding:12px 25px; border-color:#3b82f6; color:#3b82f6; background:#eff6ff; border-radius:16px; box-shadow:0 4px 6px rgba(59,130,246,0.2);" onclick="playTTS('${currentSpellWord}', 'en')">
+            <button class="tool-btn" style="font-size:24px; padding:12px 25px; border-color:#3b82f6; color:#3b82f6; background:#eff6ff; border-radius:16px; box-shadow:0 4px 6px rgba(59,130,246,0.2);" onclick="playTTS('${currentSpellWord}')">
                 🔊 Listen & Spell
             </button>`;
         
@@ -507,30 +445,32 @@
         
         let btnsHtml = '';
         letters.forEach((l, idx) => {
-            btnsHtml += `<button class="word-card-btn" onclick="document.getElementById('eng-spell-input').value+='${l}'; document.getElementById('eng-spell-input').focus();">${l}</button>`;
+            btnsHtml += `<button class="word-card-btn" onclick="document.getElementById('eng-spell-input').value+='${l}';">${l}</button>`;
         });
         
         const container = document.getElementById('practice-pad-container');
         container.style.display = 'flex';
+        // 🌟 核心防挡：将输入区域整体上移，并加入 auto-scroll 机制
         container.innerHTML = `
-            <input type="text" id="eng-spell-input" class="ans-input" style="text-align:center; font-size:32px; text-transform:lowercase; font-weight:bold; letter-spacing:2px; padding:20px; width:100%; max-width:350px;" autocomplete="off" spellcheck="false" placeholder="Type here..." />
+            <input type="text" id="eng-spell-input" class="ans-input" style="text-align:center; font-size:32px; text-transform:lowercase; font-weight:bold; letter-spacing:2px; padding:20px; width:100%; max-width:350px;" autocomplete="off" spellcheck="false" placeholder="Type here..." onfocus="this.scrollIntoView({behavior: 'smooth', block: 'center'})" />
             <div style="display:flex; gap:10px; width:100%; max-width:350px; margin-top:15px; height:55px;">
                 <button class="tool-btn" id="eng-hint-btn" style="flex:0.3; background:#fffbeb; color:#d97706; border-color:#fde68a;" onclick="showEngHint()">💡 Hint</button>
-                <button class="btn-action" id="eng-sub-btn" style="flex:0.7; background:#1e293b; color:white; margin:0;" onclick="checkEngTyping()">Submit</button>
+                <button class="btn-action" id="eng-sub-btn" style="flex:0.7; margin:0;" onclick="checkEngTyping()">Submit</button>
             </div>
             <div id="eng-hint-area" style="display:none; flex-wrap:wrap; gap:8px; justify-content:center; width:100%; margin-top:15px;">
                 ${btnsHtml}
             </div>
         `;
         
-        setTimeout(() => playTTS(currentSpellWord, 'en'), 600);
-        setTimeout(() => document.getElementById('eng-spell-input').focus(), 700);
+        setTimeout(() => playTTS(currentSpellWord), 600);
+        // 🌟 防弹键盘：取消平板的自动强制聚焦
+        if(window.innerWidth > 800) { setTimeout(() => document.getElementById('eng-spell-input').focus(), 700); }
     }
 
     function showEngHint() {
         document.getElementById('eng-hint-area').style.display = 'flex';
         document.getElementById('eng-hint-btn').style.display = 'none';
-        document.getElementById('eng-spell-input').focus();
+        // 🌟 防弹键盘：点击 Hint 时不强制聚焦输入框
     }
 
     function checkEngTyping() {
@@ -541,7 +481,7 @@
             if (document.getElementById('eng-hint-btn')) document.getElementById('eng-hint-btn').style.display = 'none';
             if (document.getElementById('eng-hint-area')) document.getElementById('eng-hint-area').style.display = 'none';
             
-            playTTS("Excellent!", 'en');
+            playTTS("Excellent!");
             const nextBtn = document.getElementById('spell-next-btn');
             nextBtn.style.background = '#10b981'; nextBtn.style.color = 'white'; nextBtn.style.pointerEvents = 'auto';
         } else {
@@ -551,7 +491,6 @@
             setTimeout(() => {
                 inp.classList.remove('error-shake');
                 inp.style.borderColor = '#e2e8f0'; inp.style.color = '#1e293b'; inp.style.background = 'white';
-                inp.focus();
             }, 400);
         }
     }
@@ -571,7 +510,6 @@
                 pyIndex++;
             }
         }
-        pinyinHtml += `<button class="tool-btn" style="padding:5px 15px; font-size:20px; border-color:#3b82f6; color:#3b82f6; background:#eff6ff; margin-left:10px;" onclick="playTTS('${pinyinArray.join(' ') || currentSpellWord}', 'zh')">🔊</button>`;
         pinyinHtml += '</div>';
 
         document.getElementById('spelling-pinyin').innerHTML = pinyinHtml;
@@ -581,7 +519,6 @@
         container.innerHTML = `<div id="hanzi-practice-box" class="hanzi-practice-box"></div>`;
         
         startNextChar();
-        setTimeout(() => playTTS(pinyinArray.join(' ') || currentSpellWord, 'zh'), 600);
     }
 
     function startNextChar() {
@@ -639,7 +576,6 @@
         
         if (qType === 'OPEN') {
             container.innerHTML = `<textarea id="ans-in" class="ans-input" rows="5" placeholder="${isCN ? '在此输入你的完整答案...' : 'Type your full answer here...'}"></textarea>`;
-            setTimeout(() => document.getElementById('ans-in').focus(), 100);
         } else if (qType === 'MCQ') {
             const opts = (q.Options || q.options || "").toString().split('/').map(o => o.trim()).filter(o => o);
             let html = `<div class="mcq-list">`;
@@ -647,11 +583,12 @@
             html += `</div><input type="hidden" id="ans-in" value="">`;
             container.innerHTML = html;
         } else {
-            container.innerHTML = `<input type="text" id="ans-in" class="ans-input" placeholder="${isCN ? '在此输入答案...' : 'Type answer here...'}" autocomplete="off">`;
-            setTimeout(() => document.getElementById('ans-in').focus(), 100);
+            container.innerHTML = `<input type="text" id="ans-in" class="ans-input" placeholder="${isCN ? '在此输入答案...' : 'Type answer here...'}" autocomplete="off" onfocus="this.scrollIntoView({behavior: 'smooth', block: 'center'})">`;
         }
         document.getElementById('fb-text').innerText = '';
         document.getElementById('sub-btn').style.display = 'flex'; document.getElementById('next-btn').style.display = 'none';
+        // 🌟 防弹键盘：取消非 MCQ 的强制自动聚焦
+        if(window.innerWidth > 800) { setTimeout(() => { if(document.getElementById('ans-in')) document.getElementById('ans-in').focus(); }, 100); }
     }
 
     function selectMCQ(btn, val) {
@@ -730,11 +667,10 @@
         if (sessionErrors <= 1) {
             msg = isCN ? `🎉 恭喜你，获得了 ${magic67} 的好成绩！太棒了！` : `🎉 Congratulations, you've got ${magic67} today!`;
             
-            // 触发欢呼声！
-            let audioUrl = curUser === 'P1' ? SUCCESS_AUDIO_VENESSA : SUCCESS_AUDIO_VALERIE;
-            if (audioUrl) {
-                let directUrl = getDriveDirectLink(audioUrl);
-                let successAudio = new Audio(directUrl);
+            // 🌟 触发内置 Base64 欢呼声！
+            let audioData = curUser === 'P1' ? BASE64_VENESSA : BASE64_VALERIE;
+            if (audioData) {
+                let successAudio = new Audio(audioData);
                 successAudio.play().catch(e => console.warn("Success audio play failed", e));
             }
         } else {
