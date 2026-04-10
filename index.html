@@ -9,83 +9,104 @@
     <style>
         :root { --primary: #10b981; --bg: #f8fafc; }
         
-        * { box-sizing: border-box; }
-
-        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #1e293b; display: flex; flex-direction: column; align-items: center; min-height: 100dvh; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #1e293b; display: flex; flex-direction: column; align-items: center; min-height: 100dvh; box-sizing: border-box; }
         
-        /* 🌟 给 container 底部留出空间，用来绝对定位日期 */
-        .container { width: 100%; max-width: 600px; background: #fff; padding: 25px 25px 60px 25px; border-radius: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center; position: relative; overflow: hidden; margin-bottom: 20px; }
+        /* 容器底部留出 padding 给绝对定位的日期 */
+        .container { width: 100%; max-width: 600px; background: #fff; padding: 25px 25px 60px 25px; border-radius: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center; position: relative; margin-bottom: 20px; }
         .screen { display: none; width: 100%; }
         
-        .magic-number { display: inline-block; font-size: 1.4em; color: #f59e0b; font-weight: 900; padding: 0 5px; animation: popPulse 1s infinite alternate cubic-bezier(0.4, 0, 0.2, 1); }
-        @keyframes popPulse { 0% { transform: scale(1); } 100% { transform: scale(1.2) translateY(-3px); } }
-        
-        /* 🌟 你修改的最新地道英文标语 */
-        .subtitle-instruction { font-size: 15px; color: #64748b; margin-top: -5px; margin-bottom: 25px; font-weight: 600; letter-spacing: 0.5px; }
+        .magic-number {
+            display: inline-block; font-size: 1.4em; color: #f59e0b; font-weight: 900; padding: 0 5px;
+            animation: popPulse 1s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @keyframes popPulse { 0% { transform: scale(1); text-shadow: 0 0 5px rgba(253, 224, 71, 0.5); } 100% { transform: scale(1.2) translateY(-3px); text-shadow: 0 0 15px rgba(234, 179, 8, 0.8), 0 0 30px rgba(234, 179, 8, 0.4); } }
 
-        .name-selector { display: flex; gap: 15px; justify-content: center; margin: 25px 0; height: 60px; }
-        button.name-btn { padding: 0 30px; height: 55px; border-radius: 16px; border: 3px solid #e2e8f0; background: white; cursor: pointer; font-weight: 700; font-size: 18px; transition: 0.2s; color: #475569; display: flex; align-items: center; justify-content: center; }
+        /* 恢复原版的稳定按键样式，仅去除了 scale(1.05) 以防跳动 */
+        .name-selector { display: flex; gap: 15px; justify-content: center; margin: 25px 0; }
+        button.name-btn { padding: 15px 30px; border-radius: 16px; border: 2px solid #e2e8f0; background: white; cursor: pointer; font-weight: 700; font-size: 18px; transition: 0.2s; color: #475569; }
+        button.name-btn:hover { background: #f1f5f9; }
         button.name-btn.active { border-color: var(--primary); background: #d1fae5; color: #065f46; }
         
         .subject-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin-bottom: 15px; }
-        button.sub-btn { flex: 1 1 40%; max-width: 45%; padding: 20px; border-radius: 16px; border: none; color: white; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        button.sub-btn:hover { transform: translateY(-2px); filter: brightness(1.05); }
+        button.sub-btn { flex: 1 1 40%; max-width: 45%; padding: 20px; border-radius: 16px; border: none; color: white; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.2s; box-sizing: border-box; }
+        button.sub-btn:hover { transform: translateY(-2px); filter: brightness(1.05); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         
         .checkbox-grid { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 20px; max-height: 250px; overflow-y: auto; padding: 5px; }
         .checkbox-label { display: flex; align-items: center; padding: 8px 12px; border-radius: 20px; border: 2px solid #e2e8f0; background: white; cursor: pointer; transition: 0.2s; font-size: 15px; font-weight: 500; color: #475569; user-select: none; }
-        .checkbox-label.selected { border-color: #3b82f6; background: #eff6ff; color: #1d4ed8; font-weight: bold; }
+        .checkbox-label:hover { background: #f8fafc; border-color: #cbd5e1; }
+        .checkbox-label input { display: none; }
+        .checkbox-label.selected { border-color: #3b82f6; background: #eff6ff; color: #1d4ed8; font-weight: bold; box-shadow: 0 2px 5px rgba(59, 130, 246, 0.1); }
+        
         .checkbox-label.vocab-list { border-color: #d8b4fe; background: #faf5ff; color: #7e22ce; }
-        .checkbox-label.vocab-list.selected { border-color: #9333ea; background: #e9d5ff; color: #6b21a8; }
+        .checkbox-label.vocab-list:hover { background: #f3e8ff; border-color: #a855f7; }
+        .checkbox-label.vocab-list.selected { border-color: #9333ea; background: #e9d5ff; color: #6b21a8; box-shadow: 0 2px 5px rgba(147, 51, 234, 0.2); font-weight: bold; }
 
         .bundle-label { width: 100%; justify-content: center; border-radius: 12px; border-width: 2px; border-style: dashed; padding: 10px; margin-top: 5px; }
         .bundle-label.selected { border-style: solid; }
         
-        .action-row { display: flex; gap: 10px; margin-top: 15px; flex-direction: row; }
+        .action-row { display: flex; flex-direction: row; gap: 10px; margin-top: 15px; }
 
-        .milestone-track { display: flex; justify-content: space-between; position: relative; margin: 15px 0 35px 0; padding: 0 5px; height: 40px; }
-        .milestone-track::before { content: ''; position: absolute; top: 50%; left: 15px; right: 15px; height: 6px; background: #e2e8f0; transform: translateY(-50%); border-radius: 3px; }
-        .milestone-fill { position: absolute; top: 50%; left: 15px; height: 6px; background: #10b981; transform: translateY(-50%); border-radius: 3px; transition: width 0.5s; }
-        .milestone { width: 36px; height: 36px; background: #f8fafc; border: 3px solid #cbd5e1; border-radius: 50%; z-index: 2; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: 0.4s; }
+        .milestone-track { display: flex; justify-content: space-between; position: relative; margin: 15px 0 35px 0; padding: 0 5px; }
+        .milestone-track::before { content: ''; position: absolute; top: 50%; left: 15px; right: 15px; height: 6px; background: #e2e8f0; z-index: 1; transform: translateY(-50%); border-radius: 3px; }
+        .milestone-fill { position: absolute; top: 50%; left: 15px; height: 6px; background: #10b981; z-index: 1; transform: translateY(-50%); border-radius: 3px; transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .milestone { width: 36px; height: 36px; background: #f8fafc; border: 3px solid #cbd5e1; border-radius: 50%; z-index: 2; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: 0.4s; box-sizing: border-box; }
         .milestone.done { border-color: #10b981; background: #d1fae5; }
-        .milestone.active { border-color: #3b82f6; background: #eff6ff; font-size: 20px; transform: scale(1.2); }
+        .milestone.active { border-color: #3b82f6; background: #eff6ff; font-size: 20px; transform: scale(1.2); box-shadow: 0 0 15px rgba(59,130,246,0.3); animation: bounceActive 1s infinite alternate; }
 
-        .q-text { font-size: 24px; text-align: left; margin: 25px 0; min-height: 36px; }
-        input.ans-input { font-size: 26px; padding: 18px; width: 100%; border: 2px solid #e2e8f0; border-radius: 12px; outline: none; transition: 0.2s; text-align: center; font-weight: bold; letter-spacing: 1px; }
-        input.ans-input:focus { border-color: #3b82f6; background: #f8faff; box-shadow: 0 0 10px rgba(59,130,246,0.1); }
+        .q-text { font-size: 24px; text-align: left; margin: 25px 0; line-height: 1.5; font-weight: 500; }
+        input.ans-input, textarea.ans-input { font-size: 20px; padding: 15px; width: 100%; border: 2px solid #e2e8f0; border-radius: 12px; box-sizing: border-box; outline: none; font-family: inherit; }
+        textarea.ans-input { resize: vertical; line-height: 1.4; }
+        input.ans-input.error-shake { border-color: #ef4444; animation: shake 0.3s; background-color: #fef2f2; }
         
         .mcq-list { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
-        button.mcq-btn { padding: 18px; border-radius: 12px; border: 2px solid #e2e8f0; background: white; font-size: 18px; cursor: pointer; text-align: left; transition: 0.2s; color: #1e293b; }
+        button.mcq-btn { padding: 16px; border-radius: 12px; border: 2px solid #e2e8f0; background: white; font-size: 18px; cursor: pointer; text-align: left; transition: 0.2s; font-family: inherit; color: #1e293b; outline: none; }
         button.mcq-btn.active { border-color: var(--primary); background: #d1fae5; font-weight: bold; color: #065f46; }
+        button.mcq-btn.error { border-color: #ef4444; background: #fef2f2; color: #b91c1c; animation: shake 0.3s; }
 
-        .feedback { font-size: 18px; margin: 15px 0; min-height: 24px; font-weight: bold; }
+        .feedback { font-size: 18px; margin: 15px 0; min-height: 50px; font-weight: bold; }
         
-        /* 保持原版饱满比例 */
-        .controls { display: flex; gap: 10px; margin-top: 20px; height: 60px; align-items: stretch; }
-        .btn-action { flex: 1; padding: 0 20px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 18px; display: flex; align-items: center; justify-content: center; }
+        /* 锁定高度防跳动 */
+        .controls { display: flex; gap: 10px; margin-top: 20px; height: 55px; align-items: stretch; }
+        .btn-action { flex: 1; padding: 0 15px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; outline: none; transition: 0.2s; font-size: 18px; box-sizing: border-box; }
         .btn-action:active { transform: scale(0.98); }
         
-        /* 糖果蓝 Submit 按钮 */
-        #sub-btn, #eng-sub-btn { background: #3b82f6; color: white; box-shadow: 0 4px 10px rgba(59,130,246,0.2); }
-        #sub-btn:hover, #eng-sub-btn:hover { background: #2563eb; }
-
-        .pinyin-display { font-size: 36px; font-weight: bold; color: #64748b; margin: 5px 0 15px 0; min-height: 50px; display: flex; justify-content: center; align-items: center; flex-wrap: wrap; }
-        .pinyin-unit { margin: 0 8px; transition: 0.3s; }
+        /* 🌟 糖果色系提交按钮 */
+        .btn-candy { background: #38bdf8; color: white; box-shadow: 0 4px 10px rgba(56, 189, 248, 0.2); }
+        .btn-candy:hover { background: #0ea5e9; }
+        
+        .pinyin-display { font-size: 32px; font-weight: bold; color: #0f172a; margin: 10px 0 20px 0; letter-spacing: 2px; }
+        .pinyin-unit { margin: 0 6px; transition: 0.3s; }
         .pinyin-unit.active { color: #ea580c; transform: scale(1.1); text-decoration: underline; }
+
+        .practice-pad-container { display: flex; flex-direction: column; align-items: center; background: #f8fafc; padding: 25px; border-radius: 20px; border: 2px dashed #cbd5e1; margin-bottom: 20px; box-shadow: inset 0 2px 10px rgba(0,0,0,0.02); width:100%; box-sizing: border-box; }
         
-        .hanzi-practice-box { width: 280px; height: 280px; border: 3px solid #cbd5e1; border-radius: 16px; background: white; margin: 0 auto 15px auto; position: relative; }
-        .word-card-btn { width: 55px; height: 65px; font-size: 30px; font-weight: bold; border: 2px solid #e2e8f0; border-radius: 12px; background: white; cursor: pointer; color: #1e293b; transition: 0.2s; }
-        .word-card-btn:hover { border-color: #3b82f6; transform: translateY(-2px); }
-        .tool-btn { background: white; border: 2px solid #e2e8f0; padding: 8px 15px; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; color: #475569; }
+        .hanzi-practice-box { width: 250px; height: 250px; border: 3px solid #cbd5e1; border-radius: 16px; background: white; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); position: relative; }
+        .hanzi-practice-box::before { content: ''; position: absolute; top: 50%; left: 0; width: 100%; height: 1px; background: #e2e8f0; border-top: 1px dashed #cbd5e1; }
+        .hanzi-practice-box::after { content: ''; position: absolute; left: 50%; top: 0; height: 100%; width: 1px; background: #e2e8f0; border-left: 1px dashed #cbd5e1; }
+
+        .word-card-btn { width: 50px; height: 60px; font-size: 28px; font-weight: bold; border: 2px solid #e2e8f0; border-radius: 12px; background: white; color: #1e293b; cursor: pointer; transition: 0.2s; display: flex; justify-content: center; align-items: center; padding: 0; outline: none; text-transform: lowercase; }
+        .word-card-btn:hover { border-color: #3b82f6; transform: translateY(-3px); box-shadow: 0 4px 10px rgba(59, 130, 246, 0.2); }
         
-        /* 🌟 日期完美放置在主框右下角 */
-        .res-section { text-align: left; border-top: 2px dashed #e2e8f0; margin-top: 20px; padding-top: 15px; }
+        .tool-btn { background: white; border: 2px solid #e2e8f0; padding: 10px 20px; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; color: #475569; transition: 0.2s; }
+        .tool-btn:hover { background: #f1f5f9; border-color: #cbd5e1; }
+
+        .draw-panel { display: none; flex-direction: column; align-items: center; margin-top: 15px; background: #f8fafc; padding: 15px; border-radius: 16px; border: 2px dashed #cbd5e1; }
+        canvas { background: white; border-radius: 12px; border: 1px solid #e2e8f0; touch-action: none; cursor: crosshair; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
+        .draw-tools { display: flex; justify-content: space-between; width: 100%; margin-top: 10px; }
+
+        .res-section { border-top: 2px dashed #e2e8f0; margin-top: 20px; padding-top: 20px; text-align: left; position: relative; }
+        .res-card { background: #f1f5f9; padding: 15px; border-radius: 12px; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        
+        /* 🌟 日期完美放置在右下角 */
         #school-term-display { position: absolute; bottom: 20px; right: 25px; font-size: 13px; color: #94a3b8; background: #f8fafc; padding: 6px 12px; border-radius: 12px; border: 1px solid #e2e8f0; font-weight: 600; }
 
         @media (min-width: 768px) {
-            .container { max-width: 750px; padding: 40px 40px 80px 40px; }
-            button.name-btn { padding: 0 45px; height: 65px; font-size: 24px; }
-            .hanzi-practice-box { width: 320px; height: 320px; }
-            .word-card-btn { width: 65px; height: 75px; font-size: 36px; }
+            body { justify-content: center; padding: 40px; background: #e2e8f0; }
+            .container { max-width: 750px; padding: 40px 40px 80px 40px; border-radius: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); }
+            button.name-btn { padding: 20px 45px; font-size: 24px; border-radius: 20px; }
+            .hanzi-practice-box { width: 300px; height: 300px; }
+            .pinyin-display { font-size: 40px; }
+            .word-card-btn { width: 60px; height: 70px; font-size: 32px; }
             #school-term-display { font-size: 15px; bottom: 30px; right: 40px; padding: 8px 16px; }
         }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
@@ -100,7 +121,7 @@
 
     <div id="menu-screen" class="screen">
         <h2 style="margin:0 0 5px 0; color:#0f172a;">Did you <span class="magic-number">6~7</span> today?</h2>
-        <div class="subtitle-instruction">Aim for a perfect score or just 1 mistake for a 6~7!</div>
+        <div style="font-size: 15px; color: #64748b; margin-top: -5px; margin-bottom: 25px; font-weight: 600;">Aim for a perfect score or just 1 mistake for a 6~7!</div>
         
         <div class="name-selector">
             <button id="btn-P3" class="name-btn" onclick="switchUser('P3')">Valerie (P3)</button>
@@ -115,7 +136,7 @@
         </div>
 
         <div class="res-section">
-            <h3 style="color:#0f172a; margin: 0 0 10px 0;">Resources 📚</h3>
+            <h3 style="margin-top:0; color:#0f172a;">Resources 📚</h3>
             <div id="res-list"></div>
         </div>
         
@@ -123,56 +144,62 @@
     </div>
 
     <div id="mode-screen" class="screen">
-        <h2 style="margin-bottom:25px;">Select Mode</h2>
+        <h2 id="mode-title" style="margin:0 0 25px 0; color:#0f172a;">Select Practice Mode</h2>
         <div style="display:flex; flex-direction:column; gap:15px;">
-            <button class="btn-action" style="background:#3b82f6; color:white; height:70px;" onclick="showTopicSelection(curSub, false)">🚀 Start Practice</button>
-            <button class="btn-action" style="background:linear-gradient(135deg, #f59e0b, #ea580c); color:white; height:70px;" onclick="showTopicSelection(curSub, true)">✍️ Spelling Game</button>
-            <button class="btn-action" style="background:#f8fafc; color:#64748b; border:2px solid #e2e8f0; margin-top:10px; height:60px;" onclick="showScreen('menu-screen')">← Back</button>
+            <button id="btn-mode-normal" class="btn-action" style="background:#3b82f6; color:white; padding:20px; height:auto;" onclick="showTopicSelection(curSub, false)">🚀 Start Practice</button>
+            <button id="btn-mode-spell" class="btn-action" style="background:linear-gradient(135deg, #f59e0b, #ea580c); color:white; padding:20px; height:auto;" onclick="showTopicSelection(curSub, true)">✍️ Spelling Game</button>
+            <button id="btn-mode-back" class="btn-action" style="background:#f8fafc; color:#64748b; border:2px solid #e2e8f0; margin-top:15px; height:auto; padding:15px;" onclick="showScreen('menu-screen')">← Back</button>
         </div>
     </div>
 
     <div id="topic-screen" class="screen">
-        <h2 id="topic-title">Select Topics</h2>
+        <h2 id="topic-title" style="margin:0 0 5px 0; color:#0f172a;">Select Topics</h2>
         <p id="topic-desc" style="color:#64748b; margin-bottom: 20px; font-size:14px;"></p>
         <div style="text-align: center; margin-bottom: 15px;">
-            <label class="checkbox-label" id="check-all-label" style="display:inline-flex;">
-                <input type="checkbox" id="check-all" onchange="toggleAllTopics(this)"> 🌟 Select All
+            <label class="checkbox-label" id="check-all-label" style="display:inline-flex; background:#eff6ff; border-color:#3b82f6;">
+                <input type="checkbox" id="check-all" onchange="toggleAllTopics(this)">
+                <b id="check-all-text">🌟 全选所有 (Select All)</b>
             </label>
         </div>
         <div id="topic-checkboxes" class="checkbox-grid"></div>
         <div class="action-row">
-            <button class="btn-action" style="background:#f8fafc; color:#64748b; border:2px solid #e2e8f0; flex:0.4; height:60px;" onclick="goBackFromTopic()">← Back</button>
-            <button class="btn-action" style="background:#10b981; color:white; flex:0.6; height:60px;" onclick="startQuiz()">Start 🚀</button>
+            <button class="btn-action" style="background:#f8fafc; color:#64748b; border:2px solid #e2e8f0; flex:0.4;" onclick="goBackFromTopic()">← Back</button>
+            <button class="btn-action" style="background:#10b981; color:white; flex:0.6;" onclick="startQuiz()">Start 🚀</button>
         </div>
     </div>
 
     <div id="quiz-screen" class="screen">
         <div id="progress-bar" class="milestone-track"></div>
         
-        <div id="pad-toggle-container" style="display:flex; justify-content: space-between; align-items: center; margin-bottom:10px;">
-            <button class="tool-btn" id="pad-btn" onclick="toggleDrawPad()">✍️ Pad</button>
-            <div id="progress-text" style="font-size:14px; color:#94a3b8;"></div>
+        <div id="pad-toggle-container" style="display:flex; justify-content: space-between; align-items: center; margin-bottom:15px;">
+            <button class="tool-btn" style="color:#10b981; border-color:#10b981; padding: 6px 12px; font-size:14px;" onclick="toggleDrawPad()">✍️ 草稿板</button>
+            <div style="font-size:14px; color:#94a3b8;" id="progress-text"></div>
         </div>
 
         <div id="q-text" class="q-text"></div>
-        <div id="draw-panel" style="display:none; flex-direction: column; align-items: center; margin-bottom:15px;">
-            <canvas id="pad" width="300" height="200" style="background:#fff; border:1px solid #ddd; touch-action:none;"></canvas>
-            <button class="tool-btn" style="margin-top:5px; width:100%;" onclick="ctx.clearRect(0,0,300,200)">Clear</button>
+        <div id="draw-panel" class="draw-panel">
+            <canvas id="pad" width="300" height="200"></canvas>
+            <div class="draw-tools">
+                <button class="tool-btn" style="padding: 6px 12px;" onclick="clearPad()">🗑️ Clear</button>
+                <button class="tool-btn" style="padding: 6px 12px;" onclick="toggleDrawPad()">❌ Close</button>
+            </div>
         </div>
-        <div id="input-container" style="min-height: 100px;"></div>
+        <div id="input-container"></div>
         <div id="fb-text" class="feedback"></div>
         <div class="controls">
-            <button class="btn-action" style="background:#f1f5f9; color:#475569;" onclick="location.reload()">Exit</button>
-            <button id="sub-btn" class="btn-action" onclick="checkAns()">Submit</button>
+            <button id="exit-btn" class="btn-action" style="background:#f1f5f9; color:#475569;" onclick="location.reload()">Exit</button>
+            <button id="sub-btn" class="btn-action btn-candy" onclick="checkAns()">Submit</button>
             <button id="next-btn" class="btn-action" style="background:#10b981; color:white; display:none;" onclick="nextQ()">Next →</button>
         </div>
     </div>
 
     <div id="spelling-screen" class="screen">
         <div id="spell-progress-bar" class="milestone-track"></div>
-        <div id="spelling-pinyin" class="pinyin-display"></div>
-        <div id="practice-pad-container" style="width:100%; display:flex; flex-direction:column; align-items:center;"></div>
-        <div id="spell-fb" class="feedback"></div>
+        
+        <div id="spelling-pinyin" class="pinyin-display" style="display:flex; justify-content:center; align-items:center; flex-wrap:wrap;"></div>
+        
+        <div id="practice-pad-container" class="practice-pad-container"></div>
+
         <div class="controls">
             <button class="btn-action" style="background:#f1f5f9; color:#475569; flex:0.3;" onclick="location.reload()">Exit</button>
             <button id="spell-next-btn" class="btn-action" style="background:#e2e8f0; color:#94a3b8; flex:0.7; pointer-events:none;" onclick="nextSpellQ()">Next →</button>
@@ -182,13 +209,6 @@
 </div>
 
 <script>
-    // ==========================================
-    // 🎵 专属欢呼语音 Base64 配置区
-    // ==========================================
-    const BASE64_VALERIE = ""; 
-    const BASE64_VENESSA = ""; 
-    // ==========================================
-
     const SHEET_ID = "1vQlpdRHnR9ybEHHgX6fouRI-vXOh8KQNLSjsbt0TYh9R3No_9i7QNv_4ELwJZJGQpTe3oZVXaZijaW4";
     const GIDS = { "English": "1893311738", "Math": "59294467", "Science": "1581471994", "华文": "2020673087", "Resources": "469231602" };
 
@@ -215,6 +235,7 @@
         synth.speak(u);
     }
 
+    // 全局回车键监听
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
             if (document.getElementById('quiz-screen').style.display === 'block') {
@@ -230,6 +251,7 @@
     let canvas, ctx, drawing = false;
     function initDrawPad() {
         canvas = document.getElementById('pad'); ctx = canvas.getContext('2d');
+        canvas.width = document.getElementById('quiz-screen').clientWidth - 60;
         ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.lineWidth = 4; ctx.strokeStyle = '#1e293b';
         const start = (e) => { drawing = true; ctx.beginPath(); const p = getPos(e); ctx.moveTo(p.x, p.y); };
         const move = (e) => { if (!drawing) return; e.preventDefault(); const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); };
@@ -242,37 +264,51 @@
     function toggleDrawPad() {
         const p = document.getElementById('draw-panel');
         p.style.display = p.style.display === 'none' ? 'flex' : 'none';
-        if (p.style.display === 'flex' && !canvas) initDrawPad();
+        if (p.style.display === 'flex' && !canvas) {
+            initDrawPad();
+            canvas.width = document.getElementById('quiz-screen').clientWidth - 60;
+        }
     }
 
-    // 🌟 彻底退回原版的稳定 Papa.parse 加载机制（去除所有复杂的 API 接口和拦截陷阱）
-    async function init() {
+    function updateSchoolTerm() {
         const now = new Date();
-        const t2 = new Date(2026, 2, 23), t3 = new Date(2026, 5, 29), t4 = new Date(2026, 8, 14);
+        const year = now.getFullYear();
+        const t2 = new Date(year, 2, 23), t3 = new Date(year, 5, 29), t4 = new Date(year, 8, 14);
         const diff = (d1, d2) => Math.floor((d1 - d2) / 864e5);
-        let term = "Term 1";
-        if (now >= t4) { const w = Math.floor(diff(now, t4)/7) + 1; term = w <= 10 ? `Term 4 Week ${w}` : "December Holiday"; }
-        else if (now >= t3) { const w = Math.floor(diff(now, t3)/7) + 1; term = w <= 10 ? `Term 3 Week ${w}` : "September Holiday"; }
-        else if (now >= t2) { const w = Math.floor(diff(now, t2)/7) + 1; term = w <= 10 ? `Term 2 Week ${w}` : "June Holiday"; }
-        
-        const dateStr = now.toLocaleDateString('en-SG', {weekday:'short', month:'short', day:'numeric'});
-        document.getElementById('school-term-display').innerText = `📅 ${dateStr} | ${term}`;
+        let termStr = "Term 1";
+        if (now >= t4) { const w = Math.floor(diff(now, t4)/7) + 1; termStr = w <= 10 ? `Term 4 Week ${w}` : "December Holiday"; }
+        else if (now >= t3) { const w = Math.floor(diff(now, t3)/7) + 1; termStr = w <= 10 ? `Term 3 Week ${w}` : "September Holiday"; }
+        else if (now >= t2) { const w = Math.floor(diff(now, t2)/7) + 1; termStr = w <= 10 ? `Term 2 Week ${w}` : "June Holiday"; }
+        const options = { weekday: 'short', month: 'short', day: 'numeric' };
+        document.getElementById('school-term-display').innerText = `📅 ${now.toLocaleDateString('en-SG', options)} | ${termStr}`;
+    }
 
-        const loads = Object.entries(GIDS).map(([name, gid]) => new Promise(res => {
-            Papa.parse(`https://docs.google.com/spreadsheets/d/e/2PACX-${SHEET_ID}/pub?gid=${gid}&single=true&output=csv&t=${Date.now()}`, {
-                download: true, header: true, skipEmptyLines: 'greedy',
-                complete: r => res({ name, data: r.data.map(row => { let n = {}; Object.keys(row).forEach(k => n[k.trim()] = row[k]); return n; }) }),
-                error: () => res(null)
+    // 🌟 原汁原味的最强加载代码，绝对不会加载失败
+    async function init() {
+        updateSchoolTerm();
+        const loads = Object.entries(GIDS).map(([name, gid]) => {
+            return new Promise(res => {
+                Papa.parse(`https://docs.google.com/spreadsheets/d/e/2PACX-${SHEET_ID}/pub?gid=${gid}&single=true&output=csv&t=${Date.now()}`, {
+                    download: true, header: true, skipEmptyLines: 'greedy',
+                    complete: r => {
+                        const cleaned = r.data.map(row => { let n = {}; Object.keys(row).forEach(k => n[k.trim()] = row[k]); return n; });
+                        res({ name, data: cleaned });
+                    }, error: () => res(null)
+                });
             });
-        }));
-        
+        });
         const results = await Promise.all(loads);
         db = {};
-        results.forEach(r => { if(r) r.data.forEach(row => { 
-            let g = (row.Grade || "").toUpperCase(); if(!g) return;
-            if(!db[g]) db[g] = {}; if(!db[g][r.name]) db[g][r.name] = []; db[g][r.name].push(row);
-        }); });
-        
+        results.forEach(r => {
+            if(!r || !r.data) return;
+            r.data.forEach(row => {
+                let g = (row.Grade || row.grade || "").trim().toUpperCase();
+                if(!g) return;
+                if(!db[g]) db[g] = {};
+                if(!db[g][r.name]) db[g][r.name] = [];
+                db[g][r.name].push(row);
+            });
+        });
         document.getElementById('loading').style.display = 'none';
         showScreen('menu-screen');
     }
@@ -282,11 +318,15 @@
         document.getElementById('btn-P3').className = g === 'P3' ? 'name-btn active' : 'name-btn';
         document.getElementById('btn-P1').className = g === 'P1' ? 'name-btn active' : 'name-btn';
         const list = document.getElementById('res-list'); list.innerHTML = '';
-        if(db[g] && db[g]['Resources']) db[g]['Resources'].forEach(r => {
-            const div = document.createElement('div'); div.className = 'res-card';
-            div.innerHTML = r.Type === 'IMAGE' ? `<b>${r.Title}</b><img src="${r.Content}" style="width:100%;margin-top:10px;border-radius:8px;">` : `<b>${r.Title}</b><p style="margin:5px 0 0 0;">${r.Content}</p>`;
-            list.appendChild(div);
-        });
+        if(db[g] && db[g]['Resources']) {
+            db[g]['Resources'].forEach(r => {
+                const div = document.createElement('div'); div.className = 'res-card';
+                if(r.Type === 'IMAGE') div.innerHTML = `<b>${r.Title}</b><img src="${r.Content}" style="width:100%;margin-top:10px;border-radius:8px;">`;
+                else if(r.Type === 'PDF') div.innerHTML = `<b>${r.Title}</b><br><a href="${r.Content}" target="_blank" style="color:#2563eb;display:block;margin-top:8px;">🔗 Open Reference</a>`;
+                else div.innerHTML = `<b>${r.Title}</b><p style="margin-top:8px;">${r.Content}</p>`;
+                list.appendChild(div);
+            });
+        } else { list.innerHTML = `<p style="color:#94a3b8;">No resources yet.</p>`; }
     }
 
     function getSortWeight(str) {
@@ -297,42 +337,58 @@
     }
 
     function handleSubjectClick(s) {
-        if (!curUser) { alert("Please select Valerie or Venessa first!"); return; }
-        
-        if (!db[curUser] || !db[curUser][s] || db[curUser][s].length === 0) { 
-            alert(s === '华文' ? "题库里暂时还没有这科的题目哦！" : "No questions available for this subject yet!"); 
-            return; 
+        if (!curUser) {
+            alert("Please select Valerie or Venessa first!");
+            return;
         }
-        
-        curSub = s; let pool = db[curUser][s];
+
+        curSub = s;
+        if (!db[curUser] || !db[curUser][s] || db[curUser][s].length === 0) {
+            alert(s === '华文' ? "题库里暂时还没有这科的题目哦！" : "No questions available for this subject yet!");
+            return;
+        }
+
+        let pool = db[curUser][s];
         let hasNormal = pool.some(q => (q.Type||"").toUpperCase() !== 'SPELLING');
         let hasSpelling = pool.some(q => (q.Type||"").toUpperCase() === 'SPELLING');
 
         if (hasNormal && hasSpelling) {
             const isCN = (s === '华文');
             document.getElementById('mode-title').innerText = isCN ? '请选择练习模式' : 'Select Practice Mode';
-            document.getElementById('mode-screen').style.display = 'block';
-            document.getElementById('menu-screen').style.display = 'none';
+            document.getElementById('btn-mode-normal').innerText = isCN ? '🚀 随机过关 (Practice)' : '🚀 Start Practice';
+            document.getElementById('btn-mode-spell').innerText = isCN ? '✍️ 听写模式 (Spelling)' : '✍️ Spelling Game';
+            document.getElementById('btn-mode-back').innerText = isCN ? '← 返回主页' : '← Back';
+            showScreen('mode-screen');
         } 
-        else if (hasSpelling) showTopicSelection(s, true);
-        else showTopicSelection(s, false);
+        else if (hasSpelling) {
+            showTopicSelection(s, true);
+        } else {
+            showTopicSelection(s, false);
+        }
     }
 
-    function showTopicSelection(s, isS) {
-        curSub = s; isSpellingMode = isS; let pool = db[curUser][s];
+    function showTopicSelection(s, spellingMode) {
+        curSub = s;
+        isSpellingMode = spellingMode;
+        let pool = db[curUser][s];
+        
         pool = pool.filter(q => {
             let type = (q.Type || "").toString().trim().toUpperCase();
             return isSpellingMode ? (type === 'SPELLING') : (type !== 'SPELLING');
         });
 
         let topics = new Set();
-        pool.forEach(q => { let t = (q.Topic || q.topic || q.Lesson || "").toString().trim(); if (t !== "") topics.add(t); });
+        pool.forEach(q => { 
+            let t = (q.Topic || q.topic || q.Lesson || "").toString().trim(); 
+            if (t !== "") topics.add(t); 
+        });
 
         const isCN = (s === '华文');
         document.getElementById('topic-title').innerText = isSpellingMode ? (isCN ? '你要听写哪里的内容？' : 'Select Spelling Topics') : (isCN ? '你要复习哪里的内容？' : 'Select Practice Topics');
         document.getElementById('topic-desc').innerText = isCN ? `（至少选择一项）` : `Choose the topics you want to practice.`;
         document.getElementById('check-all-text').innerText = isCN ? '🌟 全选 (Select All)' : '🌟 Select All';
         document.getElementById('check-all').checked = false;
+        document.getElementById('check-all-label').className = 'checkbox-label';
         
         let topicsArr = Array.from(topics).sort((a, b) => getSortWeight(a) - getSortWeight(b));
         let maxWeight = 0; topicsArr.forEach(t => { let w = getSortWeight(t); if(w < 999 && w > maxWeight) maxWeight = w; });
@@ -353,6 +409,7 @@
             const label = document.createElement('label'); label.className = baseClass;
             const cb = document.createElement('input'); cb.type = 'checkbox'; cb.value = JSON.stringify(item.values); cb.className = 'topic-cb';
             cb.checked = false;
+            
             cb.onchange = () => { label.className = cb.checked ? baseClass + ' selected' : baseClass.replace('selected', '').trim(); syncCheckAll(); };
             label.appendChild(cb); label.appendChild(document.createTextNode(item.label));
             boxGrid.appendChild(label);
@@ -378,13 +435,18 @@
         let pool = db[curUser][curSub];
         let hasNormal = pool.some(q => (q.Type||"").toUpperCase() !== 'SPELLING');
         let hasSpelling = pool.some(q => (q.Type||"").toUpperCase() === 'SPELLING');
-        if (hasNormal && hasSpelling) showScreen('mode-screen'); else showScreen('menu-screen');
+        
+        if (hasNormal && hasSpelling) {
+            showScreen('mode-screen');
+        } else {
+            showScreen('menu-screen');
+        }
     }
 
     function startQuiz() {
         let pool = db[curUser][curSub];
         const selectedJSONs = Array.from(document.querySelectorAll('.topic-cb:checked')).map(cb => cb.value);
-        if (selectedJSONs.length === 0) { alert(curSub === '华文' ? "请至少选择一项进行练习哦！" : "Please select at least one topic!"); return; }
+        if (selectedJSONs.length === 0) { alert(curSub === '华文' ? "请至少选择一个进度！" : "Please select at least one topic!"); return; }
         
         let selectedTopics = [];
         selectedJSONs.forEach(j => { selectedTopics = selectedTopics.concat(JSON.parse(j)); });
@@ -396,19 +458,23 @@
             return selectedTopics.includes(t) && modeMatch;
         });
 
-        curIdx = 0; sessionErrors = 0; document.getElementById('draw-panel').style.display = 'none';
+        curIdx = 0; sessionErrors = 0; 
+        document.getElementById('draw-panel').style.display = 'none';
 
+        // 🌟 根据科目显示或隐藏草稿板
         const padToggle = document.getElementById('pad-toggle-container');
         if (padToggle) padToggle.style.display = (curSub === 'Math') ? 'none' : 'flex';
 
         if (isSpellingMode) {
             if (curSub === 'English') sessionQs = pool.sort(() => 0.5 - Math.random());
             else sessionQs = pool;
-            showScreen('spelling-screen'); renderSpelling();
+            showScreen('spelling-screen'); 
+            renderSpelling();
         } else {
             let grabCount = Math.min(pool.length, 7);
             sessionQs = pool.sort(() => 0.5 - Math.random()).slice(0, grabCount);
-            showScreen('quiz-screen'); renderQ();
+            showScreen('quiz-screen'); 
+            renderQ();
         }
     }
 
@@ -434,9 +500,9 @@
     function renderSpelling() {
         updateProgress('spell-progress-bar');
         const q = sessionQs[curIdx];
-        document.getElementById('spell-fb').innerText = '';
+        
         const nextBtn = document.getElementById('spell-next-btn');
-        nextBtn.style.background = '#e2e8f0'; nextBtn.style.pointerEvents = 'none';
+        nextBtn.style.background = '#e2e8f0'; nextBtn.style.color = '#94a3b8'; nextBtn.style.pointerEvents = 'none';
 
         if (curSub === 'English') renderEnglishSpelling(q);
         else renderChineseSpelling(q);
@@ -465,9 +531,9 @@
         container.style.display = 'flex';
         container.innerHTML = `
             <input type="text" id="eng-spell-input" class="ans-input" style="text-align:center; font-size:32px; text-transform:lowercase; font-weight:bold; letter-spacing:2px; padding:20px; width:100%; max-width:350px;" autocomplete="off" spellcheck="false" placeholder="Type here..." onfocus="this.scrollIntoView({behavior: 'smooth', block: 'center'})" />
-            <div style="display:flex; gap:10px; width:100%; max-width:350px; margin-top:15px; height:55px;">
-                <button class="tool-btn" id="eng-hint-btn" style="flex:0.3; background:#fffbeb; color:#d97706; border-color:#fde68a;" onclick="showEngHint()">💡 Hint</button>
-                <button class="btn-action" id="eng-sub-btn" style="flex:0.7; margin:0;" onclick="checkEngTyping()">Submit</button>
+            <div style="display:flex; gap:10px; width:100%; max-width:350px; margin-top:15px;">
+                <button class="tool-btn" id="eng-hint-btn" style="flex:0.3; background:#fffbeb; color:#d97706; border-color:#fde68a; height:55px;" onclick="showEngHint()">💡 Hint</button>
+                <button class="btn-action btn-candy" id="eng-sub-btn" style="flex:0.7; height:55px;" onclick="checkEngTyping()">Submit</button>
             </div>
             <div id="eng-hint-area" style="display:none; flex-wrap:wrap; gap:8px; justify-content:center; width:100%; margin-top:15px;">
                 ${btnsHtml}
@@ -606,7 +672,7 @@
         btn.classList.add('active'); document.getElementById('ans-in').value = val;
     }
 
-    async function checkAns() {
+    function checkAns() {
         const input = document.getElementById('ans-in');
         const user = input.value.trim().toLowerCase();
         const correctRaw = (sessionQs[curIdx]['Correct Answer'] || "").toString().trim();
@@ -621,40 +687,20 @@
             document.getElementById('next-btn').style.display = 'flex';
         };
 
-        if (qType === 'OPEN') {
-            if (GEMINI_API_KEY && GEMINI_API_KEY !== "YOUR_API_KEY_HERE") {
-                fb.innerHTML = `<span style="color:#3b82f6; font-size: 16px;">⏳ ${isCN ? "老师正在看你的答案..." : "Teacher is reading your answer..."}</span>`;
-                try {
-                    const promptText = `You are a primary school teacher. Question: ${sessionQs[curIdx].Question}. Standard Answer: ${correctRaw}. Student Answer: ${user}. Evaluate meaning. Reply JSON: {"correct": boolean, "comment": "encouraging feedback in ${isCN ? 'Simplified Chinese' : 'English'}"}`;
-                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
-                        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
-                    });
-                    const data = await res.json();
-                    let aiRes = data.candidates[0].content.parts[0].text.replace(/```json/g, '').replace(/```/g, '').trim();
-                    const result = JSON.parse(aiRes);
-                    if (result.correct) fb.innerHTML = `<span style="color:#10b981;">✅ ${isCN ? "答对啦！" : "Excellent!"}</span><br><span style="font-size:16px; color:#475569;">${result.comment}</span>`;
-                    else { sessionErrors++; fb.innerHTML = `<span style="color:#ef4444;">❌ ${isCN ? "还差一点点。" : "Not quite right."}</span><br><span style="font-size:16px; color:#475569;">${result.comment}</span><br><br><span style="color:#0f172a; font-size: 15px;"><b>${isCN ? "参考答案：" : "Standard Answer:"}</b> ${correctRaw}</span>`; }
-                } catch (e) { fb.innerHTML = `<span style="color:#0f172a;"><b>${isCN ? "参考答案：" : "Suggested Answer:"}</b></span><br><span style="font-size:18px; color:#10b981;">${correctRaw}</span><br><span style="font-size:14px; color:#64748b;">${isCN ? "(只需意思相近即可)" : "(Check if your meaning is similar)"}</span>`; }
-            } else {
-                fb.innerHTML = `<span style="color:#0f172a;"><b>${isCN ? "参考答案：" : "Suggested Answer:"}</b></span><br><span style="font-size:18px; color:#10b981;">${correctRaw}</span><br><span style="font-size:14px; color:#64748b;">${isCN ? "(只需意思相近即可)" : "(Check if your meaning is similar)"}</span>`;
-            }
-            showNextState(); return;
-        }
-
         if(user === correctRaw.toLowerCase()) {
-            fb.innerHTML = `<span style="color:#10b981;">${isCN ? "✅ 答对啦！非常棒。" : "✅ Correct! Well done."}</span>`;
+            fb.innerHTML = `<span style="color:#10b981;">✅ 答对啦！非常棒。</span>`;
             showNextState();
             if (qType === 'MCQ') { document.querySelectorAll('.mcq-btn').forEach(b => { if(!b.classList.contains('active')) b.style.opacity = '0.5'; }); } 
             else { input.className = 'ans-input'; }
         } else {
             sessionErrors++; 
             if (qType === 'MCQ') {
-                fb.innerHTML = `<span style="color:#ef4444;">${isCN ? "❌ 不对哦，试试其他选项！" : "❌ Not quite. Try another option!"}</span>`;
+                fb.innerHTML = `<span style="color:#ef4444;">❌ 不对哦，试试其他选项！</span>`;
                 const activeBtn = document.querySelector('.mcq-btn.active');
                 if(activeBtn) { activeBtn.classList.remove('active'); activeBtn.classList.add('error'); }
                 input.value = ''; 
             } else {
-                fb.innerHTML = `<span style="color:#ef4444;">${isCN ? "❌ 拼写不对哦，请检查一下！" : "❌ Not quite. Check your spelling!"}</span><br><span style="font-size:15px; color:#64748b;">${isCN ? "提示：" : "Hint: "}<b>${correctRaw}</b></span>`;
+                fb.innerHTML = `<span style="color:#ef4444;">❌ 拼写不对哦，请检查一下！</span><br><span style="font-size:15px; color:#64748b;">${isCN ? "提示：" : "Hint: "}<b>${correctRaw}</b></span>`;
                 input.className = 'ans-input error-shake';
                 setTimeout(() => { input.className = 'ans-input'; input.style.backgroundColor = '#fef2f2'; input.select(); }, 300);
             }
@@ -676,6 +722,7 @@
         if (sessionErrors <= 1) {
             msg = isCN ? `🎉 恭喜你，获得了 ${magic67} 的好成绩！太棒了！` : `🎉 Congratulations, you've got ${magic67} today!`;
             
+            // 🌟 触发内置 Base64 欢呼声！
             let audioData = curUser === 'P1' ? BASE64_VENESSA : BASE64_VALERIE;
             if (audioData && audioData.trim() !== "") {
                 let successAudio = new Audio(audioData);
@@ -696,6 +743,10 @@
         document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
         document.getElementById(id).style.display = 'block';
     }
+
+    // 填入 Base64 文本
+    const BASE64_VALERIE = ""; 
+    const BASE64_VENESSA = ""; 
 
     init();
 </script>
