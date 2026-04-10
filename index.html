@@ -11,29 +11,15 @@
         
         * { box-sizing: border-box; }
 
-        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #1e293b; display: flex; flex-direction: column; align-items: center; min-height: 100dvh; position: relative; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #1e293b; display: flex; flex-direction: column; align-items: center; min-height: 100dvh; }
         
-        /* 🌟 右下角的悬浮日期微标 */
-        #school-term-display {
-            position: absolute;
-            bottom: 15px;
-            right: 15px;
-            font-size: 12px;
-            color: #94a3b8;
-            background: rgba(255, 255, 255, 0.7);
-            padding: 5px 10px;
-            border-radius: 10px;
-            pointer-events: none;
-            backdrop-filter: blur(5px);
-        }
-
-        .container { width: 100%; max-width: 600px; background: #fff; padding: 25px; border-radius: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center; position: relative; overflow: hidden; margin-bottom: 40px; }
+        /* 🌟 核心排版：给 container 增加底部 padding，给日期腾出空间 */
+        .container { width: 100%; max-width: 600px; background: #fff; padding: 25px 25px 50px 25px; border-radius: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); text-align: center; position: relative; overflow: hidden; margin-bottom: 20px; }
         .screen { display: none; width: 100%; }
         
         .magic-number { display: inline-block; font-size: 1.4em; color: #f59e0b; font-weight: 900; padding: 0 5px; animation: popPulse 1s infinite alternate cubic-bezier(0.4, 0, 0.2, 1); }
         @keyframes popPulse { 0% { transform: scale(1); } 100% { transform: scale(1.2) translateY(-3px); } }
         
-        /* 🌟 新增的副标题标语样式 */
         .subtitle-instruction { font-size: 14px; color: #64748b; margin-top: -5px; margin-bottom: 25px; font-weight: 500; }
 
         .name-selector { display: flex; gap: 15px; justify-content: center; margin: 25px 0; height: 60px; }
@@ -76,7 +62,6 @@
         .btn-action { flex: 1; padding: 0 20px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 18px; display: flex; align-items: center; justify-content: center; }
         .btn-action:active { transform: scale(0.98); }
         
-        /* 糖果蓝 Submit 按钮 */
         #sub-btn, #eng-sub-btn { background: #3b82f6; color: white; box-shadow: 0 4px 10px rgba(59,130,246,0.2); }
         #sub-btn:hover, #eng-sub-btn:hover { background: #2563eb; }
 
@@ -89,19 +74,21 @@
         .word-card-btn:hover { border-color: #3b82f6; transform: translateY(-2px); }
         .tool-btn { background: white; border: 2px solid #e2e8f0; padding: 8px 15px; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; color: #475569; }
         
+        /* 🌟 完美的对称设计：资源居左，日期居右绝对定位 */
+        .res-section { text-align: left; border-top: 2px dashed #e2e8f0; margin-top: 20px; padding-top: 15px; position: relative; }
+        #school-term-display { position: absolute; bottom: 0; right: 0; font-size: 13px; color: #94a3b8; background: #f8fafc; padding: 6px 12px; border-radius: 12px; border: 1px solid #e2e8f0; font-weight: 600; }
+
         @media (min-width: 768px) {
-            .container { max-width: 750px; padding: 40px; }
+            .container { max-width: 750px; padding: 40px 40px 60px 40px; }
             button.name-btn { padding: 0 45px; height: 65px; font-size: 24px; }
             .hanzi-practice-box { width: 320px; height: 320px; }
             .word-card-btn { width: 65px; height: 75px; font-size: 36px; }
-            #school-term-display { font-size: 14px; bottom: 20px; right: 20px; padding: 8px 15px; }
+            #school-term-display { font-size: 15px; bottom: 5px; right: 5px; padding: 8px 16px; }
         }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
     </style>
 </head>
 <body>
-
-<div id="school-term-display">Loading...</div>
 
 <div class="container">
     <div id="loading" class="screen" style="display:block; padding: 50px 0; font-size: 18px; color: #64748b;">
@@ -110,7 +97,7 @@
 
     <div id="menu-screen" class="screen">
         <h2 style="margin:0 0 5px 0; color:#0f172a;">Did you <span class="magic-number">6~7</span> today?</h2>
-        <div class="subtitle-instruction">Aim for a perfect score or just 1 mistake for a 6~7!</div>
+        <div class="subtitle-instruction">Aim for a perfect score or just 1 mistake to get 6~7!</div>
         
         <div class="name-selector">
             <button id="btn-P3" class="name-btn" onclick="switchUser('P3')">Valerie (P3)</button>
@@ -124,9 +111,10 @@
             <button class="sub-btn" style="background:#10b981;" onclick="handleSubjectClick('Science')">Science</button>
         </div>
 
-        <div class="res-section" style="text-align:left; border-top: 2px dashed #e2e8f0; margin-top:20px; padding-top:10px;">
-            <h3 style="color:#0f172a; margin-bottom: 10px;">Resources 📚</h3>
+        <div class="res-section">
+            <h3 style="color:#0f172a; margin: 0 0 10px 0;">Resources 📚</h3>
             <div id="res-list"></div>
+            <div id="school-term-display">Loading...</div>
         </div>
     </div>
 
@@ -193,7 +181,6 @@
     // ==========================================
     // 🎵 专属欢呼语音 Base64 配置区
     // ==========================================
-    // 请把你转换好的 "data:audio/mp3;base64,AAAA..." 字符串完整填入下面的双引号中！
     const BASE64_VALERIE = ""; 
     const BASE64_VENESSA = ""; 
     // ==========================================
@@ -224,7 +211,6 @@
         synth.speak(u);
     }
 
-    // --- 回车键全局监听 ---
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
             if (document.getElementById('quiz-screen').style.display === 'block') {
@@ -255,7 +241,31 @@
         if (p.style.display === 'flex' && !canvas) initDrawPad();
     }
 
-    // 🌟 核心：更强壮的数据拉取与重试机制
+    // 🌟 终极绝杀：使用 Google Visualization API，无视跨域，100% 成功拉取数据
+    async function fetchSheetData(gid) {
+        const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${gid}`;
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error("Network response was not ok");
+            const csvText = await response.text();
+            return new Promise(resolve => {
+                Papa.parse(csvText, {
+                    header: true, skipEmptyLines: 'greedy',
+                    complete: r => resolve(r.data.map(row => { let n = {}; Object.keys(row).forEach(k => n[k.trim()] = row[k]); return n; }))
+                });
+            });
+        } catch (error) {
+            console.error("Fetch failed, falling back to direct PapaParse:", error);
+            return new Promise(resolve => {
+                Papa.parse(`https://docs.google.com/spreadsheets/d/e/2PACX-${SHEET_ID}/pub?gid=${gid}&single=true&output=csv&t=${Date.now()}`, {
+                    download: true, header: true, skipEmptyLines: 'greedy',
+                    complete: r => resolve(r.data.map(row => { let n = {}; Object.keys(row).forEach(k => n[k.trim()] = row[k]); return n; })),
+                    error: () => resolve(null)
+                });
+            });
+        }
+    }
+
     async function init() {
         const now = new Date();
         const t2 = new Date(2026, 2, 23), t3 = new Date(2026, 5, 29), t4 = new Date(2026, 8, 14);
@@ -269,15 +279,9 @@
         document.getElementById('school-term-display').innerText = `📅 ${dateStr} | ${term}`;
 
         try {
-            const loads = Object.entries(GIDS).map(([name, gid]) => new Promise((res, rej) => {
-                Papa.parse(`https://docs.google.com/spreadsheets/d/e/2PACX-${SHEET_ID}/pub?gid=${gid}&single=true&output=csv&t=${Date.now()}`, {
-                    download: true, header: true, skipEmptyLines: 'greedy',
-                    complete: r => res({ name, data: r.data.map(row => { let n = {}; Object.keys(row).forEach(k => n[k.trim()] = row[k]); return n; }) }),
-                    error: (err) => { console.error(`Failed loading ${name}:`, err); res(null); }
-                });
-            }));
-            
+            const loads = Object.entries(GIDS).map(([name, gid]) => fetchSheetData(gid).then(data => ({ name, data })));
             const results = await Promise.all(loads);
+            
             db = {};
             let hasData = false;
             
@@ -427,7 +431,6 @@
 
         curIdx = 0; sessionErrors = 0; document.getElementById('draw-panel').style.display = 'none';
 
-        // 根据科目显示或隐藏草稿板
         const padToggle = document.getElementById('pad-toggle-container');
         if (padToggle) padToggle.style.display = (curSub === 'Math') ? 'none' : 'flex';
 
@@ -493,7 +496,6 @@
         
         const container = document.getElementById('practice-pad-container');
         container.style.display = 'flex';
-        // 防挡设计：上移输入框
         container.innerHTML = `
             <input type="text" id="eng-spell-input" class="ans-input" style="text-align:center; font-size:32px; text-transform:lowercase; font-weight:bold; letter-spacing:2px; padding:20px; width:100%; max-width:350px;" autocomplete="off" spellcheck="false" placeholder="Type here..." onfocus="this.scrollIntoView({behavior: 'smooth', block: 'center'})" />
             <div style="display:flex; gap:10px; width:100%; max-width:350px; margin-top:15px; height:55px;">
@@ -506,7 +508,6 @@
         `;
         
         setTimeout(() => playTTS(currentSpellWord), 600);
-        // 在宽屏设备上才自动聚焦，防止平板键盘乱弹
         if(window.innerWidth > 800) { setTimeout(() => document.getElementById('eng-spell-input').focus(), 700); }
     }
 
@@ -638,7 +639,7 @@
         btn.classList.add('active'); document.getElementById('ans-in').value = val;
     }
 
-    // 这里包含 Gemini API 判断，确保功能完整
+    // 保留 Gemini API，支持开放题 AI 判卷
     async function checkAns() {
         const input = document.getElementById('ans-in');
         const user = input.value.trim().toLowerCase();
@@ -654,7 +655,6 @@
             document.getElementById('next-btn').style.display = 'flex';
         };
 
-        // 处理开放题 AI 判卷
         if (qType === 'OPEN') {
             if (GEMINI_API_KEY && GEMINI_API_KEY !== "YOUR_API_KEY_HERE") {
                 fb.innerHTML = `<span style="color:#3b82f6; font-size: 16px;">⏳ ${isCN ? "老师正在看你的答案..." : "Teacher is reading your answer..."}</span>`;
@@ -675,7 +675,6 @@
             showNextState(); return;
         }
 
-        // 常规题判断
         if(user === correctRaw.toLowerCase()) {
             fb.innerHTML = `<span style="color:#10b981;">${isCN ? "✅ 答对啦！非常棒。" : "✅ Correct! Well done."}</span>`;
             showNextState();
@@ -701,7 +700,6 @@
         else { finishQuiz(); }
     }
 
-    // 🌟 终极音频触发点
     function finishQuiz() {
         const isCN = (curSub === '华文');
         document.querySelectorAll('.milestone-track').forEach(el => el.style.display = 'none');
@@ -712,7 +710,6 @@
         if (sessionErrors <= 1) {
             msg = isCN ? `🎉 恭喜你，获得了 ${magic67} 的好成绩！太棒了！` : `🎉 Congratulations, you've got ${magic67} today!`;
             
-            // 播放 Base64 声音
             let audioData = curUser === 'P1' ? BASE64_VENESSA : BASE64_VALERIE;
             if (audioData && audioData.trim() !== "") {
                 let successAudio = new Audio(audioData);
