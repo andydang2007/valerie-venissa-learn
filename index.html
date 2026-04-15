@@ -103,6 +103,20 @@
         /* 🌟 日期完美放置在右下角，与 Resources 齐平对齐 */
         #school-term-display { position: absolute; bottom: 20px; right: 25px; font-size: 13px; color: #94a3b8; background: #f8fafc; padding: 6px 12px; border-radius: 12px; border: 1px solid #e2e8f0; font-weight: 600; margin: 0; }
         
+        /* 🌟 新增：隐藏的悬浮游戏解锁按钮 */
+        #game-unlock-btn {
+            position: fixed; bottom: 30px; right: 30px; z-index: 999;
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+            color: white; padding: 15px 25px; border-radius: 30px;
+            font-weight: 900; font-size: 18px; cursor: pointer; border: none;
+            box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4);
+            display: none; align-items: center; gap: 8px;
+            animation: slideInBounce 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), pulseGlow 2s infinite alternate;
+        }
+        #game-unlock-btn:hover { transform: scale(1.05); filter: brightness(1.1); }
+        @keyframes slideInBounce { 0% { transform: translateY(100px) scale(0.5); opacity: 0; } 100% { transform: translateY(0) scale(1); opacity: 1; } }
+        @keyframes pulseGlow { 0% { box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4); } 100% { box-shadow: 0 4px 25px rgba(236, 72, 153, 0.8); } }
+
         @media (min-width: 768px) {
             body { justify-content: center; padding: 40px; background: #e2e8f0; }
             .container { max-width: 750px; padding: 40px 40px 80px 40px; border-radius: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); }
@@ -115,6 +129,8 @@
     </style>
 </head>
 <body>
+
+<button id="game-unlock-btn" onclick="goToGame()">🕹️ 隐藏游戏解锁！</button>
 
 <div class="container">
     <div id="loading" class="screen" style="display:block;">Syncing Lessons...</div>
@@ -218,6 +234,11 @@
     let db = {}, curUser = '', curSub = '', sessionQs = [], curIdx = 0, sessionErrors = 0;
     let isSpellingMode = false, currentWriter = null, currentSpellWord = "", currentSpellCharIdx = 0;
     let pinyinArray = [];
+    
+    // 🌟 新增：15分钟计时器变量
+    let practiceStartTime = null;
+    let practiceTimerInterval = null;
+    const TIME_LIMIT_MS = 15 * 60 * 1000; // 15分钟
     
     const synth = window.speechSynthesis;
     let bestEngVoice = null;
@@ -413,6 +434,17 @@
         if (hasNormal && hasSpelling) showScreen('mode-screen'); else showScreen('menu-screen');
     }
 
+    // 🌟 新增：启动时间监控
+    function checkPracticeTime() {
+        if (!practiceStartTime) return;
+        const elapsed = Date.now() - practiceStartTime;
+        if (elapsed >= TIME_LIMIT_MS) {
+            document.getElementById('game-unlock-btn').style.display = 'flex';
+            clearInterval(practiceTimerInterval); // 显示后停止轮询
+        }
+    }
+
+    // 🌟 核心修改：在开始做题时启动计时
     function startQuiz() {
         let pool = db[curUser][curSub];
         const selectedJSONs = Array.from(document.querySelectorAll('.topic-cb:checked')).map(cb => cb.value);
@@ -429,6 +461,12 @@
         });
 
         curIdx = 0; sessionErrors = 0; document.getElementById('draw-panel').style.display = 'none';
+        
+        // 🚀 重置并启动 15 分钟计时器
+        practiceStartTime = Date.now();
+        document.getElementById('game-unlock-btn').style.display = 'none';
+        if (practiceTimerInterval) clearInterval(practiceTimerInterval);
+        practiceTimerInterval = setInterval(checkPracticeTime, 5000); // 每5秒检查一次
 
         if (isSpellingMode) {
             if (curSub === 'English') sessionQs = pool.sort(() => 0.5 - Math.random());
@@ -439,6 +477,11 @@
             sessionQs = pool.sort(() => 0.5 - Math.random()).slice(0, grabCount);
             showScreen('quiz-screen'); renderQ();
         }
+    }
+    // 🌟 跳转到游戏页面的功能
+    function goToGame() {
+        // 直接跳转到托管的打气球游戏
+        window.location.href = "https://andydang2007.github.io/game/popballoons.html"; 
     }
 
     function updateProgress(barId) {
@@ -551,7 +594,6 @@
                 pyIndex++;
             }
         }
-        // 🌟 已移除华文的机器朗读喇叭按钮
         pinyinHtml += '</div>';
 
         document.getElementById('spelling-pinyin').innerHTML = pinyinHtml;
@@ -699,7 +741,11 @@
         else { finishQuiz(); }
     }
 
+    // 🌟 在退出或完成测验时，停止计时器
     function finishQuiz() {
+        if (practiceTimerInterval) clearInterval(practiceTimerInterval);
+        document.getElementById('game-unlock-btn').style.display = 'none';
+
         const isCN = (curSub === '华文');
         document.querySelectorAll('.milestone-track').forEach(el => el.style.display = 'none');
         document.getElementById('draw-panel').style.display = 'none';
