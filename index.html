@@ -478,12 +478,22 @@
             showScreen('quiz-screen'); renderQ();
         }
     }
-    // 🌟 跳转到游戏页面的功能
-    function goToGame() {
-        // 直接跳转到托管的打气球游戏
-        window.location.href = "https://andydang2007.github.io/game/popballoons.html"; 
-    }
 
+// 🌟 跳转并控制游戏防沉迷机制
+    function goToGame() {
+        // 1. 扣除时间：将累计的练习时间清零，重新开始15分钟循环
+        localStorage.setItem('accumulatedTime', '0');
+        
+        // 2. 隐藏入口按钮
+        document.getElementById('game-unlock-btn').style.display = 'none';
+        
+        // 3. 生成一张独一无二的门票 (利用当前毫秒级时间戳，绝对不会重复)
+        const uniqueTicket = 'hub_' + Date.now();
+        
+        // 4. 发车跳转到游戏，把门票像尾巴一样挂在网址后面
+        window.location.href = "https://andydang2007.github.io/game/popballoons.html?ticket=" + uniqueTicket; 
+    }
+    
     function updateProgress(barId) {
         const bar = document.getElementById(barId);
         const len = sessionQs.length; const pct = len > 1 ? (curIdx / (len - 1)) * 100 : 100;
