@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Spelling Hub</title>
 
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-M04YCD1PQK"></script>
     <script>
-    // 获取主控台存下来的玩家代号和科目
     let currentPlayer = localStorage.getItem('currentPlayer') || 'P3'; 
     let currentSubject = localStorage.getItem('currentSubject') || '华文';
 
@@ -30,30 +30,31 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root { --text-main: #1e293b; --text-muted: #64748b; }
-        * { box-sizing: border-box; font-family: 'Comic Sans MS', "Chalkboard SE", "Nunito", -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; font-family: 'Nunito', 'Microsoft YaHei', 'Comic Sans MS', sans-serif; -webkit-tap-highlight-color: transparent; }
         
         body { background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); margin: 0; padding: 15px; color: var(--text-main); display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100dvh; overflow: hidden; }
         
-        .container { width: 100%; max-width: 750px; background: #ffffff; padding: 30px; border-radius: 40px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); text-align: center; margin: auto; position: relative; border: 4px solid #ffffff; display: flex; flex-direction: column; max-height: 96dvh; }
+        .container { width: 100%; max-width: 750px; background: rgba(255,255,255,0.95); padding: 30px; border-radius: 40px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); text-align: center; margin: auto; position: relative; border: 4px solid #ffffff; backdrop-filter: blur(10px); display: flex; flex-direction: column; max-height: 96dvh; }
         
         .screen { display: none; flex: 1; flex-direction: column; width: 100%; overflow: hidden; animation: bounceIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
         #finish-screen { justify-content: center; overflow-y: auto; }
         
-        h1 { color: #3b82f6; margin-top: 0; font-size: 38px; margin-bottom: 25px; font-weight: 900; letter-spacing: 1px; text-shadow: 2px 2px 0px #dbeafe; flex: none; }
+        h1 { color: #3b82f6; margin-top: 0; font-size: 32px; margin-bottom: 25px; font-weight: 900; letter-spacing: 1px; text-shadow: 2px 2px 0px #dbeafe; flex: none; }
 
         .btn-group { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px; flex: none; }
-        .btn-choice { padding: 14px 28px; border-radius: 25px; border: 3px solid #e2e8f0; background: white; cursor: pointer; font-weight: 800; font-size: 22px; color: var(--text-muted); transition: 0.15s; min-width: 120px; box-shadow: 0 6px 0 #e2e8f0; outline: none; }
+        .btn-choice { padding: 14px 28px; border-radius: 25px; border: 3px solid #e2e8f0; background: white; cursor: pointer; font-weight: 900; font-size: 20px; color: var(--text-muted); transition: 0.15s; min-width: 120px; box-shadow: 0 6px 0 #e2e8f0; outline: none; }
         .btn-choice:active { transform: translateY(6px); box-shadow: 0 0 0 transparent; }
         .btn-choice.active { border-color: #3b82f6; background: #eff6ff; color: #1d4ed8; box-shadow: 0 6px 0 #93c5fd; }
 
         .checkbox-grid { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-bottom: 10px; padding: 10px; flex: 1; overflow-y: auto; align-content: flex-start; }
-        .checkbox-label { padding: 14px 22px; border-radius: 30px; border: 3px solid #e2e8f0; background: white; cursor: pointer; font-weight: 800; font-size: 18px; color: var(--text-muted); transition: all 0.2s; user-select: none; box-shadow: 0 4px 0 #f1f5f9; height: fit-content; }
+        .checkbox-label { padding: 14px 22px; border-radius: 30px; border: 3px solid #e2e8f0; background: white; cursor: pointer; font-weight: 900; font-size: 16px; color: var(--text-muted); transition: all 0.15s; user-select: none; box-shadow: 0 5px 0 #cbd5e1; height: fit-content; }
+        .checkbox-label:active { transform: translateY(5px); box-shadow: 0 0 0 transparent; }
         .checkbox-label input { display: none; }
-        .checkbox-label.selected { border-color: #a855f7; background: #faf5ff; color: #7e22ce; box-shadow: 0 4px 0 #d8b4fe; }
-        .checkbox-label.wrong-selected { border-color: #f59e0b; background: #fffbeb; color: #d97706; box-shadow: 0 4px 0 #fcd34d; }
+        .checkbox-label.selected { border-color: #a855f7; background: #faf5ff; color: #7e22ce; box-shadow: 0 5px 0 #d8b4fe; }
+        .checkbox-label.wrong-selected { border-color: #f59e0b; background: #fffbeb; color: #d97706; box-shadow: 0 5px 0 #fcd34d; }
 
         .action-panel { display: flex; gap: 15px; margin-top: 10px; height: auto; min-height: 130px; padding-bottom: 20px; width: 100%; flex: none; }
-        .btn-square { flex: 0 0 140px; border-radius: 35px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; background: #f1f5f9; color: #64748b; border: 3px solid #e2e8f0; box-shadow: 0 6px 0 #cbd5e1; font-weight: 900; cursor: pointer; transition: 0.15s; }
+        .btn-square { flex: 0 0 120px; border-radius: 30px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; background: #f1f5f9; color: #64748b; border: 3px solid #e2e8f0; box-shadow: 0 6px 0 #cbd5e1; font-weight: 900; cursor: pointer; transition: 0.15s; }
         .btn-square:active { transform: translateY(6px); box-shadow: 0 0 0 transparent; }
         .btn-stacked-col { display: flex; flex-direction: column; gap: 15px; flex: 1; }
         .btn-stacked { flex: 1; width: 100%; margin: 0; border-radius: 25px; font-size: 22px; font-weight: 900; border: none; cursor: pointer; transition: 0.15s; display: flex; align-items: center; justify-content: center; color: white; }
@@ -61,16 +62,16 @@
         .btn-review-stacked { background: #f59e0b; box-shadow: 0 6px 0 #d97706; }
         .btn-practice-stacked { background: #10b981; box-shadow: 0 6px 0 #059669; }
 
-        .progress-container { width: 100%; background: #f1f5f9; height: 16px; border-radius: 10px; margin-bottom: 25px; overflow: hidden; border: 2px solid #e2e8f0; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); flex: none; }
+        .progress-container { width: 100%; background: #f1f5f9; height: 18px; border-radius: 10px; margin-bottom: 25px; overflow: hidden; border: 3px solid #e2e8f0; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); flex: none; }
         .progress-bar { height: 100%; background: linear-gradient(90deg, #34d399, #10b981); width: 0%; transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 10px; }
-        .progress-text { font-size: 18px; color: #94a3b8; margin-bottom: 20px; font-weight: 900; flex: none; }
+        .progress-text { font-size: 20px; color: #94a3b8; margin-bottom: 20px; font-weight: 900; flex: none; }
         
         .hint-display { font-size: 32px; font-weight: bold; color: #334155; margin-bottom: 20px; min-height: 90px; display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; align-content: center; flex: none; }
-        .hint-unit { cursor: pointer; padding: 8px 16px; border-radius: 18px; border: 3px solid #e2e8f0; background: #fff; min-width: 60px; text-align: center; font-size: 26px; transition: 0.2s; box-shadow: 0 4px 0 #f1f5f9; }
-        
+        .hint-unit { cursor: pointer; padding: 10px 18px; border-radius: 20px; border: 4px solid #e2e8f0; background: #fff; min-width: 60px; text-align: center; font-size: 26px; transition: 0.2s; box-shadow: 0 5px 0 #cbd5e1; }
+        .hint-unit:active { transform: translateY(5px); box-shadow: 0 0 0 transparent; }
         .hint-unit.active { color: #ea580c; background: #fff7ed; border-color: #fb923c; transform: scale(1.1); box-shadow: 0 6px 0 #f97316; z-index: 2; }
-        .hint-unit.done { color: #10b981; background: #ecfdf5; border-color: #6ee7b7; box-shadow: 0 0 0 transparent; transform: translateY(4px); cursor: default; }
-        .hint-unit.skipped { color: #ea580c; background: #fff7ed; border-color: #fb923c; box-shadow: 0 0 0 transparent; transform: translateY(4px); cursor: pointer; } 
+        .hint-unit.done { color: #10b981; background: #ecfdf5; border-color: #6ee7b7; box-shadow: 0 0 0 transparent; transform: translateY(5px); cursor: default; }
+        .hint-unit.skipped { color: #ea580c; background: #fff7ed; border-color: #fb923c; box-shadow: 0 0 0 transparent; transform: translateY(5px); cursor: pointer; } 
 
         .practice-main { display: flex; flex-direction: column; flex: 1; width: 100%; min-height: 0; }
         .practice-area { background: #f8fafc; padding: 25px 15px; border-radius: 35px; border: 4px dashed #cbd5e1; margin-bottom: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; position: relative; overflow: hidden; min-height: 250px;}
@@ -84,14 +85,14 @@
 
         .controls-row { display: flex; gap: 16px; width: 100%; height: 75px; flex: none; }
         .btn-action { border-radius: 22px; border: none; font-weight: 900; font-size: 22px; cursor: pointer; transition: 0.15s; display: flex; align-items: center; justify-content: center; outline: none; }
-        .btn-quit { flex: 1.2; background: #f1f5f9; color: #64748b; font-size: 18px; border: 3px solid #e2e8f0; box-shadow: 0 6px 0 #cbd5e1; } 
+        .btn-quit { flex: 1; background: #f1f5f9; color: #64748b; font-size: 18px; border: 3px solid #e2e8f0; box-shadow: 0 6px 0 #cbd5e1; } 
         .btn-nav { flex: 2; background: #38bdf8; color: white; box-shadow: 0 6px 0 #0284c7; } 
         .btn-nav:disabled { background: #e2e8f0 !important; color: #94a3b8 !important; box-shadow: 0 6px 0 #cbd5e1 !important; transform: translateY(0) !important; cursor: not-allowed; opacity: 0.8; }
 
         @keyframes bounceIn { 0% { opacity: 0; transform: scale(0.9); } 100% { opacity: 1; transform: scale(1); } }
         
         @media (orientation: landscape) and (min-width: 768px) {
-            .container { max-width: 1000px; padding: 25px 40px; height: 95dvh; }
+            .container { max-width: 1000px; padding: 35px 40px; height: 95dvh; border-radius: 50px;}
             .practice-main { flex-direction: row; align-items: flex-start; gap: 30px; }
             .practice-area { margin-bottom: 0; height: 100%; min-height: 300px; flex: 1; }
             .practice-main .controls-row { display: grid; grid-template-columns: 1fr 1fr; width: 320px; height: auto; margin-top: 0; gap: 18px; flex: none; }
@@ -108,13 +109,12 @@
     </div>
 
     <div id="topic-screen" class="screen">
-        <h1 id="topic-header">📝 选择任务</h1>
+        <h1 id="topic-header">📝 听写任务</h1>
         <div id="semester-group" class="btn-group" style="margin-bottom: 10px;"></div>
         <div id="topic-list" class="checkbox-grid"></div>
         <div class="action-panel">
             <button class="btn-square" onclick="window.location.href='index.html'">
-                <span style="font-size: 36px;">🏠</span>
-                <span style="font-size: 20px;">退出</span>
+                <span style="font-size: 40px;">🏠</span>
             </button>
             <div class="btn-stacked-col">
                 <button class="btn-stacked btn-review-stacked" onclick="startReview(this)">🔥 挑战 (10题)</button>
@@ -138,8 +138,8 @@
             </div>
             <div class="controls-row">
                 <button id="quit-btn" class="btn-action btn-quit" onclick="window.location.href='index.html'">退出 🏠</button>
-                <button id="prev-btn" class="btn-action btn-nav" onclick="moveQuestion(-1)">⬅️ 上一个</button>
-                <button id="next-btn" class="btn-action btn-nav" onclick="moveQuestion(1)">下一个 ➡️</button>
+                <button id="prev-btn" class="btn-action btn-nav" onclick="moveQuestion(-1)">⬅️ 上一步</button>
+                <button id="next-btn" class="btn-action btn-nav" onclick="moveQuestion(1)">下一步 ➡️</button>
             </div>
         </div>
     </div>
@@ -149,9 +149,8 @@
 
 <script>
     const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQAq-_y8eYBv2Mv7_TrW1Q4ffAlLb48tJIXfDzeT8KQKXKowlG_Hvh6TH380RHLL-OTKIypPwNVw0NX/pub?gid=0&single=true&output=csv";
-    const LIMIT = 5; // 每日限制次数
+    const LIMIT = 5; 
 
-    // 默认从 localStorage 取，取不到则用保底值
     let db = {}, curUser = currentPlayer, curSub = currentSubject, practiceList = [], curIdx = 0;
     let hzWriter = null, practiceChars = [];
     let totalCorrectCount = 0;
@@ -160,7 +159,6 @@
     let isRetrySession = false;
     let currentRetryRatio = 1;
 
-    // 🟢 核心：每日次数检查与递增
     function checkAndIncrementLimit(lessons, mode) {
         const today = new Date().toISOString().split('T')[0];
         const storageKey = `spelling_usage_${today}`;
@@ -202,11 +200,9 @@
                 
                 document.getElementById('loading').style.display = 'none';
 
-                // 安全校验，防止 localStorage 数据丢失
                 if (!db[curUser]) curUser = Object.keys(db)[0] || 'P3';
                 if (!db[curUser][curSub]) curSub = Object.keys(db[curUser])[0] || '华文';
 
-                // 🔥 直接执行加载章节的逻辑
                 loadTopics();
             }
         });
@@ -218,9 +214,8 @@
             return;
         }
 
-        // 个性化标题，显示是谁的听写
         let childName = curUser === 'P1' ? 'Venessa' : 'Valerie';
-        document.getElementById('topic-header').innerText = `📝 ${childName} 的听写任务`;
+        document.getElementById('topic-header').innerText = `🎈 ${childName} 的听写 🎈`;
 
         let pool = db[curUser][curSub];
         let topics = [...new Set(pool.map(q => q.Topic))].sort((a,b) => getWeight(a) - getWeight(b));
@@ -433,13 +428,13 @@
             if (canPlay) setTimeout(() => { window.location.href = "https://andydang2007.github.io/game/popballoons.html?ticket=" + Date.now(); }, 3000);
         }
         
-        let html = `<div style="padding:40px 0;"><h1 style="font-size:70px;">${currentWrongItems.length===0?'🏆':'👍'}</h1><h2 style="font-size:36px;">你真棒！</h2><p style="font-size:22px; font-weight:800;">这一次你写对了 <br><span style="color:#10b981; font-size:40px;">${totalCorrectCount}</span> 个字！</p>`;
+        let html = `<div style="padding:40px 0;"><h1 style="font-size:70px;">${currentWrongItems.length===0?'🏆':'👍'}</h1><h2 style="font-size:36px; font-weight:900;">你真棒！</h2><p style="font-size:22px; font-weight:800;">这一次你写对了 <br><span style="color:#10b981; font-size:40px;">${totalCorrectCount}</span> 个字！</p>`;
         if (currentWrongItems.length > 0) {
-            html += `<div style="margin-top:30px; background:#fffbeb; padding:25px 15px; border-radius:25px; border:3px dashed #fcd34d;"><h3 style="font-size:22px;">请选择你要再练一练的字 🐣</h3><div class="checkbox-grid" id="wrong-list">`;
+            html += `<div style="margin-top:30px; background:#fffbeb; padding:25px 15px; border-radius:25px; border:4px dashed #fcd34d;"><h3 style="font-size:22px; font-weight:900; color:#d97706;">请选择你要再练一练的字 🐣</h3><div class="checkbox-grid" id="wrong-list">`;
             currentWrongItems.forEach((q, idx) => { html += `<label class="checkbox-label"><input type="checkbox" value="${idx}" onchange="this.parentElement.classList.toggle('wrong-selected', this.checked)"> ${q.Answer}</label>`; });
-            html += `</div><button class="btn-action btn-nav" style="width:220px; margin:0 auto; background:#f59e0b;" onclick="startRetry()">我爱学习 🚀</button></div>`;
+            html += `</div><button class="btn-action btn-nav" style="width:220px; margin:0 auto; background:#f59e0b; box-shadow: 0 6px 0 #d97706;" onclick="startRetry()">我爱学习 🚀</button></div>`;
         }
-        html += `<div class="controls-row" style="justify-content:center; margin-top:40px;"><button class="btn-action btn-quit" style="width:200px; flex:none;" onclick="window.location.href='index.html'">返回主控台 🏠</button></div></div>`;
+        html += `<div class="controls-row" style="justify-content:center; margin-top:40px;"><button class="btn-action btn-quit" style="width:200px; flex:none; box-shadow: 0 6px 0 #cbd5e1;" onclick="window.location.href='index.html'">返回主控台 🏠</button></div></div>`;
         document.getElementById('finish-screen').innerHTML = html; showScreen('finish-screen');
     }
 
@@ -464,11 +459,11 @@
             setTimeout(() => { window.location.href = "https://andydang2007.github.io/game/popballoons.html?ticket=" + Date.now(); }, 3000);
         }
 
-        let html = `<div style="padding:40px 0;"><h2 style="font-size:24px; color:#94a3b8;">🏅 挑战结果</h2><h1 style="font-size:90px;">${emoji}</h1><h2 style="font-size:46px; color:#f59e0b;">${stars}</h2><p style="font-size:24px; font-weight:800;">${msg}</p>
-                    <div style="margin-top:25px; text-align:left; background:#f8fafc; padding:20px; border-radius:20px; border:2px solid #e2e8f0; max-width:500px; margin-left:auto; margin-right:auto;">
-                        <div style="margin-bottom:15px;"><span style="background:#dcfce7; color:#059669; border-radius:12px; padding:4px 10px; font-weight:bold;">✅ 掌握得很好:</span> <span style="font-size:20px; font-weight:900; color:#10b981;">${correctChars.join(', ') || '无'}</span></div>
-                        <div><span style="background:#fee2e2; color:#e11d48; border-radius:12px; padding:4px 10px; font-weight:bold;">❌ 还需要练习:</span> <span style="font-size:20px; font-weight:900; color:#f43f5e;">${wrongChars.join(', ') || '无'}</span></div>
-                    </div><div class="controls-row" style="justify-content:center; margin-top:40px;"><button class="btn-action btn-quit" style="width:220px; flex:none;" onclick="window.location.href='index.html'">返回主控台 🏠</button></div></div>`;
+        let html = `<div style="padding:40px 0;"><h2 style="font-size:24px; color:#94a3b8; font-weight:800;">🏅 挑战结果</h2><h1 style="font-size:90px;">${emoji}</h1><h2 style="font-size:46px; color:#f59e0b;">${stars}</h2><p style="font-size:24px; font-weight:900;">${msg}</p>
+                    <div style="margin-top:25px; text-align:left; background:#f8fafc; padding:20px; border-radius:20px; border:3px solid #e2e8f0; max-width:500px; margin-left:auto; margin-right:auto;">
+                        <div style="margin-bottom:15px;"><span style="background:#dcfce7; color:#059669; border-radius:12px; padding:6px 12px; font-weight:900;">✅ 掌握得很好:</span> <span style="font-size:22px; font-weight:900; color:#10b981;">${correctChars.join(', ') || '无'}</span></div>
+                        <div><span style="background:#fee2e2; color:#e11d48; border-radius:12px; padding:6px 12px; font-weight:900;">❌ 还需要练习:</span> <span style="font-size:22px; font-weight:900; color:#f43f5e;">${wrongChars.join(', ') || '无'}</span></div>
+                    </div><div class="controls-row" style="justify-content:center; margin-top:40px;"><button class="btn-action btn-quit" style="width:220px; flex:none; box-shadow: 0 6px 0 #cbd5e1;" onclick="window.location.href='index.html'">返回主控台 🏠</button></div></div>`;
         document.getElementById('finish-screen').innerHTML = html; showScreen('finish-screen');
     }
 
