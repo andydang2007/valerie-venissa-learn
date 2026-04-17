@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Spelling Hub</title>
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-M04YCD1PQK"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-M04YCD1PQK');
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5/dist/hanzi-writer.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root { --text-main: #1e293b; --text-muted: #64748b; }
+        * { box-sizing: border-box; font-family: 'Comic Sans MS', "Chalkboard SE", "Nunito", -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        body { background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); margin: 0; padding: 15px; color: var(--text-main); display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100dvh; overflow: hidden; }
+        
+        .container { width: 100%; max-width: 750px; background: #ffffff; padding: 30px; border-radius: 40px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); text-align: center; margin: auto; position: relative; border: 4px solid #ffffff; display: flex; flex-direction: column; max-height: 96dvh; }
+        
+        .screen { display: none; flex: 1; flex-direction: column; width: 100%; overflow: hidden; animation: bounceIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+        #setup-screen, #finish-screen { justify-content: center; }
+        #finish-screen { overflow-y: auto; }
+        
+        h1 { color: #3b82f6; margin-top: 0; font-size: 38px; margin-bottom: 25px; font-weight: 900; letter-spacing: 1px; text-shadow: 2px 2px 0px #dbeafe; flex: none; }
+
+        .btn-group { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px; flex: none; }
+        .btn-choice { padding: 14px 28px; border-radius: 25px; border: 3px solid #e2e8f0; background: white; cursor: pointer; font-weight: 800; font-size: 22px; color: var(--text-muted); transition: 0.15s; min-width: 120px; box-shadow: 0 6px 0 #e2e8f0; outline: none; }
+        .btn-choice:active { transform: translateY(6px); box-shadow: 0 0 0 transparent; }
+        .btn-choice.active { border-color: #3b82f6; background: #eff6ff; color: #1d4ed8; box-shadow: 0 6px 0 #93c5fd; }
+        
+        .btn-sub-English { background: #38bdf8; border-color: #38bdf8; color: white; box-shadow: 0 6px 0 #0284c7; }
+        .btn-sub-华文 { background: #c084fc; border-color: #c084fc; color: white; box-shadow: 0 6px 0 #a855f7; }
+        .btn-sub-高华 { background: #9333ea; border-color: #9333ea; color: white; box-shadow: 0 6px 0 #7e22ce; }
+
+        .checkbox-grid { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-bottom: 10px; padding: 10px; flex: 1; overflow-y: auto; align-content: flex-start; }
+        .checkbox-label { padding: 14px 22px; border-radius: 30px; border: 3px solid #e2e8f0; background: white; cursor: pointer; font-weight: 800; font-size: 18px; color: var(--text-muted); transition: all 0.2s; user-select: none; box-shadow: 0 4px 0 #f1f5f9; height: fit-content; }
+        .checkbox-label input { display: none; }
+        .checkbox-label.selected { border-color: #a855f7; background: #faf5ff; color: #7e22ce; box-shadow: 0 4px 0 #d8b4fe; }
+        .checkbox-label.wrong-selected { border-color: #f59e0b; background: #fffbeb; color: #d97706; box-shadow: 0 4px 0 #fcd34d; }
+
+        .action-panel { display: flex; gap: 15px; margin-top: 10px; height: auto; min-height: 130px; padding-bottom: 20px; width: 100%; flex: none; }
+        .btn-square { flex: 0 0 140px; border-radius: 35px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; background: #f1f5f9; color: #64748b; border: 3px solid #e2e8f0; box-shadow: 0 6px 0 #cbd5e1; font-weight: 900; cursor: pointer; transition: 0.15s; }
+        .btn-square:active { transform: translateY(6px); box-shadow: 0 0 0 transparent; }
+        .btn-stacked-col { display: flex; flex-direction: column; gap: 15px; flex: 1; }
+        .btn-stacked { flex: 1; width: 100%; margin: 0; border-radius: 25px; font-size: 22px; font-weight: 900; border: none; cursor: pointer; transition: 0.15s; display: flex; align-items: center; justify-content: center; color: white; }
+        .btn-stacked:active { transform: translateY(6px); box-shadow: 0 0 0 transparent; }
+        .btn-review-stacked { background: #f59e0b; box-shadow: 0 6px 0 #d97706; }
+        .btn-practice-stacked { background: #10b981; box-shadow: 0 6px 0 #059669; }
+
+        .progress-container { width: 100%; background: #f1f5f9; height: 16px; border-radius: 10px; margin-bottom: 25px; overflow: hidden; border: 2px solid #e2e8f0; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); flex: none; }
+        .progress-bar { height: 100%; background: linear-gradient(90deg, #34d399, #10b981); width: 0%; transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 10px; }
+        .progress-text { font-size: 18px; color: #94a3b8; margin-bottom: 20px; font-weight: 900; flex: none; }
+        
+        .hint-display { font-size: 32px; font-weight: bold; color: #334155; margin-bottom: 20px; min-height: 90px; display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; align-content: center; flex: none; }
+        .hint-unit { cursor: pointer; padding: 8px 16px; border-radius: 18px; border: 3px solid #e2e8f0; background: #fff; min-width: 60px; text-align: center; font-size: 26px; transition: 0.2s; box-shadow: 0 4px 0 #f1f5f9; }
+        
+        .hint-unit.active { color: #ea580c; background: #fff7ed; border-color: #fb923c; transform: scale(1.1); box-shadow: 0 6px 0 #f97316; z-index: 2; }
+        .hint-unit.done { color: #10b981; background: #ecfdf5; border-color: #6ee7b7; box-shadow: 0 0 0 transparent; transform: translateY(4px); cursor: default; }
+        .hint-unit.skipped { color: #ea580c; background: #fff7ed; border-color: #fb923c; box-shadow: 0 0 0 transparent; transform: translateY(4px); cursor: pointer; } 
+
+        .practice-main { display: flex; flex-direction: column; flex: 1; width: 100%; min-height: 0; }
+        .practice-area { background: #f8fafc; padding: 25px 15px; border-radius: 35px; border: 4px dashed #cbd5e1; margin-bottom: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; position: relative; overflow: hidden; min-height: 250px;}
+        .hanzi-box { width: 260px; height: 260px; border: 4px solid #94a3b8; border-radius: 25px; background: white; box-shadow: inset 0 0 20px rgba(0,0,0,0.03); }
+
+        .helper-row { display: flex; gap: 15px; margin-top: 20px; justify-content: center; width: 100%; }
+        .btn-helper { font-size: 16px; padding: 12px 24px; border-radius: 25px; font-weight: 900; cursor: pointer; transition: 0.15s; outline: none; user-select: none; -webkit-touch-callout: none; display: none; }
+        
+        #peek-btn { background: #fef08a; color: #a16207; border: 3px solid #fde047; box-shadow: 0 5px 0 #facc15; }
+        #skip-char-btn { background: #f1f5f9; color: #64748b; border: 3px solid #e2e8f0; box-shadow: 0 5px 0 #cbd5e1; }
+
+        .controls-row { display: flex; gap: 16px; width: 100%; height: 75px; flex: none; }
+        .btn-action { border-radius: 22px; border: none; font-weight: 900; font-size: 22px; cursor: pointer; transition: 0.15s; display: flex; align-items: center; justify-content: center; outline: none; }
+        .btn-quit { flex: 1.2; background: #f1f5f9; color: #64748b; font-size: 18px; border: 3px solid #e2e8f0; box-shadow: 0 6px 0 #cbd5e1; } 
+        .btn-nav { flex: 2; background: #38bdf8; color: white; box-shadow: 0 6px 0 #0284c7; } 
+        .btn-nav:disabled { background: #e2e8f0 !important; color: #94a3b8 !important; box-shadow: 0 6px 0 #cbd5e1 !important; transform: translateY(0) !important; cursor: not-allowed; opacity: 0.8; }
+
+        @keyframes bounceIn { 0% { opacity: 0; transform: scale(0.9); } 100% { opacity: 1; transform: scale(1); } }
+        
+        @media (orientation: landscape) and (min-width: 768px) {
+            .container { max-width: 1000px; padding: 25px 40px; height: 95dvh; }
+            .practice-main { flex-direction: row; align-items: flex-start; gap: 30px; }
+            .practice-area { margin-bottom: 0; height: 100%; min-height: 300px; flex: 1; }
+            .practice-main .controls-row { display: grid; grid-template-columns: 1fr 1fr; width: 320px; height: auto; margin-top: 0; gap: 18px; flex: none; }
+            .practice-main .btn-action { height: 85px; width: 100%; border-radius: 25px; }
+            .practice-main .btn-quit { grid-column: 1 / 3; font-size: 24px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="loading" class="screen" style="display:flex; justify-content:center; align-items:center; padding: 60px 0; font-size: 24px; font-weight: 900; color: #3b82f6;">
+        🌟 魔法书正在加载... 
+    </div>
+
+    <div id="setup-screen" class="screen">
+        <h1>🎈 Spelling Hub 🎈</h1>
+        <div id="grade-group" class="btn-group"></div>
+        <div id="subject-group" class="btn-group" style="display:none; margin-top: 35px;"></div>
+    </div>
+
+    <div id="topic-screen" class="screen">
+        <h1 id="topic-header">📝 选择任务</h1>
+        <div id="semester-group" class="btn-group" style="margin-bottom: 10px;"></div>
+        <div id="topic-list" class="checkbox-grid"></div>
+        <div class="action-panel">
+            <button class="btn-square" onclick="location.reload()">
+                <span style="font-size: 36px;">🏠</span>
+                <span style="font-size: 20px;">结束</span>
+            </button>
+            <div class="btn-stacked-col">
+                <button class="btn-stacked btn-review-stacked" onclick="startReview(this)">🔥 挑战 (10题)</button>
+                <button class="btn-stacked btn-practice-stacked" onclick="startPractice()">🚀 练习 (全练)</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="practice-screen" class="screen">
+        <div class="progress-container"><div id="prog-bar" class="progress-bar"></div></div>
+        <div id="prog-text" class="progress-text">1 / 10</div>
+        <div id="hint-area" class="hint-display"></div>
+        <div class="practice-main">
+            <div id="work-area" class="practice-area">
+                <div id="thumb-up" style="position:absolute; font-size:110px; display:none; z-index:10;">👍</div>
+                <div id="draw-target"></div>
+                <div class="helper-row">
+                    <button id="peek-btn" class="btn-helper">👀 看一下 (按住)</button>
+                    <button id="skip-char-btn" class="btn-helper" onclick="skipCurrentChar()">太简单，跳过 ⏭️</button>
+                </div>
+            </div>
+            <div class="controls-row">
+                <button id="quit-btn" class="btn-action btn-quit" onclick="location.reload()">结束测试 🏠</button>
+                <button id="prev-btn" class="btn-action btn-nav" onclick="moveQuestion(-1)">⬅️ 上一个</button>
+                <button id="next-btn" class="btn-action btn-nav" onclick="moveQuestion(1)">下一个 ➡️</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="finish-screen" class="screen"></div>
+</div>
+
+<script>
+    const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQAq-_y8eYBv2Mv7_TrW1Q4ffAlLb48tJIXfDzeT8KQKXKowlG_Hvh6TH380RHLL-OTKIypPwNVw0NX/pub?gid=0&single=true&output=csv";
+    const LIMIT = 5; // 每日限制次数
+
+    let db = {}, curUser = '', curSub = '', practiceList = [], curIdx = 0;
+    let hzWriter = null, practiceChars = [];
+    let totalCorrectCount = 0;
+    let currentWrongItems = [];
+    let currentMode = 'practice';
+    let isRetrySession = false;
+    let currentRetryRatio = 1;
+
+        // 🟢 核心：每日次数检查与递增
+    function checkAndIncrementLimit(lessons, mode) {
+        const today = new Date().toISOString().split('T')[0];
+        const storageKey = `spelling_usage_${today}`;
+        let usage = JSON.parse(localStorage.getItem(storageKey) || "{}");
+
+        for (let lesson of lessons) {
+            if (!usage[lesson]) usage[lesson] = { practice: 0, challenge: 0 };
+            if (usage[lesson][mode] >= LIMIT) {
+                // 💡 动态提示：精准报出是哪一课超限了
+                alert(`「${lesson}」你今天已经学过很多次了，学点别的吧！`);
+                return false;
+            }
+        }
+
+        // 验证通过，增加计数并保存
+        lessons.forEach(l => usage[l][mode]++);
+        localStorage.setItem(storageKey, JSON.stringify(usage));
+        return true;
+    }
+
+    function init() {
+        Papa.parse(SHEET_URL + "&t=" + Date.now(), {
+            download: true, header: true, skipEmptyLines: 'greedy',
+            transformHeader: h => h.replace(/^\uFEFF/, '').trim().toUpperCase(),
+            complete: function(results) {
+                results.data.forEach((row, index) => { 
+                    let g = (row['GRADE'] || "").toUpperCase(), sub = (row['SUBJECT'] || "").trim();
+                    if(!g || !sub) return;
+                    if(!db[g]) db[g] = {}; 
+                    if(!db[g][sub]) db[g][sub] = []; 
+                    db[g][sub].push({
+                        Topic: row['TOPIC'] || row['LESSON'] || "Default",
+                        Hint: row['QUESTION'] || row['HINT'] || "",
+                        Answer: row['CORRECT ANSWER'] || row['ANSWER'] || "",
+                        isWrong: false,
+                        isCompleted: false, 
+                        mistakeChars: [], 
+                        originalIndex: index 
+                    });
+                });
+                document.getElementById('loading').style.display = 'none';
+                renderGrades(); showScreen('setup-screen');
+            }
+        });
+    }
+
+    function renderGrades() {
+        const gg = document.getElementById('grade-group'); gg.innerHTML = '';
+        Object.keys(db).sort().forEach(g => {
+            gg.innerHTML += `<button id="btn-user-${g}" class="btn-choice btn-user" onclick="selectUser('${g}')">${g}</button>`;
+        });
+    }
+
+    function selectUser(u) {
+        curUser = u;
+        document.querySelectorAll('#grade-group .btn-choice').forEach(b => b.classList.remove('active'));
+        const target = document.getElementById(`btn-user-${u}`);
+        if(target) target.classList.add('active');
+        const sg = document.getElementById('subject-group'); sg.style.display = 'flex'; sg.innerHTML = '';
+        Object.keys(db[u]).forEach(sub => {
+            sg.innerHTML += `<button class="btn-choice btn-sub-${sub}" onclick="selectSub('${sub}', this)">${sub}</button>`;
+        });
+    }
+
+    function selectSub(s, el) { 
+        curSub = s; 
+        document.querySelectorAll('#subject-group .btn-choice').forEach(b => b.classList.remove('active'));
+        if(el) el.classList.add('active');
+        setTimeout(loadTopics, 200); 
+    }
+
+    function loadTopics() {
+        let pool = db[curUser][curSub];
+        let topics = [...new Set(pool.map(q => q.Topic))].sort((a,b) => getWeight(a) - getWeight(b));
+        const gradeMap = {'P1': '一', 'P2': '二', 'P3': '三', 'P4': '四', 'P5': '五', 'P6': '六'};
+        let gradeStr = gradeMap[curUser] || curUser;
+        let semGroup = document.getElementById('semester-group');
+        semGroup.innerHTML = `
+            <button id="sem-btn-A" class="btn-choice sem-toggle" style="padding: 10px 24px; font-size: 18px; min-width: 100px; border-radius: 20px;" onclick="selectSemester('A', this)">📖 ${gradeStr}上</button>
+            <button id="sem-btn-B" class="btn-choice sem-toggle" style="padding: 10px 24px; font-size: 18px; min-width: 100px; border-radius: 20px;" onclick="selectSemester('B', this)">📘 ${gradeStr}下</button>
+        `;
+        const list = document.getElementById('topic-list'); list.innerHTML = '';
+        topics.forEach(t => {
+            const lbl = document.createElement('label');
+            lbl.className = 'checkbox-label';
+            lbl.innerHTML = `<input type="checkbox" value="${t}" onchange="this.parentElement.classList.toggle('selected', this.checked)"> ${t}`;
+            list.appendChild(lbl);
+        });
+        showScreen('topic-screen');
+    }
+
+    function selectSemester(type, btn) {
+        btn.classList.toggle('active');
+        let isActive = btn.classList.contains('active');
+        document.querySelectorAll('#topic-list input').forEach(cb => {
+            let weight = getWeight(cb.value);
+            if (type === 'A' && weight <= 10) { cb.checked = isActive; cb.parentElement.classList.toggle('selected', isActive); }
+            else if (type === 'B' && (weight > 10 && weight < 999)) { cb.checked = isActive; cb.parentElement.classList.toggle('selected', isActive); }
+        });
+    }
+
+    function getWeight(s) {
+        const dict = {'一':1,'二':2,'三':3,'四':4,'五':5,'六':6,'七':7,'八':8,'九':9,'十':10,'十一':11,'十二':12,'十三':13,'十四':14,'十五':15,'十六':16,'十七':17,'十八':18,'十九':19,'二十':20};
+        let m = s.match(/第(.+)课/); if(m && dict[m[1]]) return dict[m[1]];
+        let n = s.match(/\d+/); return n ? parseInt(n[0]) : 999;
+    }
+
+    function startPractice() {
+        let sel = [...document.querySelectorAll('#topic-list input:checked')].map(i => i.value);
+        if(sel.length === 0) return;
+
+        // 🟢 检查限次
+        if (!checkAndIncrementLimit(sel, 'practice')) return;
+
+        currentMode = 'practice'; 
+        isRetrySession = false;
+        currentRetryRatio = 1;
+        document.getElementById('quit-btn').innerText = '结束练习 🏠';
+        
+        let pool = db[curUser][curSub].filter(q => sel.includes(q.Topic));
+        const phrases = pool.filter(q => !/[，。！？]/u.test(q.Answer)).sort((a,b) => a.originalIndex - b.originalIndex);
+        const sentences = pool.filter(q => /[，。！？]/u.test(q.Answer)).sort((a,b) => a.originalIndex - b.originalIndex);
+        practiceList = [...phrases, ...sentences]; 
+        resetPracticeList(practiceList);
+        curIdx = 0; totalCorrectCount = 0; showScreen('practice-screen'); renderQuestion();
+    }
+
+    function startReview(btn) {
+        let sel = [...document.querySelectorAll('#topic-list input:checked')].map(i => i.value);
+        if(sel.length < 2) {
+            const ot = btn.innerText; btn.innerText = "至少选两课哦🐣"; btn.style.background = "#f43f5e";
+            setTimeout(() => { btn.innerText = ot; btn.style.background = ""; }, 2000);
+            return;
+        }
+
+        // 🟢 检查限次
+        if (!checkAndIncrementLimit(sel, 'challenge')) return;
+
+        currentMode = 'challenge'; 
+        isRetrySession = false;
+        currentRetryRatio = 1;
+        document.getElementById('quit-btn').innerText = '结束测试 🏠';
+        let pool = db[curUser][curSub].filter(q => sel.includes(q.Topic));
+        let phrases = pool.filter(q => !/[，。！？]/u.test(q.Answer)).sort(() => 0.5 - Math.random());
+        let sentences = pool.filter(q => /[，。！？]/u.test(q.Answer)).sort(() => 0.5 - Math.random());
+        practiceList = sentences.length > 0 ? [...phrases.slice(0, 9), sentences[0]] : phrases.slice(0, 10);
+        resetPracticeList(practiceList);
+        curIdx = 0; totalCorrectCount = 0; showScreen('practice-screen'); renderQuestion();
+    }
+
+    function resetPracticeList(list) {
+        list.forEach(q => {
+            q.isWrong = false; q.isCompleted = false; q.mistakeChars = []; 
+            if (q.charsData) q.charsData.forEach(c => { c.done = c.isP; c.skipped = false; c.wasSkipped = false; });
+        });
+    }
+
+    function moveQuestion(step) {
+        let target = curIdx + step;
+        if(target >= 0 && target < practiceList.length) { curIdx = target; renderQuestion(); }
+        else if (target >= practiceList.length) { finish(); }
+    }
+
+    function renderQuestion() {
+        const q = practiceList[curIdx];
+        document.getElementById('prog-bar').style.width = `${((curIdx + 1) / practiceList.length) * 100}%`;
+        document.getElementById('prog-text').innerText = `${curIdx + 1} / ${practiceList.length}`;
+        document.getElementById('prev-btn').disabled = (curIdx === 0);
+        const nb = document.getElementById('next-btn');
+        if (curIdx === practiceList.length - 1) { nb.innerText = "完成 ✨"; nb.style.background = "#10b981"; }
+        else { nb.innerText = "下一个 ➡️"; nb.style.background = "#38bdf8"; }
+        if(curSub === 'English') setupEnglish(q); else setupChinese(q);
+    }
+
+    function setupChinese(q) {
+        document.getElementById('draw-target').innerHTML = '';
+        const skb = document.getElementById('skip-char-btn');
+        const pkb = document.getElementById('peek-btn');
+        skb.style.display = 'block'; 
+        skb.innerText = currentMode === 'challenge' ? '不会写，跳过 ⏭️' : '太简单，跳过 ⏭️';
+        pkb.style.display = currentMode === 'challenge' ? 'none' : 'block';
+
+        if (!q.charsData) {
+            const word = q.Answer.trim(); const pinyins = q.Hint.trim().split(/\s+/);
+            q.charsData = []; let pIdx = 0;
+            for(let char of word) {
+                let isP = /[，。！？、：；（）《》“”" "]/u.test(char);
+                q.charsData.push({ char, pinyin: isP ? char : (pinyins[pIdx++] || ''), isP, done: isP, skipped: false, wasSkipped: false });
+            }
+        }
+        practiceChars = q.charsData;
+        document.getElementById('hint-area').innerHTML = practiceChars.map((item, i) => {
+            let innerHtml = (item.isP) ? `<div style="font-size:32px; line-height:1.2; padding-top:6px;">${item.char}</div>` : 
+                            (item.done && currentMode !== 'challenge') ? `<div style="font-size:14px; line-height:1; opacity:0.8;">${item.pinyin}</div><div style="font-size:32px; font-weight:900; line-height:1.2; margin-top:2px;">${item.char}</div>` :
+                            `<div style="font-size:26px; line-height:1.2; padding-top:6px;">${item.pinyin}</div>`;
+            return `<div class="hint-unit ${item.done?'done':(item.skipped?'skipped':'')}" id="py-${i}" onclick="jumpTo(${i})">${innerHtml}</div>`;
+        }).join('');
+        autoJump();
+    }
+
+    function jumpTo(idx) {
+        if(practiceChars[idx].isP || practiceChars[idx].done) return; 
+        if (practiceChars[idx].skipped) practiceChars[idx].skipped = false;
+        document.querySelectorAll('.hint-unit').forEach((el, i) => { el.classList.toggle('active', i === idx); if (i === idx) el.classList.remove('skipped'); });
+        document.getElementById('draw-target').innerHTML = `<div id="hz-box" class="hanzi-box"></div>`;
+        let boxSize = window.innerWidth <= 768 ? 200 : 260;
+        hzWriter = HanziWriter.create('hz-box', practiceChars[idx].char, { width: boxSize, height: boxSize, padding: 15, showOutline: false, showCharacter: false, strokeColor: '#1e293b', drawingColor: '#3b82f6', outlineColor: '#cbd5e1' });
+        hzWriter.quiz({ 
+            onMistake: () => { 
+                let q = practiceList[curIdx]; q.isWrong = true; 
+                if (!q.mistakeChars.find(c => c.char === practiceChars[idx].char)) q.mistakeChars.push({ char: practiceChars[idx].char, pinyin: practiceChars[idx].pinyin });
+            },
+            onComplete: () => {
+                showThumb(); practiceChars[idx].done = true;
+                if (!practiceList[curIdx].isWrong) totalCorrectCount++;
+                let pyEl = document.getElementById(`py-${idx}`); pyEl.classList.remove('active'); pyEl.classList.add('done');
+                pyEl.innerHTML = currentMode === 'challenge' ? `<div style="font-size:26px; line-height:1.2; padding-top:6px;">${practiceChars[idx].pinyin}</div>` : `<div style="font-size:14px; line-height:1; opacity:0.8;">${practiceChars[idx].pinyin}</div><div style="font-size:32px; font-weight:900; line-height:1.2; margin-top:2px;">${practiceChars[idx].char}</div>`;
+                setTimeout(autoJump, 600);
+            }
+        });
+        if (currentMode !== 'challenge') {
+            const peek = document.getElementById('peek-btn');
+            const show = (e) => { e.preventDefault(); peek.style.transform = 'translateY(5px)'; peek.style.boxShadow = '0 0 0 transparent'; hzWriter.showOutline(); };
+            const hide = (e) => { e.preventDefault(); peek.style.transform = ''; peek.style.boxShadow = ''; hzWriter.hideOutline(); };
+            peek.onmousedown = peek.ontouchstart = show; peek.onmouseup = peek.onmouseleave = peek.ontouchend = peek.ontouchcancel = hide;
+        }
+    }
+
+    function skipCurrentChar() {
+        let idx = practiceChars.findIndex(i => !i.done && !i.skipped);
+        if(idx !== -1) {
+            let pyEl = document.getElementById(`py-${idx}`); practiceChars[idx].wasSkipped = true;
+            if (currentMode === 'practice') {
+                practiceChars[idx].done = true; pyEl.classList.add('done');
+                pyEl.innerHTML = `<div style="font-size:14px; line-height:1; opacity:0.8;">${practiceChars[idx].pinyin}</div><div style="font-size:32px; font-weight:900; line-height:1.2; margin-top:2px;">${practiceChars[idx].char}</div>`;
+            } else {
+                practiceChars[idx].skipped = true; pyEl.classList.add('skipped');
+                pyEl.innerHTML = `<div style="font-size:26px; line-height:1.2; padding-top:6px;">${practiceChars[idx].pinyin}</div>`;
+            }
+            autoJump(); 
+        }
+    }
+
+    function autoJump() { let next = practiceChars.findIndex(i => !i.done && !i.skipped); if(next !== -1) jumpTo(next); else practiceList[curIdx].isCompleted = true; }
+    function showThumb() { const t = document.getElementById('thumb-up'); t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 600); }
+
+    function setupEnglish(q) {
+        document.getElementById('skip-char-btn').style.display = 'none'; document.getElementById('peek-btn').style.display = 'none';
+        const answer = q.Answer.toLowerCase().trim();
+        document.getElementById('hint-area').innerHTML = `<div style="font-size:28px; color:#64748b; font-weight:800;">${q.Hint}</div>`;
+        let letters = answer.split(''); while(letters.length < answer.length + 3) letters.push("abcdefghijklmnopqrstuvwxyz"[Math.floor(Math.random()*26)]);
+        letters.sort(() => 0.5 - Math.random());
+        document.getElementById('draw-target').innerHTML = `<div class="letter-pool">${letters.map((l, i) => `<button id="l-${i}" class="letter-btn" onclick="typeL('${l}', ${id})">${l}</button>`).join('')}</div><input type="text" id="eng-in" class="spell-input" readonly placeholder="✍️">`;
+    }
+
+    function finish() {
+        practiceList.forEach(q => {
+            if (curSub !== 'English' && q.charsData) {
+                q.charsData.forEach(item => { if (!item.isP && !item.done) { q.isWrong = true; if (!q.mistakeChars.find(mc => mc.char === item.char)) q.mistakeChars.push({ char: item.char, pinyin: item.pinyin }); } });
+            } else if (!q.isCompleted) q.isWrong = true;
+        });
+        if (currentMode === 'challenge') showChallengeResult(); else showPracticeResult();
+    }
+
+    // 🟢 练习结算：静默检测
+    function showPracticeResult() {
+        let totalC = 0, skippedC = 0;
+        practiceList.forEach(q => { if(q.charsData) q.charsData.forEach(i => { if(!i.isP) { totalC++; if(i.wasSkipped) skippedC++; } }); });
+        let canPlay = (skippedC/totalC <= 0.5) && (!isRetrySession || currentRetryRatio >= 0.5);
+
+        currentWrongItems = [];
+        if (curSub === 'English') currentWrongItems = practiceList.filter(q => q.isWrong);
+        else {
+            let wrongMap = new Map();
+            practiceList.forEach(q => q.mistakeChars.forEach(mc => wrongMap.set(mc.char, mc)));
+            currentWrongItems = Array.from(wrongMap.values()).map(mc => ({ Answer: mc.char, Hint: mc.pinyin, Topic: '错字重练', isWrong: false, mistakeChars: [] }));
+        }
+
+        if (currentWrongItems.length === 0) {
+            confetti({ particleCount: 250, spread: 100, origin: { y: 0.5 } });
+            new Audio("https://actions.google.com/sounds/v1/foley/cheer_short.ogg").play().catch(()=>{});
+            if (canPlay) setTimeout(() => { window.location.href = "https://andydang2007.github.io/game/popballoons.html?ticket=" + Date.now(); }, 3000);
+        }
+        
+        let html = `<div style="padding:40px 0;"><h1 style="font-size:70px;">${currentWrongItems.length===0?'🏆':'👍'}</h1><h2 style="font-size:36px;">你真棒！</h2><p style="font-size:22px; font-weight:800;">这一次你写对了 <br><span style="color:#10b981; font-size:40px;">${totalCorrectCount}</span> 个字！</p>`;
+        if (currentWrongItems.length > 0) {
+            html += `<div style="margin-top:30px; background:#fffbeb; padding:25px 15px; border-radius:25px; border:3px dashed #fcd34d;"><h3 style="font-size:22px;">请选择你要再练一练的字 🐣</h3><div class="checkbox-grid" id="wrong-list">`;
+            currentWrongItems.forEach((q, idx) => { html += `<label class="checkbox-label"><input type="checkbox" value="${idx}" onchange="this.parentElement.classList.toggle('wrong-selected', this.checked)"> ${q.Answer}</label>`; });
+            html += `</div><button class="btn-action btn-nav" style="width:220px; margin:0 auto; background:#f59e0b;" onclick="startRetry()">我爱学习 🚀</button></div>`;
+        }
+        html += `<div class="controls-row" style="justify-content:center; margin-top:40px;"><button class="btn-action btn-quit" style="width:200px; flex:none;" onclick="location.reload()">结束练习 🏠</button></div></div>`;
+        document.getElementById('finish-screen').innerHTML = html; showScreen('finish-screen');
+    }
+
+    function showChallengeResult() {
+        let correctChars = [], wrongChars = [];
+        practiceList.forEach(q => {
+            if (curSub !== 'English' && q.charsData) {
+                q.charsData.forEach(item => { if(!item.isP) { if(item.done && !q.mistakeChars.find(mc => mc.char === item.char)) correctChars.push(item.char); else wrongChars.push(item.char); } });
+            } else { if(q.isWrong) wrongChars.push(q.Answer); else correctChars.push(q.Answer); }
+        });
+        correctChars = [...new Set(correctChars)]; wrongChars = [...new Set(wrongChars)];
+        correctChars = correctChars.filter(c => !wrongChars.includes(c));
+        let acc = (correctChars.length + wrongChars.length) > 0 ? correctChars.length / (correctChars.length + wrongChars.length) : 0;
+
+        let emoji = acc>=0.9?'🤩':acc>=0.7?'😊':acc>=0.5?'✊':'💪';
+        let stars = acc>=0.9?'⭐⭐⭐⭐⭐':acc>=0.7?'⭐⭐⭐⭐':acc>=0.5?'⭐⭐⭐':'⭐⭐';
+        let msg = acc>=0.9?'太棒啦！全对！':acc>=0.7?'很棒哦！只有一点点错！':acc>=0.5?'不错哦！还要继续努力！':'加油！多写几次就记住啦！';
+        
+        if (acc >= 0.9) {
+            confetti({ particleCount: 300, spread: 100 });
+            new Audio("https://actions.google.com/sounds/v1/foley/cheer_short.ogg").play().catch(()=>{});
+            setTimeout(() => { window.location.href = "https://andydang2007.github.io/game/popballoons.html?ticket=" + Date.now(); }, 3000);
+        }
+
+        let html = `<div style="padding:40px 0;"><h2 style="font-size:24px; color:#94a3b8;">🏅 挑战结果</h2><h1 style="font-size:90px;">${emoji}</h1><h2 style="font-size:46px; color:#f59e0b;">${stars}</h2><p style="font-size:24px; font-weight:800;">${msg}</p>
+                    <div style="margin-top:25px; text-align:left; background:#f8fafc; padding:20px; border-radius:20px; border:2px solid #e2e8f0; max-width:500px; margin-left:auto; margin-right:auto;">
+                        <div style="margin-bottom:15px;"><span style="background:#dcfce7; color:#059669; border-radius:12px; padding:4px 10px; font-weight:bold;">✅ 掌握得很好:</span> <span style="font-size:20px; font-weight:900; color:#10b981;">${correctChars.join(', ') || '无'}</span></div>
+                        <div><span style="background:#fee2e2; color:#e11d48; border-radius:12px; padding:4px 10px; font-weight:bold;">❌ 还需要练习:</span> <span style="font-size:20px; font-weight:900; color:#f43f5e;">${wrongChars.join(', ') || '无'}</span></div>
+                    </div><div class="controls-row" style="justify-content:center; margin-top:40px;"><button class="btn-action btn-quit" style="width:220px; flex:none;" onclick="location.reload()">结束测试 🏠</button></div></div>`;
+        document.getElementById('finish-screen').innerHTML = html; showScreen('finish-screen');
+    }
+
+    function startRetry() {
+        let sel = [...document.querySelectorAll('#wrong-list input:checked')];
+        if (sel.length === 0) return;
+        isRetrySession = true; currentRetryRatio = sel.length / currentWrongItems.length;
+        practiceList = sel.map(i => currentWrongItems[parseInt(i.value)]);
+        resetPracticeList(practiceList); curIdx = 0; totalCorrectCount = 0; showScreen('practice-screen'); renderQuestion();
+    }
+
+    function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.style.display='none'); document.getElementById(id).style.display='flex'; }
+    init();
+</script>
+
+</body>
+</html>
