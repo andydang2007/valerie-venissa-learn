@@ -7,6 +7,19 @@
 
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-M04YCD1PQK"></script>
     <script>
+    // ⚠️ 1. 在脚本的最开头，立刻获取刚才主页面存下来的玩家代号
+    // 如果直接打开页面找不到，就默认是 'P3'（姐姐）
+    let currentPlayer = localStorage.getItem('currentPlayer') || 'P3'; 
+
+    // ⚠️ 2. 把获取到的身份，放进游戏状态里
+    let state = {
+        pilot: currentPlayer, 
+        score: 0, 
+        combo: 0, 
+        timeLeft: 300, 
+        isPlaying: false,
+    };
+
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
@@ -101,9 +114,9 @@
     </div>
 
     <div id="setup-screen" class="screen">
-        <h1>🎈 Spelling Hub 🎈</h1>
-        <div id="grade-group" class="btn-group"></div>
-        <div id="subject-group" class="btn-group" style="display:none; margin-top: 35px;"></div>
+        <h1 id="hub-title">🎈 Spelling Hub 🎈</h1>
+        <div id="subject-group" class="btn-group" style="margin-top: 15px;"></div>
+        <button class="btn-action btn-quit" style="margin: 20px auto 0; padding: 10px 20px; font-size: 16px; width: 200px;" onclick="window.location.href='index.html'">← 返回主控台</button>
     </div>
 
     <div id="topic-screen" class="screen">
@@ -111,9 +124,9 @@
         <div id="semester-group" class="btn-group" style="margin-bottom: 10px;"></div>
         <div id="topic-list" class="checkbox-grid"></div>
         <div class="action-panel">
-            <button class="btn-square" onclick="location.reload()">
+            <button class="btn-square" onclick="window.location.href='index.html'">
                 <span style="font-size: 36px;">🏠</span>
-                <span style="font-size: 20px;">结束</span>
+                <span style="font-size: 20px;">退出</span>
             </button>
             <div class="btn-stacked-col">
                 <button class="btn-stacked btn-review-stacked" onclick="startReview(this)">🔥 挑战 (10题)</button>
@@ -136,7 +149,7 @@
                 </div>
             </div>
             <div class="controls-row">
-                <button id="quit-btn" class="btn-action btn-quit" onclick="location.reload()">结束测试 🏠</button>
+                <button id="quit-btn" class="btn-action btn-quit" onclick="window.location.href='index.html'">退出 🏠</button>
                 <button id="prev-btn" class="btn-action btn-nav" onclick="moveQuestion(-1)">⬅️ 上一个</button>
                 <button id="next-btn" class="btn-action btn-nav" onclick="moveQuestion(1)">下一个 ➡️</button>
             </div>
@@ -150,7 +163,8 @@
     const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQAq-_y8eYBv2Mv7_TrW1Q4ffAlLb48tJIXfDzeT8KQKXKowlG_Hvh6TH380RHLL-OTKIypPwNVw0NX/pub?gid=0&single=true&output=csv";
     const LIMIT = 5; // 每日限制次数
 
-    let db = {}, curUser = '', curSub = '', practiceList = [], curIdx = 0;
+    // curUser 默认直接使用从 index.html 传过来的 currentPlayer
+    let db = {}, curUser = currentPlayer, curSub = '', practiceList = [], curIdx = 0;
     let hzWriter = null, practiceChars = [];
     let totalCorrectCount = 0;
     let currentWrongItems = [];
@@ -158,7 +172,7 @@
     let isRetrySession = false;
     let currentRetryRatio = 1;
 
-        // 🟢 核心：每日次数检查与递增
+    // 🟢 核心：每日次数检查与递增
     function checkAndIncrementLimit(lessons, mode) {
         const today = new Date().toISOString().split('T')[0];
         const storageKey = `spelling_usage_${today}`;
@@ -167,13 +181,11 @@
         for (let lesson of lessons) {
             if (!usage[lesson]) usage[lesson] = { practice: 0, challenge: 0 };
             if (usage[lesson][mode] >= LIMIT) {
-                // 💡 动态提示：精准报出是哪一课超限了
                 alert(`「${lesson}」你今天已经学过很多次了，学点别的吧！`);
                 return false;
             }
         }
 
-        // 验证通过，增加计数并保存
         lessons.forEach(l => usage[l][mode]++);
         localStorage.setItem(storageKey, JSON.stringify(usage));
         return true;
@@ -199,26 +211,29 @@
                         originalIndex: index 
                     });
                 });
+                
                 document.getElementById('loading').style.display = 'none';
-                renderGrades(); showScreen('setup-screen');
+
+                // 如果由于某种原因 localStorage 里的值不对，做一个安全回退
+                if (!db[curUser]) curUser = Object.keys(db)[0] || 'P3';
+
+                // 动态修改标题，显得更温馨
+                let childName = curUser === 'P1' ? 'Venessa' : 'Valerie';
+                document.getElementById('hub-title').innerText = `🎈 ${childName}'s Spelling 🎈`;
+
+                // 直接跳过用户选择，渲染科目！
+                renderSubjects();
+                showScreen('setup-screen');
             }
         });
     }
 
-    function renderGrades() {
-        const gg = document.getElementById('grade-group'); gg.innerHTML = '';
-        Object.keys(db).sort().forEach(g => {
-            gg.innerHTML += `<button id="btn-user-${g}" class="btn-choice btn-user" onclick="selectUser('${g}')">${g}</button>`;
-        });
-    }
-
-    function selectUser(u) {
-        curUser = u;
-        document.querySelectorAll('#grade-group .btn-choice').forEach(b => b.classList.remove('active'));
-        const target = document.getElementById(`btn-user-${u}`);
-        if(target) target.classList.add('active');
-        const sg = document.getElementById('subject-group'); sg.style.display = 'flex'; sg.innerHTML = '';
-        Object.keys(db[u]).forEach(sub => {
+    // 🟢 新增：直接渲染当前用户的科目按钮
+    function renderSubjects() {
+        const sg = document.getElementById('subject-group'); 
+        sg.style.display = 'flex'; 
+        sg.innerHTML = '';
+        Object.keys(db[curUser]).forEach(sub => {
             sg.innerHTML += `<button class="btn-choice btn-sub-${sub}" onclick="selectSub('${sub}', this)">${sub}</button>`;
         });
     }
@@ -270,7 +285,6 @@
         let sel = [...document.querySelectorAll('#topic-list input:checked')].map(i => i.value);
         if(sel.length === 0) return;
 
-        // 🟢 检查限次
         if (!checkAndIncrementLimit(sel, 'practice')) return;
 
         currentMode = 'practice'; 
@@ -294,7 +308,6 @@
             return;
         }
 
-        // 🟢 检查限次
         if (!checkAndIncrementLimit(sel, 'challenge')) return;
 
         currentMode = 'challenge'; 
@@ -423,7 +436,6 @@
         if (currentMode === 'challenge') showChallengeResult(); else showPracticeResult();
     }
 
-    // 🟢 练习结算：静默检测
     function showPracticeResult() {
         let totalC = 0, skippedC = 0;
         practiceList.forEach(q => { if(q.charsData) q.charsData.forEach(i => { if(!i.isP) { totalC++; if(i.wasSkipped) skippedC++; } }); });
@@ -449,7 +461,7 @@
             currentWrongItems.forEach((q, idx) => { html += `<label class="checkbox-label"><input type="checkbox" value="${idx}" onchange="this.parentElement.classList.toggle('wrong-selected', this.checked)"> ${q.Answer}</label>`; });
             html += `</div><button class="btn-action btn-nav" style="width:220px; margin:0 auto; background:#f59e0b;" onclick="startRetry()">我爱学习 🚀</button></div>`;
         }
-        html += `<div class="controls-row" style="justify-content:center; margin-top:40px;"><button class="btn-action btn-quit" style="width:200px; flex:none;" onclick="location.reload()">结束练习 🏠</button></div></div>`;
+        html += `<div class="controls-row" style="justify-content:center; margin-top:40px;"><button class="btn-action btn-quit" style="width:200px; flex:none;" onclick="window.location.href='index.html'">返回主控台 🏠</button></div></div>`;
         document.getElementById('finish-screen').innerHTML = html; showScreen('finish-screen');
     }
 
@@ -478,7 +490,7 @@
                     <div style="margin-top:25px; text-align:left; background:#f8fafc; padding:20px; border-radius:20px; border:2px solid #e2e8f0; max-width:500px; margin-left:auto; margin-right:auto;">
                         <div style="margin-bottom:15px;"><span style="background:#dcfce7; color:#059669; border-radius:12px; padding:4px 10px; font-weight:bold;">✅ 掌握得很好:</span> <span style="font-size:20px; font-weight:900; color:#10b981;">${correctChars.join(', ') || '无'}</span></div>
                         <div><span style="background:#fee2e2; color:#e11d48; border-radius:12px; padding:4px 10px; font-weight:bold;">❌ 还需要练习:</span> <span style="font-size:20px; font-weight:900; color:#f43f5e;">${wrongChars.join(', ') || '无'}</span></div>
-                    </div><div class="controls-row" style="justify-content:center; margin-top:40px;"><button class="btn-action btn-quit" style="width:220px; flex:none;" onclick="location.reload()">结束测试 🏠</button></div></div>`;
+                    </div><div class="controls-row" style="justify-content:center; margin-top:40px;"><button class="btn-action btn-quit" style="width:220px; flex:none;" onclick="window.location.href='index.html'">返回主控台 🏠</button></div></div>`;
         document.getElementById('finish-screen').innerHTML = html; showScreen('finish-screen');
     }
 
