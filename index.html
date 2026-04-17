@@ -108,7 +108,6 @@
         @keyframes slideInBounce { 0% { transform: translateY(100px) scale(0.5); opacity: 0; } 100% { transform: translateY(0) scale(1); opacity: 1; } }
         @keyframes pulseGlow { 0% { box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4); } 100% { box-shadow: 0 4px 25px rgba(236, 72, 153, 0.8); } }
 
-        /* 🌟 密码锁弹窗样式 */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
         .modal-content { background: white; padding: 30px; border-radius: 24px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.1); width: 90%; max-width: 350px; display: flex; flex-direction: column; align-items: center; }
         .pin-input-hub { font-size: 32px; font-weight: 900; letter-spacing: 10px; padding: 15px; width: 150px; text-align: center; border: 3px solid #e2e8f0; border-radius: 16px; margin: 20px 0; outline: none; color: #1e293b; transition: 0.2s; }
@@ -118,6 +117,7 @@
         @media (min-width: 768px) {
             body { justify-content: center; padding: 40px; background: #e2e8f0; }
             .container { max-width: 750px; padding: 40px 40px 80px 40px; border-radius: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); }
+            button.name-btn { padding: 20px 45px; font-size: 24px; border-radius: 20px; }
             .hanzi-practice-box { width: 300px; height: 300px; }
             #school-term-display { font-size: 15px; bottom: 30px; right: 40px; padding: 8px 16px; }
         }
@@ -241,6 +241,8 @@
 </div>
 
 <script>
+    // 数据上传挂载点
+    const GOOGLE_LOG_URL = "YOUR_DEPLOYED_URL_HERE";
     const SUCCESS_AUDIO_VALERIE = "https://drive.google.com/file/d/1StoRXMJqWPegTr5Cu6oxlyIvL0iVgFwH/view?usp=sharing"; 
     const SUCCESS_AUDIO_VENESSA = "https://drive.google.com/file/d/1dMcI2VhKCzCKzTnAn570yyTGF0R_MJPh/view?usp=sharing"; 
 
@@ -282,7 +284,6 @@
         u.rate = 0.8; u.volume = 1; synth.speak(u);
     }
 
-    // --- 回车键全局监听 (加入密码框的监听) ---
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
             if (document.getElementById('pin-modal').style.display === 'flex') {
@@ -342,7 +343,6 @@
         showScreen('user-screen');
     }
 
-    // 🌟 核心拦截逻辑：判断是否需要密码
     function switchUser(g) {
         if (g === 'P1') {
             pendingUser = g;
@@ -354,32 +354,23 @@
         executeSwitchUser(g);
     }
 
-    // 🌟 实际执行切换用户的逻辑，并跳入科目页面
     function executeSwitchUser(g) {
         curUser = g;
-        
-        // 动态设置欢迎标题
         document.getElementById('welcome-title').innerText = g === 'P3' ? 'Welcome, Valerie (P3)!' : 'Welcome, Venessa (P1)!';
-        
-        // 渲染对应的资源
         const list = document.getElementById('res-list'); list.innerHTML = '';
         if(db[g] && db[g]['Resources']) db[g]['Resources'].forEach(r => {
             const div = document.createElement('div'); div.className = 'res-card';
             div.innerHTML = r.Type === 'IMAGE' ? `<b>${r.Title}</b><img src="${r.Content}" style="width:100%;margin-top:10px;border-radius:8px;">` : `<b>${r.Title}</b><p>${r.Content}</p>`;
             list.appendChild(div);
         });
-        
-        // 切换到科目页面
         showScreen('subject-screen');
     }
 
-    // 🌟 关闭密码框
     function closePinModal() {
         document.getElementById('pin-modal').style.display = 'none';
         pendingUser = null;
     }
 
-    // 🌟 校验老爸的动态密码
     function verifyHubPin() {
         const input = document.getElementById('hub-pin-input').value;
         const now = new Date();
@@ -499,6 +490,18 @@
         }
     }
 
+    function logToCloud(mistakesArray) {
+        if (!GOOGLE_LOG_URL || GOOGLE_LOG_URL.includes("YOUR_DEPLOYED_URL_HERE")) return;
+        const payload = {
+            pilot: curUser,
+            grade: curUser,
+            score: "Quiz Mode",
+            maxCombo: "N/A",
+            mistakes: mistakesArray.join(', ')
+        };
+        fetch(GOOGLE_LOG_URL, { method: 'POST', body: JSON.stringify(payload) }).catch(e => console.warn("Log error", e));
+    }
+
     function startQuiz() {
         let pool = db[curUser][curSub];
         const selectedJSONs = Array.from(document.querySelectorAll('.topic-cb:checked')).map(cb => cb.value);
@@ -515,6 +518,7 @@
         });
 
         curIdx = 0; sessionErrors = 0; document.getElementById('draw-panel').style.display = 'none';
+        window.currentSessionMistakes = [];
         
         practiceStartTime = Date.now();
         document.getElementById('game-unlock-btn').style.display = 'none';
@@ -624,6 +628,7 @@
             nextBtn.style.background = '#10b981'; nextBtn.style.color = 'white'; nextBtn.style.pointerEvents = 'auto';
         } else {
             sessionErrors++;
+            if(window.currentSessionMistakes) window.currentSessionMistakes.push(currentSpellWord);
             inp.classList.add('error-shake');
             inp.style.borderColor = '#ef4444'; inp.style.color = '#ef4444'; inp.style.background = '#fef2f2';
             setTimeout(() => {
@@ -691,7 +696,10 @@
         });
 
         currentWriter.quiz({
-            onMistake: function() { sessionErrors++; },
+            onMistake: function() { 
+                sessionErrors++; 
+                if(window.currentSessionMistakes) window.currentSessionMistakes.push(char);
+            },
             onComplete: function() { 
                 currentSpellCharIdx++;
                 setTimeout(() => startNextChar(), 500); 
@@ -752,22 +760,7 @@
         };
 
         if (qType === 'OPEN') {
-            if (GEMINI_API_KEY && GEMINI_API_KEY !== "YOUR_API_KEY_HERE") {
-                fb.innerHTML = `<span style="color:#3b82f6; font-size: 16px;">⏳ ${isCN ? "老师正在看你的答案..." : "Teacher is reading your answer..."}</span>`;
-                try {
-                    const promptText = `You are a primary school teacher. Question: ${sessionQs[curIdx].Question}. Standard Answer: ${correctRaw}. Student Answer: ${user}. Evaluate meaning. Reply JSON: {"correct": boolean, "comment": "encouraging feedback in ${isCN ? 'Simplified Chinese' : 'English'}"}`;
-                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
-                        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
-                    });
-                    const data = await res.json();
-                    let aiRes = data.candidates[0].content.parts[0].text.replace(/```json/g, '').replace(/```/g, '').trim();
-                    const result = JSON.parse(aiRes);
-                    if (result.correct) fb.innerHTML = `<span style="color:#10b981;">✅ ${isCN ? "答对啦！" : "Excellent!"}</span><br><span style="font-size:16px; color:#475569;">${result.comment}</span>`;
-                    else { sessionErrors++; fb.innerHTML = `<span style="color:#ef4444;">❌ ${isCN ? "还差一点点。" : "Not quite right."}</span><br><span style="font-size:16px; color:#475569;">${result.comment}</span><br><br><span style="color:#0f172a; font-size: 15px;"><b>${isCN ? "参考答案：" : "Standard Answer:"}</b> ${correctRaw}</span>`; }
-                } catch (e) { fb.innerHTML = `<span style="color:#0f172a;"><b>${isCN ? "参考答案：" : "Suggested Answer:"}</b></span><br><span style="font-size:18px; color:#10b981;">${correctRaw}</span><br><span style="font-size:14px; color:#64748b;">${isCN ? "(只需意思相近即可)" : "(Check if your meaning is similar)"}</span>`; }
-            } else {
-                fb.innerHTML = `<span style="color:#0f172a;"><b>${isCN ? "参考答案：" : "Suggested Answer:"}</b></span><br><span style="font-size:18px; color:#10b981;">${correctRaw}</span><br><span style="font-size:14px; color:#64748b;">${isCN ? "(只需意思相近即可)" : "(Check if your meaning is similar)"}</span>`;
-            }
+            fb.innerHTML = `<span style="color:#0f172a;"><b>${isCN ? "参考答案：" : "Suggested Answer:"}</b></span><br><span style="font-size:18px; color:#10b981;">${correctRaw}</span><br><span style="font-size:14px; color:#64748b;">${isCN ? "(只需意思相近即可)" : "(Check if your meaning is similar)"}</span>`;
             showNextState(); return;
         }
 
@@ -778,6 +771,7 @@
             else { input.className = 'ans-input'; }
         } else {
             sessionErrors++; 
+            if(window.currentSessionMistakes) window.currentSessionMistakes.push(sessionQs[curIdx].Question);
             if (qType === 'MCQ') {
                 fb.innerHTML = `<span style="color:#ef4444;">${isCN ? "❌ 不对哦，试试其他选项！" : "❌ Not quite. Try another option!"}</span>`;
                 const activeBtn = document.querySelector('.mcq-btn.active');
@@ -799,6 +793,8 @@
     function finishQuiz() {
         if (practiceTimerInterval) clearInterval(practiceTimerInterval);
         document.getElementById('game-unlock-btn').style.display = 'none';
+
+        logToCloud(window.currentSessionMistakes || []);
 
         const isCN = (curSub === '华文');
         document.querySelectorAll('.milestone-track').forEach(el => el.style.display = 'none');
