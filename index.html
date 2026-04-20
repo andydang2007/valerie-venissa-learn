@@ -46,18 +46,15 @@
         .btn-action { width: 100%; border-radius: 25px; border: none; font-weight: 900; font-size: 20px; cursor: pointer; transition: 0.15s; display: flex; align-items: center; justify-content: center; outline: none; padding: 20px; box-shadow: 0 8px 0 rgba(0,0,0,0.1); }
         .btn-action:active { transform: translateY(6px); box-shadow: 0 2px 0 rgba(0,0,0,0.1); }
 
-        /* 📝 去除了Checkbox的纯胶囊设计 */
         .checkbox-grid { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-bottom: 20px; max-height: 400px; overflow-y: auto; }
         .topic-cb { padding: 14px 22px; border-radius: 25px; border: 3px solid #e2e8f0; background: white; cursor: pointer; transition: 0.15s; font-size: 16px; font-weight: 800; color: #475569; user-select: none; box-shadow: 0 5px 0 #cbd5e1; display: flex; align-items: center; }
         .topic-cb:active { transform: translateY(5px); box-shadow: 0 0 0 transparent; }
         .topic-cb.selected { border-color: #3b82f6; background: #eff6ff; color: #1d4ed8; box-shadow: 0 5px 0 #93c5fd; }
         
-        /* 🎮 测验界面的响应式大布局 */
         .quiz-wrapper { display: flex; flex-direction: column; width: 100%; gap: 15px; }
         .progress-col { width: 100%; display: flex; flex-direction: column; }
         .quiz-main-col { width: 100%; display: flex; flex-direction: column; align-items: stretch; text-align: left; }
 
-        /* 默认：横向进度条 */
         .milestone-track { display: flex; flex-direction: row; justify-content: space-between; align-items: center; position: relative; padding: 0 5px; width: 100%; height: 38px; }
         .milestone-track::before { content: ''; position: absolute; left: 15px; right: 15px; top: 50%; height: 8px; background: #e2e8f0; z-index: 1; transform: translateY(-50%); border-radius: 4px; }
         .milestone-fill { position: absolute; left: 15px; top: 50%; height: 8px; background: #10b981; z-index: 1; transform: translateY(-50%); border-radius: 4px; transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); width: var(--pct); }
@@ -67,7 +64,8 @@
         .milestone.active { border-color: #3b82f6; background: #eff6ff; font-size: 20px; transform: scale(1.2); box-shadow: 0 0 15px rgba(59,130,246,0.3); animation: bounceActive 1s infinite alternate; }
 
         .q-text { font-size: 26px; text-align: left; margin: 15px 0; line-height: 1.5; font-weight: 800; color: #1e293b; width: 100%; }
-        input.ans-input, textarea.ans-input { font-size: 22px; padding: 18px; width: 100%; border: 4px solid #e2e8f0; border-radius: 20px; box-sizing: border-box; outline: none; font-family: inherit; font-weight: bold; color: #334155; }
+        input.ans-input, textarea.ans-input { font-size: 22px; padding: 18px; width: 100%; border: 4px solid #e2e8f0; border-radius: 20px; box-sizing: border-box; outline: none; font-family: inherit; font-weight: bold; color: #334155; transition: 0.2s; }
+        input.ans-input:focus, textarea.ans-input:focus { border-color: #3b82f6; background: #f8fafc; }
         input.ans-input.error-shake { border-color: #ef4444; animation: shake 0.3s; background-color: #fef2f2; color: #ef4444; }
         
         .mcq-list { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; width: 100%; }
@@ -91,7 +89,6 @@
         .pin-input-hub:focus { border-color: #f59e0b; background: #fffbeb; }
         .error-shake { border-color: #ef4444 !important; animation: shake 0.3s; background-color: #fef2f2 !important; }
         
-        /* 📱 iPad横屏：进度条左靠 */
         @media (min-width: 768px) { 
             .container { padding: 40px 60px; } 
             .grid-cards { gap: 25px; } 
@@ -237,11 +234,9 @@
 <script>
     const SHEET_ID = "1vQlpdRHnR9ybEHHgX6fouRI-vXOh8KQNLSjsbt0TYh9R3No_9i7QNv_4ELwJZJGQpTe3oZVXaZijaW4";
     const GIDS = { "English": "1893311738", "Math": "59294467", "Science": "1581471994", "华文": "2020673087", "Resources": "469231602" };
-    
     let db = {}, curUser = '', curSub = '', sessionQs = [], curIdx = 0, sessionErrors = 0, pendingUser = null;
     let canvas, ctx, drawing = false;
 
-    // 智能隐藏顶栏逻辑
     function showScreen(id) {
         document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
         document.getElementById(id).style.display = 'block';
@@ -263,7 +258,6 @@
         else if (now >= t3) { const w = Math.floor(diff(now, t3)/7) + 1; term = w <= 10 ? `Term 3 Week ${w}` : "Holiday"; }
         else if (now >= t2) { const w = Math.floor(diff(now, t2)/7) + 1; term = w <= 10 ? `Term 2 Week ${w}` : "Holiday"; }
         
-        // 更新顶部的日期和星期格式
         document.getElementById('school-term-display').innerHTML = `<span>📅 ${now.toLocaleDateString('en-SG', {month:'short', year:'numeric'})}</span><span style="color:#cbd5e1">|</span><span>${term}</span>`;
 
         let cached = sessionStorage.getItem('hub_db_cache');
@@ -376,6 +370,7 @@
         }
     }
 
+    // 🔥 三条大路通罗马：路由分离
     function goToPinyinGame() { window.location.href = "pinyin.html"; }
     function goToChineseSpelling() { window.location.href = "tingxie.html"; }
     function goToEnglishSpelling() { window.location.href = "spelling.html"; }
