@@ -14,7 +14,6 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     
     <script>
-        // 从主控台抓取当前选中的是 Valerie 还是 Venessa
         let currentPlayer = localStorage.getItem('currentPlayer') || 'P3'; 
     </script>
 
@@ -24,7 +23,6 @@
         
         body { background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); margin: 0; padding: 20px; color: var(--text-main); display: flex; flex-direction: column; align-items: center; justify-content: flex-start; min-height: 100dvh; overflow-x: hidden; }
         
-        /* ☁️ 内容框上移至 3:7 比例 */
         .container { width: 100%; max-width: 850px; background: rgba(255,255,255,0.95); padding: 30px 20px; border-radius: 40px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); text-align: center; position: relative; border: 4px solid #ffffff; backdrop-filter: blur(12px); display: flex; flex-direction: column; align-items: center; margin-top: 10vh; margin-bottom: auto; }
         
         .screen { display: none; width: 100%; flex-direction: column; align-items: center; animation: bounceIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
@@ -45,7 +43,7 @@
 
         .practice-main { display: flex; flex-direction: column; width: 100%; align-items: center; justify-content: center; gap: 20px; margin: 10px 0; }
         
-        .audio-btn { font-size: 50px; background: #eff6ff; color: #3b82f6; border: 4px solid #bfdbfe; width: 110px; height: 110px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 10px 0 #93c5fd; transition: 0.1s; outline: none; margin: 0 auto; }
+        .audio-btn { font-size: 50px; background: #eff6ff; color: #3b82f6; border: 4px solid #bfdbfe; width: 110px; height: 110px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 10px 0 #93c5fd; transition: 0.1s; outline: none; margin: 0 auto; padding-left: 5px; }
         .audio-btn:active { transform: translateY(10px); box-shadow: 0 0 0 transparent; }
 
         .spell-input { width: 100%; max-width: 450px; font-size: 44px; text-align: center; font-weight: 900; letter-spacing: 3px; padding: 18px; border-radius: 25px; border: 5px solid #e2e8f0; color: #1e293b; outline: none; transition: 0.2s; box-shadow: inset 0 4px 10px rgba(0,0,0,0.05); font-family: monospace; text-transform: lowercase; background: #f8fafc; }
@@ -122,8 +120,8 @@
 </div>
 
 <script>
-    // 🔥 修正后的数据源链接
-    const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQlpdRHnR9ybEHHgX6fouRI-vXOh8KQNLSjsbt0TYh9R3No_9i7QNv_4ELwJZJGQpTe3oZVXaZijaW4/pub?gid=1634517601&single=true&output=csv";
+    // 🔥 彻底换成了真正的表格 ID，并使用 Google Sheets 标准的 csv 导出接口！
+    const SHEET_URL = "https://docs.google.com/spreadsheets/d/1MJHkk7HaKRJgY3LQ-Y3IeHemC-keJJWtH7zh-5K_eec/export?format=csv&gid=1634517601";
     const LIMIT = 5; 
 
     let db = [], practiceList = [], curIdx = 0, sessionErrors = 0;
@@ -174,6 +172,9 @@
         let childName = currentPlayer === 'P1' ? 'Venessa' : 'Valerie';
         document.getElementById('topic-header').innerText = `📝 ${childName}'s English Spelling`;
 
+        // 强行清理此页面的专属缓存，防止被其他科目干扰
+        sessionStorage.removeItem('eng_spell_db_cache');
+
         Papa.parse(SHEET_URL + "&t=" + Date.now(), {
             download: true, header: true, skipEmptyLines: 'greedy',
             complete: function(results) {
@@ -184,7 +185,6 @@
                     let g = (n.Grade || n.GRADE || "").toString().trim().toUpperCase();
                     let type = (n.Type || n.TYPE || "").toString().trim().toUpperCase();
                     
-                    // 确保匹配当前用户且类型是 SPELLING
                     if (g === currentPlayer && type === 'SPELLING') {
                         pool.push({
                             Topic: (n.Topic || n.TOPIC || n.Lesson || "").toString().trim() || "Default",
@@ -198,7 +198,7 @@
                 
                 db = pool;
                 if (db.length === 0) {
-                    document.getElementById('loading').innerHTML = "⚠️ No spelling words found. Please check Sheet data.";
+                    document.getElementById('loading').innerHTML = "⚠️ No spelling words found.<br>Check if sheet is public and data format is correct.";
                     return;
                 }
                 document.getElementById('loading').style.display = 'none';
@@ -254,7 +254,6 @@
         practiceList.forEach(q => q.isWrong = false);
         curIdx = 0; totalCorrectCount = 0; sessionErrors = 0;
         
-        // 解锁音频
         initVoice();
         synth.speak(new SpeechSynthesisUtterance(''));
 
