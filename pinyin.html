@@ -34,10 +34,11 @@
 
         .sci-fi-text { font-family: 'Orbitron', sans-serif; }
 
+        /* 🔥 将顶部 UI 的 z-index 提高到 200 */
         header {
             display: flex; justify-content: flex-end; align-items: center;
             padding: 10px 20px; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px);
-            border-bottom: 2px solid rgba(0, 240, 255, 0.2); z-index: 10; gap: 30px;
+            border-bottom: 2px solid rgba(0, 240, 255, 0.2); z-index: 200; gap: 30px;
         }
 
         .hub-btn {
@@ -55,9 +56,10 @@
 
         #combat-area { flex: 1; position: relative; overflow: hidden; display: flex; align-items: center; }
         
+        /* 🔥 将激光画布提高到 150，压在怪物上方 */
         #laser-canvas { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-            pointer-events: none; z-index: 50; 
+            pointer-events: none; z-index: 150; 
         }
 
         .flash-error { animation: errorFlash 0.3s ease-out; }
@@ -76,23 +78,25 @@
         }
         .shake-screen { animation: shake-screen 0.2s; animation-iteration-count: 1; }
 
+        /* 🔥 飞船容器提高到 100 */
         #spaceship-container { 
             position: absolute; left: 30px; top: 50%; 
             width: 100px; height: 100px;
             transform: translateY(-50%) rotate(90deg); 
-            z-index: 10; display: flex; justify-content: center; align-items: center;
+            z-index: 100; display: flex; justify-content: center; align-items: center;
             mix-blend-mode: screen; 
         }
         
         #player-ship-img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; filter: contrast(1.8) brightness(0.8); }
         #laser-muzzle { position: absolute; top: 0; left: 50%; width: 1px; height: 1px; pointer-events: none; }
 
+        /* 🔥 飞船核心点击区提高到 120 */
         .ship-core {
             position: absolute; top: 50%; left: -65px; 
             transform: translate(-50%, -50%) rotate(-90deg); 
             min-width: 70px; height: 38px; padding: 0 10px;
             background: rgba(0,0,0,0.8); border: 2px solid var(--accent-glow); border-radius: 4px;
-            display: flex; justify-content: center; align-items: center; z-index: 12; cursor: pointer;
+            display: flex; justify-content: center; align-items: center; z-index: 120; cursor: pointer;
             box-shadow: 0 0 15px var(--accent-glow); backdrop-filter: blur(4px);
         }
         
@@ -100,9 +104,10 @@
         .ship-core.needs-fix { border-color: var(--wrong-color); box-shadow: 0 0 20px var(--wrong-color); animation: pulseRed 0.8s infinite alternate; }
         @keyframes pulseRed { from { opacity: 0.7; } to { opacity: 1; } }
 
+        /* 🔥 提示手指提高到 130 */
         #finger-hint {
             position: absolute; top: -55px; left: 50%; transform: translateX(-50%);
-            font-size: 40px; animation: pointDown 0.5s infinite alternate; display: none; z-index: 20;
+            font-size: 40px; animation: pointDown 0.5s infinite alternate; display: none; z-index: 130;
         }
         @keyframes pointDown { from { top: -55px; } to { top: -40px; } }
 
@@ -114,7 +119,8 @@
         .enemy-img { width: 65px; height: 65px; object-fit: contain; mix-blend-mode: screen; filter: contrast(1.2); }
         .fade-out-fast { opacity: 0 !important; transform: translateY(-50%) scale(0.01) !important; }
 
-        .explosion-effect-container { position: fixed; width: 150px; height: 150px; pointer-events: none; z-index: 60; mix-blend-mode: screen; }
+        /* 🔥 爆炸和连击文字置顶 */
+        .explosion-effect-container { position: fixed; width: 150px; height: 150px; pointer-events: none; z-index: 160; mix-blend-mode: screen; }
         .explosion-layer {
             position: absolute; width: 100%; height: 100%;
             background-image: url("explosion.png"); background-size: contain; background-repeat: no-repeat; background-position: center;
@@ -124,7 +130,7 @@
 
         .combo-text {
             position: fixed; color: #fbbf24; font-size: 40px; font-weight: 900; font-family: 'Orbitron', sans-serif;
-            text-shadow: 0 0 20px #fbbf24, 0 0 10px #ff0000; pointer-events: none; z-index: 70;
+            text-shadow: 0 0 20px #fbbf24, 0 0 10px #ff0000; pointer-events: none; z-index: 170;
             animation: comboPop 0.8s ease-out forwards; white-space: nowrap;
         }
         @keyframes comboPop {
@@ -159,7 +165,8 @@
         #btn-fire-action { width: 20vw; max-width: 110px; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #ff4d4d, #b91c1c); border: 6px solid #450a0a; color: white; font-size: 22px; font-weight: 900; cursor: pointer; transition: 0.1s; letter-spacing: 2px; box-shadow: inset 0 5px 10px rgba(255,255,255,0.4), 0 10px 0 #7f1d1d, 0 15px 25px rgba(0,0,0,0.8); text-shadow: -1px -1px 0 rgba(0,0,0,0.4); }
         #btn-fire-action:active { transform: translateY(8px); box-shadow: inset 0 5px 10px rgba(255,255,255,0.4), 0 2px 0 #7f1d1d, 0 5px 10px rgba(0,0,0,0.8); background: radial-gradient(circle at 30% 30%, #cc0000, #7f1d1d); }
 
-        #overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.95); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(10px); }
+        /* 🔥 全局 overlay 置换最高 */
+        #overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.95); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 300; backdrop-filter: blur(10px); }
         .game-title { display: flex; flex-direction: column; align-items: center; gap: 15px; font-size: 36px; color: #fff; margin-bottom: 60px; text-shadow: 0 0 20px var(--accent-glow); text-align: center; letter-spacing: 4px; }
         .title-line { display: flex; gap: 20px; }
         .psle-cap { color: #fbbf24; font-size: 64px; text-shadow: 0 0 20px rgba(251, 191, 36, 0.6); }
@@ -305,7 +312,6 @@
 
     async function loadDB() {
         try {
-            // 🔥 闪存逻辑
             let ALL_WORDS = [];
             let cachedPinyinDB = sessionStorage.getItem('pinyin_db_cache');
             
@@ -457,6 +463,9 @@
         div.className = 'enemy-container';
         div.style.top = top + '%';
         div.style.right = '-100px';
+
+        // 🔥 新增动态图层逻辑：速度越快，z-index越小，就会钻到慢怪下面
+        div.style.zIndex = Math.floor(100 - speed * 1000);
 
         div.innerHTML = `
             <div class="enemy-text">${word.char}</div>
