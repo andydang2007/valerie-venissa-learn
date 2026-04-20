@@ -7,6 +7,7 @@
     
     <link rel="apple-touch-icon" href="spaceship2.jpg">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script>
         let currentPlayer = localStorage.getItem('currentPlayer') || 'P3'; 
@@ -34,10 +35,11 @@
 
         .sci-fi-text { font-family: 'Orbitron', sans-serif; }
 
+        /* 🔥 调整了所有元素的图层顺序 (z-index) */
         header {
             display: flex; justify-content: flex-end; align-items: center;
             padding: 10px 20px; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px);
-            border-bottom: 2px solid rgba(0, 240, 255, 0.2); z-index: 10; gap: 30px;
+            border-bottom: 2px solid rgba(0, 240, 255, 0.2); z-index: 200; gap: 30px;
         }
 
         .hub-btn {
@@ -57,7 +59,7 @@
         
         #laser-canvas { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-            pointer-events: none; z-index: 50; 
+            pointer-events: none; z-index: 150; 
         }
 
         .flash-error { animation: errorFlash 0.3s ease-out; }
@@ -76,11 +78,12 @@
         }
         .shake-screen { animation: shake-screen 0.2s; animation-iteration-count: 1; }
 
+        /* 🔥 飞船置于 100，确保怪物从底部穿过 */
         #spaceship-container { 
             position: absolute; left: 30px; top: 50%; 
             width: 100px; height: 100px;
             transform: translateY(-50%) rotate(90deg); 
-            z-index: 10; display: flex; justify-content: center; align-items: center;
+            z-index: 100; display: flex; justify-content: center; align-items: center;
             mix-blend-mode: screen; 
         }
         
@@ -92,7 +95,7 @@
             transform: translate(-50%, -50%) rotate(-90deg); 
             min-width: 70px; height: 38px; padding: 0 10px;
             background: rgba(0,0,0,0.8); border: 2px solid var(--accent-glow); border-radius: 4px;
-            display: flex; justify-content: center; align-items: center; z-index: 12; cursor: pointer;
+            display: flex; justify-content: center; align-items: center; z-index: 120; cursor: pointer;
             box-shadow: 0 0 15px var(--accent-glow); backdrop-filter: blur(4px);
         }
         
@@ -102,19 +105,19 @@
 
         #finger-hint {
             position: absolute; top: -55px; left: 50%; transform: translateX(-50%);
-            font-size: 40px; animation: pointDown 0.5s infinite alternate; display: none; z-index: 20;
+            font-size: 40px; animation: pointDown 0.5s infinite alternate; display: none; z-index: 130;
         }
         @keyframes pointDown { from { top: -55px; } to { top: -40px; } }
 
         .enemy-container {
             position: absolute; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            z-index: 8; transition: opacity 0.1s ease-out, transform 0.1s ease-out;
+            transition: opacity 0.1s ease-out, transform 0.1s ease-out;
         }
         .enemy-text { font-size: 32px; font-weight: 900; color: #fff; text-shadow: 0 0 10px var(--accent-glow), 0 0 20px var(--accent-glow); margin-bottom: 2px; z-index: 2; }
         .enemy-img { width: 65px; height: 65px; object-fit: contain; mix-blend-mode: screen; filter: contrast(1.2); }
         .fade-out-fast { opacity: 0 !important; transform: translateY(-50%) scale(0.01) !important; }
 
-        .explosion-effect-container { position: fixed; width: 150px; height: 150px; pointer-events: none; z-index: 60; mix-blend-mode: screen; }
+        .explosion-effect-container { position: fixed; width: 150px; height: 150px; pointer-events: none; z-index: 160; mix-blend-mode: screen; }
         .explosion-layer {
             position: absolute; width: 100%; height: 100%;
             background-image: url("explosion.png"); background-size: contain; background-repeat: no-repeat; background-position: center;
@@ -124,7 +127,7 @@
 
         .combo-text {
             position: fixed; color: #fbbf24; font-size: 40px; font-weight: 900; font-family: 'Orbitron', sans-serif;
-            text-shadow: 0 0 20px #fbbf24, 0 0 10px #ff0000; pointer-events: none; z-index: 70;
+            text-shadow: 0 0 20px #fbbf24, 0 0 10px #ff0000; pointer-events: none; z-index: 170;
             animation: comboPop 0.8s ease-out forwards; white-space: nowrap;
         }
         @keyframes comboPop {
@@ -159,7 +162,7 @@
         #btn-fire-action { width: 20vw; max-width: 110px; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #ff4d4d, #b91c1c); border: 6px solid #450a0a; color: white; font-size: 22px; font-weight: 900; cursor: pointer; transition: 0.1s; letter-spacing: 2px; box-shadow: inset 0 5px 10px rgba(255,255,255,0.4), 0 10px 0 #7f1d1d, 0 15px 25px rgba(0,0,0,0.8); text-shadow: -1px -1px 0 rgba(0,0,0,0.4); }
         #btn-fire-action:active { transform: translateY(8px); box-shadow: inset 0 5px 10px rgba(255,255,255,0.4), 0 2px 0 #7f1d1d, 0 5px 10px rgba(0,0,0,0.8); background: radial-gradient(circle at 30% 30%, #cc0000, #7f1d1d); }
 
-        #overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.95); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; backdrop-filter: blur(10px); }
+        #overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.95); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 300; backdrop-filter: blur(10px); }
         .game-title { display: flex; flex-direction: column; align-items: center; gap: 15px; font-size: 36px; color: #fff; margin-bottom: 60px; text-shadow: 0 0 20px var(--accent-glow); text-align: center; letter-spacing: 4px; }
         .title-line { display: flex; gap: 20px; }
         .psle-cap { color: #fbbf24; font-size: 64px; text-shadow: 0 0 20px rgba(251, 191, 36, 0.6); }
@@ -225,7 +228,7 @@
             <div class="title-line"><span><span class="psle-cap">L</span>ASER</span><span><span class="psle-cap">E</span>XPEDITION</span></div>
         </h1>
         
-        <div id="loading-ui" class="sci-fi-text">CONNECTING TO DATABASE...</div>
+        <div id="loading-ui" class="sci-fi-text">CONNECTING TO HANGAR...</div>
         
         <div class="ship-selector-title sci-fi-text" id="selector-title">SELECT YOUR FIGHTER</div>
         <div class="ship-selector" id="ship-selector">
@@ -303,52 +306,45 @@
         return { i: initial, f: final, t: tone };
     }
 
-    async function loadDB() {
-        try {
-            // 🔥 闪存逻辑
-            let ALL_WORDS = [];
-            let cachedPinyinDB = sessionStorage.getItem('pinyin_db_cache');
-            
-            if (cachedPinyinDB) {
-                ALL_WORDS = JSON.parse(cachedPinyinDB);
-            } else {
-                const resp = await fetch(CSV_URL);
-                const text = await resp.text();
-                ALL_WORDS = text.split('\n').slice(1).map(row => {
-                    let cols = row.split('\t');
-                    if (cols.length < 7) cols = row.split(','); 
-                    if (cols.length < 7) return null;
+    function loadDB() {
+        Papa.parse(CSV_URL, {
+            download: true,
+            header: true,
+            skipEmptyLines: 'greedy',
+            complete: function(results) {
+                let ALL_WORDS = results.data.map(row => {
+                    let n = {};
+                    Object.keys(row).forEach(k => n[k.trim()] = row[k]);
+                    let vals = Object.values(n);
+                    if (vals.length < 7) return null;
                     
-                    const grade = cols[0].trim();
-                    const topic = cols[2].trim();
-                    const char = cols[4].trim();
-                    const pyStr = cols[6].trim();
+                    let grade = (n.Grade || n.GRADE || vals[0] || "").toString().trim().toUpperCase();
+                    let char = (n['CORRECT ANSWER'] || n['ANSWER'] || vals[4] || "").toString().trim();
+                    let pyStr = (n.QUESTION || n.HINT || vals[6] || "").toString().trim();
                     
-                    if (!char || !pyStr) return null;
-                    
+                    if(!char || !pyStr) return null;
                     let py = pyStr.split('/')[0].trim();
                     let lesson = lessonMap[topic] || 99;
                     
                     return { grade: grade, lesson: lesson, char: char, ...parsePinyin(py), py: py };
                 }).filter(w => w);
-                sessionStorage.setItem('pinyin_db_cache', JSON.stringify(ALL_WORDS));
+
+                DB_WORDS = ALL_WORDS.filter(w => w.grade === currentPlayer);
+                if (DB_WORDS.length === 0) DB_WORDS = ALL_WORDS;
+
+                if (DB_WORDS.length > 0) {
+                    document.getElementById('loading-ui').style.display = 'none';
+                    document.getElementById('selector-title').style.display = 'block';
+                    document.getElementById('ship-selector').style.display = 'flex';
+                    document.getElementById('btn-start').style.display = 'block';
+                } else {
+                    document.getElementById('loading-ui').innerText = "NO WORDS FOUND IN HANGAR";
+                }
+            },
+            error: function() {
+                document.getElementById('loading-ui').innerText = "HANGAR CONNECTION FAILED";
             }
-            
-            if (currentPlayer === 'P1') {
-                DB_WORDS = ALL_WORDS.filter(w => w.grade === 'P1' && w.lesson <= 8);
-            } else {
-                DB_WORDS = ALL_WORDS.filter(w => w.grade === 'P1' || w.grade === 'P2' || (w.grade === 'P3' && w.lesson <= 7));
-            }
-            
-            if(DB_WORDS.length > 0){
-                document.getElementById('loading-ui').style.display = 'none';
-                document.getElementById('selector-title').style.display = 'block';
-                document.getElementById('ship-selector').style.display = 'flex';
-                document.getElementById('btn-start').style.display = 'block';
-            } else {
-                document.getElementById('loading-ui').innerText = "NO WORDS FOUND FOR THIS PROFILE";
-            }
-        } catch (e) { document.getElementById('loading-ui').innerText = "DB CONNECTION FAILED"; }
+        });
     }
 
     function initAudio() {
@@ -398,8 +394,8 @@
         document.getElementById('ship-selector').style.display = 'none';
         
         let startBtn = document.getElementById('btn-start');
-        startBtn.innerText = "BACK TO HUB";
-        startBtn.onclick = () => { window.location.href = 'index.html'; }; 
+        startBtn.innerText = "PLAY AGAIN";
+        startBtn.onclick = () => location.reload(); 
     }
 
     function getFixedOpts(correct, allArr) {
@@ -457,6 +453,9 @@
         div.className = 'enemy-container';
         div.style.top = top + '%';
         div.style.right = '-100px';
+        
+        // 🔥 动态图层景深算法：速度越快的怪物 z-index 越低（自动钻到慢怪下面）
+        div.style.zIndex = Math.floor(100 - speed * 1000); 
 
         div.innerHTML = `
             <div class="enemy-text">${word.char}</div>
