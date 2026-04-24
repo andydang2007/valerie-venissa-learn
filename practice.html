@@ -3,15 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Smart Practice</title>
+    <title>Family Learning Hub</title>
 
     <link rel="apple-touch-icon" href="https://img.icons8.com/fluency/240/paper-plane.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="LearningHub">
 
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     
     <style>
         :root { --primary: #10b981; --bg: #f8fafc; --text-main: #1e293b; --text-muted: #64748b; }
@@ -19,159 +18,308 @@
         
         body { background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); margin: 0; padding: 20px; color: var(--text-main); display: flex; flex-direction: column; align-items: center; justify-content: flex-start; min-height: 100vh; overflow-x: hidden; }
         
-        .container { width: 100%; max-width: 850px; background: rgba(255,255,255,0.95); padding: 30px 20px; border-radius: 40px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); text-align: center; position: relative; border: 4px solid #ffffff; backdrop-filter: blur(12px); display: flex; flex-direction: column; align-items: center; margin-top: 5vh; margin-bottom: auto; }
+        .container { width: 100%; max-width: 700px; background: rgba(255,255,255,0.95); padding: 30px 25px 40px 25px; border-radius: 40px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); text-align: center; position: relative; border: 4px solid #ffffff; backdrop-filter: blur(12px); display: flex; flex-direction: column; align-items: center; margin-top: 5vh; margin-bottom: auto; }
+        .screen { display: none; width: 100%; animation: bounceIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); flex-direction: column; align-items: center; }
         
-        .screen { display: none; width: 100%; flex-direction: column; align-items: center; animation: bounceIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
-        @keyframes bounceIn { 0% { opacity: 0; transform: scale(0.9); } 100% { opacity: 1; transform: scale(1); } }
+        @keyframes bounceIn { 0% { opacity: 0; transform: scale(0.95); } 100% { opacity: 1; transform: scale(1); } }
         
-        .header-tag { background: #f8fafc; color: #3b82f6; padding: 10px 25px; border-radius: 30px; font-weight: 900; font-size: 18px; border: 3px solid #e2e8f0; box-shadow: 0 4px 0 #cbd5e1; margin-bottom: 20px; display: inline-flex; align-items: center; gap: 8px; }
+        #school-term-display { margin-bottom: 25px; background: rgba(255,255,255,0.8); padding: 12px 30px; border-radius: 20px; border: 2px solid #fff; box-shadow: 0 8px 15px rgba(59, 130, 246, 0.1); display: flex; flex-direction: column; align-items: center; gap: 4px; }
 
-        /* 💡 进度条折行适配 */
-        .milestone-track { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px; width: 100%; margin-bottom: 10px; }
-        .milestone { width: 28px; height: 28px; background: #f8fafc; border: 3px solid #cbd5e1; border-radius: 50%; z-index: 2; display: flex; align-items: center; justify-content: center; font-size: 12px; transition: 0.4s; box-sizing: border-box; flex-shrink: 0; }
-        .milestone.done { border-color: #10b981; background: #d1fae5; }
-        .milestone.active { border-color: #3b82f6; background: #eff6ff; font-size: 16px; transform: scale(1.2); box-shadow: 0 0 10px rgba(59,130,246,0.3); animation: bounceActive 1s infinite alternate; }
-        @keyframes bounceActive { 0% { transform: scale(1.2) translateY(0); } 100% { transform: scale(1.2) translateY(-3px); } }
+        .magic-number { display: inline-block; font-size: 1.4em; color: #f59e0b; font-weight: 900; padding: 0 5px; animation: popPulse 1s infinite alternate cubic-bezier(0.4, 0, 0.2, 1); }
+        @keyframes popPulse { 0% { transform: scale(1); } 100% { transform: scale(1.15) translateY(-3px); text-shadow: 0 0 15px rgba(234, 179, 8, 0.5); } }
 
-        .q-text { font-size: 26px; text-align: left; margin: 15px 0 25px 0; line-height: 1.5; font-weight: 800; color: #1e293b; width: 100%; }
-        input.ans-input, textarea.ans-input { font-size: 22px; padding: 18px; width: 100%; border: 4px solid #e2e8f0; border-radius: 20px; box-sizing: border-box; outline: none; font-family: inherit; font-weight: bold; color: #334155; }
-        input.ans-input.error-shake { border-color: #ef4444; animation: shake 0.3s; background-color: #fef2f2; color: #ef4444; }
+        button.name-btn { width: 100%; max-width: 320px; padding: 20px; border-radius: 30px; border: 4px solid #e2e8f0; background: white; cursor: pointer; font-weight: 900; font-size: 26px; transition: 0.15s; color: #475569; display: flex; align-items: center; justify-content: center; gap: 15px; box-shadow: 0 8px 0 #cbd5e1; outline: none; margin-bottom: 20px; }
+        button.name-btn:active { transform: translateY(8px); box-shadow: 0 0 0 transparent; }
+        .name-btn .avatar { font-size: 46px; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.1)); }
+
+        .dashboard-header { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 25px; width: 100%; }
+        .dashboard-header .avatar-row { display: flex; align-items: center; gap: 15px; }
+        .dashboard-header .avatar { font-size: 50px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.15)); }
+        .dashboard-header h2 { margin: 0; font-size: 28px; color: #0f172a; font-weight: 900; }
+        .streak-badge { font-size: 14px; color: #d97706; background: #fffbeb; padding: 5px 15px; border-radius: 20px; font-weight: 900; border: 2px solid #fde68a; box-shadow: 0 4px 0 #fde68a; }
+
+        /* 🏆 豪华荣誉墙 */
+        .honor-wall { width: 100%; background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border: 4px solid #fde68a; border-radius: 30px; padding: 20px; margin-bottom: 30px; text-align: left; box-shadow: inset 0 4px 15px rgba(245, 158, 11, 0.1), 0 10px 20px rgba(0,0,0,0.05); position: relative; overflow: hidden; }
+        .honor-wall::after { content: '✨'; position: absolute; top: -15px; right: -5px; font-size: 100px; opacity: 0.15; transform: rotate(15deg); pointer-events: none; }
         
-        .mcq-list { display: flex; flex-direction: column; gap: 12px; width: 100%; }
-        button.mcq-btn { padding: 18px; border-radius: 20px; border: 4px solid #e2e8f0; background: white; font-size: 20px; font-weight: 700; cursor: pointer; text-align: left; transition: 0.15s; color: #1e293b; outline: none; box-shadow: 0 5px 0 #cbd5e1; }
-        button.mcq-btn.active { border-color: #3b82f6; background: #eff6ff; font-weight: 900; color: #1d4ed8; box-shadow: 0 5px 0 #93c5fd; }
-        button.mcq-btn.error { border-color: #ef4444; background: #fef2f2; color: #b91c1c; animation: shake 0.3s; }
-
-        .feedback { font-size: 20px; margin: 15px 0; min-height: 28px; font-weight: 900; width: 100%; }
-        .btn-action { width: 100%; border-radius: 25px; border: none; font-weight: 900; font-size: 20px; cursor: pointer; transition: 0.15s; display: flex; align-items: center; justify-content: center; outline: none; padding: 20px; box-shadow: 0 8px 0 rgba(0,0,0,0.1); }
-        .btn-action:active { transform: translateY(6px); box-shadow: 0 2px 0 rgba(0,0,0,0.1); }
-
-        .tool-btn { background: white; border: 3px solid #e2e8f0; padding: 10px 20px; border-radius: 15px; font-weight: 900; font-size: 16px; cursor: pointer; color: #475569; transition: 0.15s; box-shadow: 0 4px 0 #cbd5e1; outline: none; }
-        .draw-panel { display: none; flex-direction: column; align-items: center; margin-top: 15px; background: #f8fafc; padding: 15px; border-radius: 25px; border: 4px dashed #cbd5e1; width: 100%; }
-        canvas { background: white; border-radius: 15px; border: 2px solid #e2e8f0; touch-action: none; cursor: crosshair; }
-
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.85); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
-        .epic-modal { background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); padding: 40px; border-radius: 40px; text-align: center; width: 90%; max-width: 450px; border: 6px solid #fde68a; box-shadow: inset 0 0 30px rgba(245, 158, 11, 0.2), 0 30px 60px rgba(0,0,0,0.4); display: flex; flex-direction: column; align-items: center; position: relative; transition: 0.2s; }
-        @keyframes epicPop { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        .honor-wall h3 { margin: 0 0 15px 0; font-size: 22px; color: #d97706; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; font-weight: 900; z-index: 2; position: relative; }
         
-        .epic-icon { font-size: 80px; margin-top: -80px; background: white; width: 120px; height: 120px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 6px solid #fde68a; box-shadow: 0 10px 20px rgba(245, 158, 11, 0.3); z-index: 2; animation: float 3s ease-in-out infinite; }
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        .total-trophies { font-size: 14px; background: white; padding: 6px 12px; border-radius: 20px; color: #f59e0b; border: 2px solid #fcd34d; box-shadow: 0 4px 0 #fde68a; display: flex; align-items: center; gap: 5px; }
+        .total-number { font-size: 18px; font-weight: 900; color: #d97706; }
         
-        .epic-title { font-size: 32px; font-weight: 900; color: #b45309; margin: 20px 0 10px 0; }
-        .epic-desc { font-size: 18px; font-weight: 800; color: #92400e; line-height: 1.5; margin-bottom: 30px; }
-        .epic-highlight { color: #ea580c; font-size: 22px; font-weight: 900; background: white; padding: 5px 15px; border-radius: 15px; border: 2px dashed #fcd34d; display: inline-block; margin: 10px 0; }
-        .stat-badge { background: #fffbeb; color: #d97706; padding: 8px 15px; border-radius: 20px; font-weight: 900; font-size: 16px; border: 2px solid #fde68a; display: inline-block; margin-top: 10px; }
+        .badges-container { display: flex; flex-direction: column; gap: 20px; position: relative; z-index: 2; }
+        .badge-category { width: 100%; }
+        .badge-category-title { font-size: 16px; color: #b45309; font-weight: 900; margin-bottom: 12px; border-bottom: 2px dashed #fde68a; padding-bottom: 5px; display: flex; align-items: center; gap: 6px; }
+        
+        .badge-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px 6px; width: 100%; justify-items: center; }
+        
+        .badge-item { display: flex; flex-direction: column; align-items: center; gap: 6px; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; width: 100%; }
+        
+        /* 解锁与未解锁（灰色）状态 */
+        .badge-item.locked { opacity: 0.45; filter: grayscale(100%); transform: scale(0.95); }
+        .badge-item.unlocked { opacity: 1; filter: grayscale(0%); transform: scale(1.05); }
+        
+        .badge-icon-wrapper { position: relative; display: flex; justify-content: center; }
+        .badge-icon { width: 48px; height: 48px; border-radius: 16px; background: white; border: 3px solid #cbd5e1; display: flex; align-items: center; justify-content: center; font-size: 26px; box-shadow: 0 4px 0 #94a3b8; transition: 0.3s; }
+        
+        .badge-item.unlocked .badge-icon { border-color: #f59e0b; background: #fffbeb; box-shadow: 0 4px 0 #d97706, 0 0 10px rgba(245, 158, 11, 0.3); }
+        .badge-item.unlocked.bronze .badge-icon { border-color: #cd7f32; box-shadow: 0 4px 0 #8b5a2b; background: #fdf5e6; }
+        .badge-item.unlocked.silver .badge-icon { border-color: #94a3b8; box-shadow: 0 4px 0 #64748b; background: #f1f5f9; }
+        .badge-item.unlocked.gold .badge-icon { border-color: #fbbf24; box-shadow: 0 4px 0 #d97706; background: #fffbeb; }
+        
+        /* 未解锁时的虚线框样式 */
+        .badge-item.locked .badge-icon { border: 3px dashed #94a3b8; background: #f1f5f9; box-shadow: none; font-size: 24px; }
+        
+        .badge-count { position: absolute; top: -6px; right: -6px; background: #ef4444; color: white; font-size: 11px; font-weight: 900; padding: 2px 6px; border-radius: 10px; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.2); animation: popPulse 2s infinite alternate; z-index: 3; }
+
+        .badge-name { font-size: 11px; font-weight: 900; color: #64748b; text-align: center; line-height: 1.1; width: 100%; word-wrap: break-word; }
+        .badge-item.unlocked .badge-name { color: #d97706; }
+        .badge-progress { font-size: 10px; color: #94a3b8; font-weight: 800; margin-top: 2px; }
+
+        .section-title { width: 100%; text-align: left; margin: 0 0 15px 5px; font-size: 20px; font-weight: 900; color: #334155; }
+        .grid-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; width: 100%; margin-bottom: 25px; }
+        
+        .card-btn { background: white; border: 4px solid #e2e8f0; border-radius: 25px; padding: 20px 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: 0.15s; color: #475569; font-weight: 900; font-size: 18px; box-shadow: 0 6px 0 #cbd5e1; }
+        .card-btn:active { transform: translateY(6px); box-shadow: 0 0 0 transparent; }
+        .card-btn .emoji { font-size: 38px; filter: drop-shadow(0 3px 3px rgba(0,0,0,0.1)); }
+        
+        .card-btn.eng { border-color: #bae6fd; }
+        .card-btn.math { border-color: #fbcfe8; }
+        .card-btn.cn { border-color: #e9d5ff; }
+        .card-btn.sci { border-color: #a7f3d0; }
+
+        .menu-row { display: flex; gap: 15px; width: 100%; margin-bottom: 15px; }
+        .menu-btn { flex: 1; background: white; border: 4px solid #e2e8f0; border-radius: 20px; padding: 20px 10px; font-size: 18px; font-weight: 900; color: #475569; cursor: pointer; box-shadow: 0 6px 0 #cbd5e1; display: flex; flex-direction: column; align-items: center; gap: 8px; transition: 0.1s; }
+        .menu-btn:active { transform: translateY(6px); box-shadow: 0 0 0 transparent; }
+        .menu-btn .emoji { font-size: 32px; }
+
+        .btn-action { width: 100%; border-radius: 20px; border: none; font-weight: 900; font-size: 18px; cursor: pointer; transition: 0.15s; display: flex; align-items: center; justify-content: center; outline: none; padding: 18px; box-shadow: 0 6px 0 rgba(0,0,0,0.1); background: #f1f5f9; color: #64748b; border: 4px solid #e2e8f0; }
+        .btn-action:active { transform: translateY(6px); box-shadow: 0 0 0 transparent; }
+
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.8); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
+        .modal-content { background: white; padding: 40px; border-radius: 40px; text-align: center; width: 90%; max-width: 380px; display: flex; flex-direction: column; align-items: center; border: 5px solid #fff; box-shadow: 0 25px 50px rgba(0,0,0,0.2); }
+        .pin-input-hub { font-size: 36px; font-weight: 900; letter-spacing: 10px; padding: 15px; width: 160px; text-align: center; border: 4px solid #e2e8f0; border-radius: 20px; margin: 20px 0; outline: none; color: #1e293b; transition: 0.2s; background: #f8fafc; }
+        .pin-input-hub:focus { border-color: #f59e0b; background: #fffbeb; }
+        .error-shake { border-color: #ef4444 !important; animation: shake 0.3s; background-color: #fef2f2 !important; }
+
+        /* 🎁 神秘商店专属样式 */
+        .shop-header { display:flex; gap:15px; width:100%; margin-bottom:25px; }
+        .shop-bal-card { flex:1; border-radius:20px; padding:15px; text-align:center; }
+        .shop-bal-vault { background:#fffbeb; border:3px solid #fde68a; }
+        .shop-bal-crys { background:#f0f9ff; border:3px solid #bae6fd; }
+        
+        .shop-item-grid { display:grid; grid-template-columns:repeat(2, 1fr); gap:15px; width:100%; margin-bottom:25px; }
+        .shop-item { background: white; border: 4px solid #e2e8f0; border-radius: 25px; padding: 25px 10px; display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: 0.2s; box-shadow: 0 6px 0 #cbd5e1; }
+        .shop-item:active { transform: translateY(4px); box-shadow: 0 2px 0 #cbd5e1; }
+        .shop-item.active { border-color: #f59e0b; background: #fffbeb; transform: scale(1.05); box-shadow: 0 10px 20px rgba(245,158,11,0.2); }
+        
+        /* 🌟 核心修改：去掉阴影防止灰框，使用 mix-blend-mode 消除白底，放大图标 */
+        .shop-icon { width: 100px; height: 100px; object-fit: contain; margin-bottom: 15px; mix-blend-mode: multiply; }
+        
+        .shop-item .name { font-weight: 900; font-size: 18px; color: #475569; margin-bottom: 12px; }
+        
+        /* 🌟 核心修改：调整价格字体大小与图标比例平衡 */
+        .shop-item .price { font-size: 22px; font-weight: 900; border-radius: 15px; padding: 6px 15px; display: inline-flex; align-items: center; gap: 6px; }
+        .shop-item.coin-item .price { background: #fef3c7; color: #d97706; border: 2px solid #fde68a; }
+        .shop-item.crys-item .price { background: #e0f2fe; color: #0284c7; border: 2px solid #bae6fd; }
+
+        #secret-code { font-family: monospace; font-size: 28px; background: #fffbeb; padding: 15px; border: 3px dashed #f59e0b; margin: 20px 0; color: #b45309; font-weight: 900; letter-spacing: 2px; }
 
         @media (min-width: 768px) { 
-            .container { padding: 40px 60px; } 
-            .quiz-wrapper { flex-direction: row; gap: 40px; align-items: stretch; }
-            .progress-col { flex: 0 0 60px; align-items: center; justify-content: flex-start; }
-            .quiz-main-col { flex: 1; }
-            .milestone-track { flex-direction: column; flex-wrap: nowrap; width: 38px; height: 100%; min-height: 500px; padding: 15px 0; margin: 0; justify-content: flex-start; }
-            .milestone { width: 36px; height: 36px; font-size: 16px; }
-            .milestone.active { font-size: 20px; }
+            .container { padding: 40px 50px; max-width: 750px; } 
+            .grid-cards { grid-template-columns: repeat(4, 1fr); }
+            .badge-grid { gap: 15px 10px; }
+            .badge-icon { width: 56px; height: 56px; font-size: 30px; border-radius: 18px; }
+            .badge-name { font-size: 13px; }
+            .badge-count { font-size: 12px; padding: 2px 8px; top: -8px; right: -8px; }
+            .shop-item-grid { grid-template-columns: repeat(3, 1fr); }
+            .shop-icon { width: 120px; height: 120px; } /* PC端更大 */
         }
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div id="loading" class="screen" style="display:flex; justify-content:center; align-items:center; padding: 60px 0; font-size: 24px; font-weight: 900; color: #3b82f6;">
-        🌟 魔法书正在组卷... 
+    <div id="school-term-display">
+        </div>
+
+    <div id="user-screen" class="screen" style="display: flex;">
+        <h2 style="margin:0 0 5px 0; color:#0f172a; font-size: 30px; font-weight: 900;">Who is learning?</h2>
+        <div style="font-size: 16px; color: #64748b; margin-top: 5px; font-weight: 800; margin-bottom: 25px;">Aim for <span class="magic-number" style="font-size:1.1em;">6~7</span> today!</div>
+
+        <button class="name-btn" onclick="switchUser('P3')">
+            <span class="avatar">👱‍♀️</span> Valerie
+        </button>
+        <button class="name-btn" onclick="switchUser('P1')">
+            <span class="avatar">👧</span> Venessa
+        </button>
     </div>
 
-    <div id="quiz-screen" class="screen">
-        <div class="header-tag" id="header-info">🚀 Practice</div>
-        <div class="quiz-wrapper">
-            <div class="progress-col">
-                <div id="progress-bar" class="milestone-track"></div>
-                <div id="progress-text" style="font-size:16px; font-weight: 800; color:#94a3b8; margin-top: 10px;"></div>
+    <div id="dashboard-screen" class="screen">
+        <div class="dashboard-header">
+            <div class="avatar-row">
+                <div class="avatar" id="dash-avatar">👱‍♀️</div>
+                <h2 id="dash-name">Welcome!</h2>
             </div>
-            <div class="quiz-main-col">
-                <div style="display:flex; justify-content: flex-end; width:100%;">
-                    <button id="draw-pad-btn" class="tool-btn" style="color:#059669; border-color:#a7f3d0; background:#ecfdf5; display:none;" onclick="toggleDrawPad()">✍️ 草稿板</button>
-                </div>
-                <div id="q-text" class="q-text"></div>
-                <div id="draw-panel" class="draw-panel">
-                    <canvas id="pad" width="300" height="200"></canvas>
-                    <div style="display:flex; justify-content: space-between; width:100%; margin-top:12px;">
-                        <button class="tool-btn" style="background:#fef2f2; border-color:#fecaca; color:#e11d48;" onclick="clearPad()">🗑️ Clear</button>
-                        <button class="tool-btn" onclick="toggleDrawPad()">❌ Close</button>
-                    </div>
-                </div>
-                <div id="input-container" style="width: 100%;"></div>
-                <div id="fb-text" class="feedback"></div>
-                <div style="display:flex; gap:15px; margin-top: 10px; width: 100%;">
-                    <button id="exit-btn" class="btn-action" style="background:#f1f5f9; color:#64748b; border: 4px solid #e2e8f0; box-shadow: 0 6px 0 #cbd5e1; flex: 0.8;" onclick="window.location.href='index.html'">Quit 🏠</button>
-                    <button id="sub-btn" class="btn-action" style="background:#3b82f6; color:white; box-shadow: 0 6px 0 #2563eb; flex: 1.2;" onclick="checkAns()">Submit</button>
-                    <button id="next-btn" class="btn-action" style="background:#10b981; color:white; box-shadow: 0 6px 0 #059669; flex: 1.2; display:none;" onclick="nextQ()">Next ➡️</button>
-                </div>
+            <div class="streak-badge" id="dash-streak">🔥 连续打卡第 0 天</div>
+        </div>
+
+        <div class="section-title">Select Subject</div>
+        <div class="grid-cards">
+            <div class="card-btn eng" onclick="showSubMenu('english-menu')">
+                <div class="emoji">🔤</div> English
+            </div>
+            <div class="card-btn math" onclick="launchPractice('Math')">
+                <div class="emoji">🔢</div> Math
+            </div>
+            <div class="card-btn cn" onclick="showSubMenu('chinese-menu')">
+                <div class="emoji" id="cn-emoji">🐼</div> <span id="cn-label">华文</span>
+            </div>
+            <div class="card-btn sci" onclick="launchPractice('Science')">
+                <div class="emoji">🌱</div> Science
             </div>
         </div>
+
+        <div class="honor-wall">
+            <h3>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    🏆 My Badges 
+                    <div class="total-trophies">Total: <span class="total-number" id="total-badge-count">0</span></div>
+                </div>
+                <button onclick="openShop()" style="background:#f59e0b; color:white; border:none; padding:10px 18px; border-radius:20px; font-weight:900; font-size:16px; cursor:pointer; box-shadow:0 6px 0 #d97706; display:flex; align-items:center; gap:6px; transition:0.15s;" onactive="this.style.transform='translateY(4px)'; this.style.boxShadow='none';">
+                    🎁 神秘商店
+                </button>
+            </h3>
+            
+            <div class="badges-container" id="badges-container">
+                </div>
+        </div>
+        
+        <button class="btn-action" onclick="showScreen('user-screen')">👤 Switch User</button>
     </div>
 
-    <div id="finish-screen" class="screen"></div>
+    <div id="shop-screen" class="screen">
+        <h2 style="margin:0 0 20px 0; font-size: 32px; font-weight: 900; color: #b45309; text-shadow: 0 2px 4px rgba(245,158,11,0.2);">🎁 神秘兑换中心</h2>
+        
+        <div class="shop-header">
+            <div class="shop-bal-card shop-bal-vault">
+                <div style="font-size:14px; color:#d97706; font-weight:900;">家庭金币</div>
+                <div style="font-size:36px; font-weight:900; color:#b45309;">💰 <span id="shop-vault-total">0</span></div>
+            </div>
+            <div class="shop-bal-card shop-bal-crys">
+                <div style="font-size:14px; color:#0369a1; font-weight:900;">个人水晶</div>
+                <div style="font-size:36px; font-weight:900; color:#0ea5e9;">💎 <span id="shop-user-crys">0</span></div>
+            </div>
+        </div>
+
+        <div class="shop-item-grid">
+            <div class="shop-item coin-item" onclick="selectPrize(this, '金币', 67, '汉堡', 'hb')">
+                <img src="hb.png" class="shop-icon" alt="汉堡">
+                <div class="name">汉堡</div>
+                <div class="price">💰 67</div>
+            </div>
+            <div class="shop-item coin-item" onclick="selectPrize(this, '金币', 134, '套餐', 'tc')">
+                <img src="tc.png" class="shop-icon" alt="套餐">
+                <div class="name">套餐</div>
+                <div class="price">💰 134</div>
+            </div>
+            <div class="shop-item coin-item" onclick="selectPrize(this, '金币', 268, '披萨大餐', 'pz')">
+                <img src="pz.png" class="shop-icon" alt="披萨大餐">
+                <div class="name">披萨大餐</div>
+                <div class="price">💰 268</div>
+            </div>
+            <div class="shop-item crys-item" onclick="selectPrize(this, '水晶', 7, '甜筒', 'tt')">
+                <img src="tt.png" class="shop-icon" alt="甜筒">
+                <div class="name">甜筒</div>
+                <div class="price">💎 7</div>
+            </div>
+            <div class="shop-item crys-item" onclick="selectPrize(this, '水晶', 14, '麦旋风', 'xf')">
+                <img src="xf.png" class="shop-icon" alt="麦旋风">
+                <div class="name">麦旋风</div>
+                <div class="price">💎 14</div>
+            </div>
+        </div>
+
+        <button id="do-redeem-btn" class="btn-action" style="background:#cbd5e1; color:white; border-color:#94a3b8; box-shadow:0 6px 0 #94a3b8; margin-bottom:15px;" disabled onclick="executeRedeem()">✅ 确认兑换</button>
+        <button class="btn-action" onclick="showScreen('dashboard-screen')">← 返回荣誉墙</button>
+    </div>
+
+    <div id="english-menu" class="screen">
+        <h2 style="margin:0 0 20px 0; font-size: 26px; font-weight: 900; color: #0f172a;">🔤 English Modes</h2>
+        <div class="menu-row">
+            <div class="menu-btn" style="border-color:#bae6fd; color:#0284c7;" onclick="launchPractice('English')">
+                <div class="emoji">🚀</div> Practice
+            </div>
+            <div class="menu-btn" style="border-color:#fde68a; color:#b45309;" onclick="window.location.href='spelling.html'">
+                <div class="emoji">✍️</div> Spelling
+            </div>
+        </div>
+        <button class="btn-action" onclick="showScreen('dashboard-screen')">← Back to Hub</button>
+    </div>
+
+    <div id="chinese-menu" class="screen">
+        <h2 style="margin:0 0 20px 0; font-size: 26px; font-weight: 900; color: #0f172a;">🐼 华文练习</h2>
+        <div class="menu-row" style="flex-wrap: wrap;">
+            <div class="menu-btn" style="border-color:#bae6fd; color:#0284c7; flex: 1 1 40%;" onclick="launchPractice('华文')">
+                <div class="emoji">📝</div> 复习
+            </div>
+            <div class="menu-btn" style="border-color:#fde68a; color:#b45309; flex: 1 1 40%;" onclick="window.location.href='tingxie.html'">
+                <div class="emoji">✍️</div> 听写
+            </div>
+            <div class="menu-btn" style="border-color:#fbcfe8; color:#be185d; flex: 1 1 100%; flex-direction: row; justify-content: center;" onclick="window.location.href='pinyin.html'">
+                <div class="emoji">🎮</div> 拼音游戏
+            </div>
+        </div>
+        <button class="btn-action" onclick="showScreen('dashboard-screen')">← 返回主页</button>
+    </div>
+
 </div>
 
-<div id="badge-modal" class="modal-overlay">
-    <div class="epic-modal">
-        <div class="epic-icon" id="badge-icon">⚡️</div>
-        <div class="epic-title" id="badge-title">新纪录诞生！</div>
-        <div class="epic-desc" id="badge-desc"></div>
-        <div style="font-size:12px; color:#b45309; font-weight:800; margin-bottom: 20px;">☁️ 荣誉已存入云端荣誉墙...</div>
-        <button class="btn-action" style="background:#f59e0b; color:white; box-shadow: 0 8px 0 #d97706;" onclick="closeBadgeModal()">Awesome! 🚀</button>
+<div id="pin-modal" class="modal-overlay">
+    <div class="modal-content">
+        <div style="font-size: 40px; margin-bottom: 5px;">🛡️</div>
+        <h3 style="margin:0 0 10px 0; color:#0f172a; font-size: 24px; font-weight: 900;">Parent Lock</h3>
+        <p style="color:#64748b; font-size:14px; margin:0; font-weight: 700;">Ask Dad for today's code.</p>
+        <input type="tel" id="hub-pin-input" class="pin-input-hub" maxlength="4" placeholder="***" autocomplete="off" inputmode="numeric" pattern="[0-9]*">
+        <div style="display:flex; gap:10px; width: 100%;">
+            <button class="btn-action" style="flex:1; padding:15px; font-size:16px;" onclick="closePinModal()">Cancel</button>
+            <button class="btn-action" style="flex:1; padding:15px; font-size:16px; background:#f59e0b; color:white; border-color:#f59e0b; box-shadow:0 6px 0 #d97706;" onclick="verifyHubPin()">Unlock</button>
+        </div>
+    </div>
+</div>
+
+<div id="redeem-modal" class="modal-overlay">
+    <div class="modal-content" style="border-color: #f59e0b;">
+        <div style="font-size: 60px; margin-bottom:10px;">🎉</div>
+        <h2 style="margin:0; color:#0f172a; font-size:28px;">兑换成功！</h2>
+        <p style="color:#64748b; font-weight:800; margin-top:10px;">请截图保存下方口令，找老爸接头兑现：</p>
+        <div id="secret-code">CODE-XXXX</div>
+        <button class="btn-action" style="background:#f59e0b; color:white; border-color:#d97706; box-shadow:0 6px 0 #b45309;" onclick="closeRedeemModal()">我知道了！</button>
     </div>
 </div>
 
 <script>
+    let pendingUser = null;
+    let currentUser = '';
+    let selectedPrize = null;
+    
     const SYNC_API_URL = "https://script.google.com/macros/s/AKfycbyNi-a8VpHLrIpd0x5Fnb_825ZzFrLp4h2oMKot3xefrLGiLe3Pj-d8L-xWQh5w-Kkd/exec";
-    const SHEET_ID = "1vQlpdRHnR9ybEHHgX6fouRI-vXOh8KQNLSjsbt0TYh9R3No_9i7QNv_4ELwJZJGQpTe3oZVXaZijaW4";
-    const GIDS = { "English": "1893311738", "Math": "59294467", "Science": "1581471994", "华文": "2020673087" };
-    
-    let db = {}, sessionQs = [], curIdx = 0, sessionErrors = 0;
-    let canvas, ctx, drawing = false;
-    let currentTermNum = 1, startTime = 0; 
-    
-    let curUser = localStorage.getItem('currentPlayer') || 'P3';
-    let curSub = localStorage.getItem('currentSubject') || 'English';
 
-    let badgeQueue = [], pendingGameResult = null;
-
-    async function syncToCloud(payload) {
-        try {
-            fetch(SYNC_API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-        } catch (e) { console.error("Cloud sync failed", e); }
-    }
-
-    // --- 🐞 错题池系统 (完全保留) ---
-    function getMistakes() { return JSON.parse(localStorage.getItem('hub_mistakes') || '{}'); }
-    function saveMistakes(m) { localStorage.setItem('hub_mistakes', JSON.stringify(m)); }
-    function getQuestionKey(sub, grade, qText) { return `${grade}_${sub}_${qText.trim()}`; }
-
-    // --- 🎈 气球游戏追踪 ---
-    function getDailyStats() {
-        const today = new Date().toISOString().split('T')[0];
-        const key = `practice_stats_${today}_${curUser}_${curSub}`;
-        let stats = JSON.parse(localStorage.getItem(key) || '{"perfects":0, "gamesPlayed":0, "date":""}');
-        if(stats.date !== today) stats = { perfects: 0, gamesPlayed: 0, date: today }; 
-        return { key, stats };
-    }
-    
-    function applyPerfectSession() {
-        let { key, stats } = getDailyStats();
-        stats.perfects += 1;
-        let triggerGame = false, bonusMsg = "";
-        if (stats.perfects % 2 === 0 && stats.gamesPlayed < 3) {
-            triggerGame = true; stats.gamesPlayed += 1;
-            bonusMsg = "🎉 完美达标！即将进入气球大作战！🎈";
-        } else if (stats.gamesPlayed >= 3) {
-            bonusMsg = "🌟 你今天已获得最高次数奖励！";
-        } else {
-            bonusMsg = "🔥 再获得一次 6~7 就能玩气球啦！";
-        }
-        localStorage.setItem(key, JSON.stringify(stats));
-        return { trigger: triggerGame, msg: bonusMsg };
+    function initDate() {
+        const now = new Date();
+        const t2 = new Date(2026, 2, 23), t3 = new Date(2026, 5, 29), t4 = new Date(2026, 8, 14);
+        const diff = (d1, d2) => Math.floor((d1 - d2) / 864e5);
+        let termStr = "Term 1";
+        
+        if (now >= t4) { const w = Math.floor(diff(now, t4)/7) + 1; termStr = w <= 10 ? `Term 4 Week ${w}` : "Holiday"; }
+        else if (now >= t3) { const w = Math.floor(diff(now, t3)/7) + 1; termStr = w <= 10 ? `Term 3 Week ${w}` : "Holiday"; }
+        else if (now >= t2) { const w = Math.floor(diff(now, t2)/7) + 1; termStr = w <= 10 ? `Term 2 Week ${w}` : "Holiday"; }
+        
+        document.getElementById('school-term-display').innerHTML = `
+            <div style="font-size: 14px; color: #64748b;">📅 ${now.toLocaleDateString('en-SG', {month:'short', day:'numeric'})}</div>
+            <div style="font-size: 18px; color: #3b82f6; font-weight: 900;">${termStr}</div>
+        `;
     }
 
     function showScreen(id) {
@@ -179,303 +327,240 @@
         document.getElementById(id).style.display = 'flex';
     }
 
-    async function init() {
-        let childName = curUser === 'P1' ? 'Venessa' : 'Valerie';
-        let activeIcon = curSub === '华文' ? '🐼' : (curSub === 'Science' ? '🌱' : (curSub === 'Math' ? '🔢' : '🚀'));
-        document.getElementById('header-info').innerHTML = `${activeIcon} ${childName} - ${curSub}`;
+    function showSubMenu(menuId) { showScreen(menuId); }
 
-        // --- 🛡️ 3.0 每日门禁系统 (1次/天/科) ---
-        const today = new Date().toISOString().split('T')[0];
-        const limitKey = `limit_${today}_${curUser}_${curSub}`;
-        if (parseInt(localStorage.getItem(limitKey) || "0") >= 1) {
-            document.getElementById('loading').innerHTML = `
-                <div style="padding:40px; text-align:center;">
-                    <div style="font-size:60px; margin-bottom:20px;">🏆</div>
-                    <h2 style="color:#1e293b; margin-bottom:10px;">今日【${curSub}】已达标啦！</h2>
-                    <p style="color:#64748b; font-weight:800; font-size:16px; margin-bottom:30px;">每天只做一次，保证最高质量。明天再来挑战！</p>
-                    <button class="btn-action" style="background:#3b82f6; color:white; max-width:200px; margin: 0 auto;" onclick="window.location.href='index.html'">返回主页</button>
-                </div>`;
+    function launchPractice(subject) {
+        localStorage.setItem('currentSubject', subject);
+        window.location.href = 'practice.html';
+    }
+
+    function switchUser(g) {
+        if (g === 'P1') { 
+            pendingUser = g; document.getElementById('pin-modal').style.display = 'flex'; 
+            const pinInput = document.getElementById('hub-pin-input');
+            pinInput.value = ''; setTimeout(() => pinInput.focus(), 100); return; 
+        }
+        executeSwitchUser(g);
+    }
+
+    function executeSwitchUser(g) {
+        currentUser = g;
+        localStorage.setItem('currentPlayer', g);
+        
+        document.getElementById('dash-avatar').innerText = g === 'P3' ? '👱‍♀️' : '👧';
+        document.getElementById('dash-name').innerText = `Hello, ${g === 'P3' ? 'Valerie' : 'Venessa'}!`;
+        document.getElementById('cn-label').innerText = g === 'P3' ? '高级华文' : '华文';
+        
+        updateEconomyUI();
+        renderBadges();
+        
+        showScreen('dashboard-screen');
+    }
+
+    function verifyHubPin() {
+        const input = document.getElementById('hub-pin-input').value;
+        const now = new Date();
+        const mmdd = (now.getMonth() + 1) * 100 + now.getDate();
+        const day = now.getDay() === 0 ? 7 : now.getDay();
+        
+        if (input === (mmdd + day).toString()) {
+            closePinModal();
+            executeSwitchUser(pendingUser);
+        } else {
+            const el = document.getElementById('hub-pin-input'); el.classList.add('error-shake');
+            setTimeout(() => { el.classList.remove('error-shake'); el.value = ''; el.focus(); }, 400);
+        }
+    }
+    
+    function closePinModal() { document.getElementById('pin-modal').style.display = 'none'; document.getElementById('hub-pin-input').value = ''; }
+
+    function updateEconomyUI() {
+        let streak = localStorage.getItem(`streak_${currentUser}`) || "0";
+        document.getElementById('dash-streak').innerText = `🔥 连续打卡第 ${streak} 天`;
+        
+        document.getElementById('shop-vault-total').innerText = localStorage.getItem('gold_coins_vault') || "0";
+        document.getElementById('shop-user-crys').innerText = localStorage.getItem(`crystals_${currentUser}`) || "0";
+    }
+
+    function openShop() {
+        updateEconomyUI();
+        selectedPrize = null;
+        document.querySelectorAll('.shop-item').forEach(i => i.classList.remove('active'));
+        
+        const btn = document.getElementById('do-redeem-btn');
+        btn.style.background = '#cbd5e1'; 
+        btn.style.borderColor = '#94a3b8'; 
+        btn.style.boxShadow = '0 6px 0 #94a3b8'; 
+        btn.disabled = true;
+        
+        showScreen('shop-screen');
+    }
+
+    // 更新：将 prefix 统一转为大写，配合后端的核销
+    function selectPrize(el, type, price, name, prefix) {
+        document.querySelectorAll('.shop-item').forEach(i => i.classList.remove('active'));
+        el.classList.add('active');
+        selectedPrize = { type, price, name, prefix: prefix.toUpperCase() };
+        
+        const btn = document.getElementById('do-redeem-btn');
+        btn.style.background = '#10b981';
+        btn.style.borderColor = '#059669';
+        btn.style.boxShadow = '0 6px 0 #059669';
+        btn.disabled = false;
+    }
+
+    function executeRedeem() {
+        if (!selectedPrize) return;
+        confirmRedeem(selectedPrize.type, selectedPrize.price, selectedPrize.name, selectedPrize.prefix);
+    }
+
+    function confirmRedeem(type, price, name, prefix) {
+        let balanceKey = type === '金币' ? 'gold_coins_vault' : `crystals_${currentUser}`;
+        let currentBalance = parseInt(localStorage.getItem(balanceKey) || "0");
+
+        if (currentBalance < price) {
+            alert(`🚫 余额不足！你的${type}还差 ${price - currentBalance} 个，继续努力哦！`);
             return;
         }
 
-        const now = new Date();
-        const t2 = new Date(2026, 2, 23), t3 = new Date(2026, 5, 29), t4 = new Date(2026, 8, 14);
-        if (now >= t4) currentTermNum = 4; else if (now >= t3) currentTermNum = 3; else if (now >= t2) currentTermNum = 2; else currentTermNum = 1;
+        if (confirm(`确定要消耗 ${price} ${type} 兑换【${name}】吗？`)) {
+            localStorage.setItem(balanceKey, currentBalance - price);
+            
+            const now = new Date();
+            const datePart = (now.getMonth() + 1).toString().padStart(2, '0') + now.getDate().toString().padStart(2, '0');
+            const checkSum = (now.getDate() + price).toString().padStart(3, '0'); 
+            const code = `${prefix}-${datePart}-${checkSum}`;
+
+            try {
+                fetch(SYNC_API_URL, {
+                    method: 'POST', mode: 'no-cors',
+                    body: JSON.stringify({ type: 'redemption', user: currentUser, rewardName: name, price: price, code: code })
+                });
+            } catch(e) {}
+
+            document.getElementById('secret-code').innerText = code;
+            document.getElementById('redeem-modal').style.display = 'flex';
+            
+            updateEconomyUI(); 
+        }
+    }
+    
+    function closeRedeemModal() {
+        document.getElementById('redeem-modal').style.display = 'none';
+        openShop(); 
+    }
+
+    function renderBadges() {
+        const container = document.getElementById('badges-container');
+        container.innerHTML = ''; 
+
+        let totalPerfects = 0;
+        let totalGames = 0;
+        let activeDates = new Set();
+        let subPerfects = { 'English': 0, 'Math': 0, '华文': 0, 'Science': 0 };
+        let totalSpeedBreaks = parseInt(localStorage.getItem(`speed_breaks_${currentUser}`) || '0');
         
-        let cached = sessionStorage.getItem('hub_db_cache');
-        if (cached) { try { db = JSON.parse(cached); if (Object.keys(db).length > 0) { startQuiz(); return; } } catch(e) { sessionStorage.removeItem('hub_db_cache'); } }
+        for (let i = 0; i < localStorage.length; i++) {
+            let key = localStorage.key(i);
+            if (key.startsWith('practice_stats_') && key.includes(`_${currentUser}_`)) {
+                try {
+                    let parts = key.split('_');
+                    let date = parts[2];
+                    let sub = parts[4];
+                    let stats = JSON.parse(localStorage.getItem(key));
+                    let perf = stats.perfects || 0;
+                    let games = stats.gamesPlayed || 0;
+                    
+                    totalPerfects += perf;
+                    totalGames += games;
+                    if (perf > 0 || games > 0) activeDates.add(date);
+                    if (sub && subPerfects[sub] !== undefined) subPerfects[sub] += perf;
+                } catch(e) {}
+            }
+        }
 
-        const loads = Object.entries(GIDS).map(([name, gid]) => new Promise(res => {
-            Papa.parse(`https://docs.google.com/spreadsheets/d/e/2PACX-${SHEET_ID}/pub?gid=${gid}&single=true&output=csv&t=${Date.now()}`, {
-                download: true, header: true, skipEmptyLines: 'greedy',
-                complete: r => res({ name, data: r.data.map(row => { let n = {}; Object.keys(row).forEach(k => n[k.trim()] = row[k]); return n; }) }),
-                error: () => res({name, data: []})
-            });
-        }));
-        const results = await Promise.race([Promise.all(loads), new Promise(res => setTimeout(() => res('timeout'), 4000))]);
-        if (results === 'timeout') { document.getElementById('loading').innerHTML = "⚠️ 网络慢，请重试。"; return; }
-        db = {};
-        results.forEach(r => { if(r && r.data) { r.data.forEach(row => { 
-            let g = (row.Grade || row.GRADE || "").toUpperCase(); if(!g) return;
-            if(!db[g]) db[g] = {}; if(!db[g][r.name]) db[g][r.name] = []; db[g][r.name].push(row);
-        }); } });
-        if (Object.keys(db).length > 0) { sessionStorage.setItem('hub_db_cache', JSON.stringify(db)); startQuiz(); }
-        else { document.getElementById('loading').innerText = "⚠️ Data error."; }
-    }
+        let totalDays = activeDates.size;
+        let totalTrophies = 0;
 
-    function startQuiz() {
-        let mainPool = (db[curUser][curSub] || []).filter(q => (q.Type || "").toString().trim().toUpperCase() !== 'SPELLING');
-        mainPool = mainPool.filter(q => {
-            let t = q.Term || q.TERM; if (!t) return true; 
-            let tNum = parseInt(t.toString().replace(/\D/g, ''));
-            return isNaN(tNum) || tNum <= currentTermNum;
+        const renderItemHTML = (b) => {
+            totalTrophies += b.count;
+            
+            let classes = ['badge-item'];
+            if (b.count > 0) {
+                classes.push('unlocked');
+                if (b.tier) classes.push(b.tier);
+            } else {
+                classes.push('locked'); 
+            }
+            
+            let countHtml = (b.count > 1) ? `<div class="badge-count">x${b.count}</div>` : '';
+            let progressHtml = (b.count === 0 && b.targetDays) ? `<div class="badge-progress">${totalDays}/${b.targetDays}</div>` : '';
+            
+            return `
+                <div class="${classes.join(' ')}">
+                    <div class="badge-icon-wrapper">
+                        <div class="badge-icon">${b.icon}</div>
+                        ${countHtml}
+                    </div>
+                    <div class="badge-name">${b.name}</div>
+                    ${progressHtml}
+                </div>
+            `;
+        };
+
+        const coreBadges = [
+            { icon: '🎯', name: '神射手', count: totalPerfects },
+            { icon: '⚡️', name: '极速突破', count: totalSpeedBreaks },
+            { icon: '🎈', name: '气球猎人', count: totalGames }
+        ];
+        container.innerHTML += `
+            <div class="badge-category">
+                <div class="badge-category-title">🌟 核心战绩</div>
+                <div class="badge-grid">${coreBadges.map(renderItemHTML).join('')}</div>
+            </div>`;
+
+        const subBadges = [
+            { icon: '🔤', name: '英语达人', count: subPerfects['English'] },
+            { icon: '🔢', name: '数学天才', count: subPerfects['Math'] },
+            { icon: '🐼', name: '华文小将', count: subPerfects['华文'] },
+            { icon: '🌱', name: '科学博士', count: subPerfects['Science'] }
+        ];
+        container.innerHTML += `
+            <div class="badge-category">
+                <div class="badge-category-title">🎓 科目大师</div>
+                <div class="badge-grid">${subBadges.map(renderItemHTML).join('')}</div>
+            </div>`;
+
+        const streakMilestones = [3, 5, 10, 15, 30];
+        let streakBadges = streakMilestones.map(day => {
+            let count = (totalDays >= day) ? 1 : 0;
+            let tier = day >= 15 ? 'gold' : (day >= 10 ? 'silver' : 'bronze');
+            return { icon: '📅', name: `打卡${day}天`, count: count, tier: tier, targetDays: day };
         });
-        if (mainPool.length === 0) { 
-            document.getElementById('loading').innerHTML = "⚠️ 没有可用练习题。"; 
-            setTimeout(() => window.location.href='index.html', 2000); return; 
-        }
 
-        // --- 扣除今日体力 ---
-        const today = new Date().toISOString().split('T')[0];
-        localStorage.setItem(`limit_${today}_${curUser}_${curSub}`, "1");
+        container.innerHTML += `
+            <div class="badge-category">
+                <div class="badge-category-title">📅 毅力打卡</div>
+                <div class="badge-grid">${streakBadges.map(renderItemHTML).join('')}</div>
+            </div>`;
 
-        let lowerGrade = curUser === 'P3' ? 'P2' : (curUser === 'P2' ? 'P1' : null);
-        let lowerPicked = [];
-        if (lowerGrade && db[lowerGrade] && db[lowerGrade][curSub]) {
-            let lPool = db[lowerGrade][curSub].filter(q => (q.Type || "").toString().trim().toUpperCase() !== 'SPELLING');
-            lPool.sort(() => 0.5 - Math.random()); lowerPicked = lPool.slice(0, 2);
-        }
-        let mistakes = getMistakes(), eligibleMistakes = [], freshNewPool = []; 
-        mainPool.forEach(q => {
-            let key = getQuestionKey(curSub, curUser, q.Question);
-            if (mistakes[key]) eligibleMistakes.push({ q: q, level: mistakes[key] }); else freshNewPool.push(q);
-        });
-        let mistakesPicked = [];
-        if (eligibleMistakes.length > 0) {
-            let weightedList = [];
-            eligibleMistakes.forEach(item => { let w = Math.max(1, 5 - item.level); for(let i=0; i<w; i++) weightedList.push(item.q); });
-            let targetMistakes = Math.min(5, eligibleMistakes.length);
-            while (mistakesPicked.length < targetMistakes && weightedList.length > 0) {
-                let idx = Math.floor(Math.random() * weightedList.length); let selectedQ = weightedList[idx];
-                if (!mistakesPicked.includes(selectedQ)) mistakesPicked.push(selectedQ);
-                weightedList = weightedList.filter(item => item !== selectedQ);
-            }
-        }
-        let remainingQuota = 15 - lowerPicked.length - mistakesPicked.length;
-        freshNewPool.sort(() => 0.5 - Math.random());
-        sessionQs = [...lowerPicked, ...mistakesPicked, ...freshNewPool.slice(0, remainingQuota)];
-        sessionQs.sort(() => 0.5 - Math.random());
-        curIdx = 0; sessionErrors = 0; 
-        document.getElementById('draw-panel').style.display = 'none';
-        if (curUser === 'P3' && curSub === 'Math') document.getElementById('draw-pad-btn').style.display = 'block';
-        else document.getElementById('draw-pad-btn').style.display = 'none';
-        
-        startTime = Date.now(); 
-        showScreen('quiz-screen'); renderQ();
+        document.getElementById('total-badge-count').innerText = totalTrophies;
     }
-
-    function updateProgress() {
-        const bar = document.getElementById('progress-bar');
-        let html = '', icon = curSub === '华文' ? '🐼' : (curSub === 'Science' ? '🌱' : (curSub === 'Math' ? '🔢' : '🚀'));
-        for(let i=0; i<sessionQs.length; i++) html += `<div class="milestone${i < curIdx ? ' done' : (i === curIdx ? ' active' : '')}">${i < curIdx ? '⭐' : (i === curIdx ? icon : '☁️')}</div>`;
-        bar.innerHTML = html;
-        document.getElementById('progress-text').innerText = `${curIdx + 1} / ${sessionQs.length}`;
-    }
-
-    function renderQ() {
-        updateProgress(); if(ctx && canvas) clearPad();
-        const q = sessionQs[curIdx], isCN = (curSub === '华文');
-        document.getElementById('q-text').innerText = q.Question;
-        const container = document.getElementById('input-container'), qType = (q.Type || "").toString().trim().toUpperCase();
-        q.isEvaluated = false; 
-        if (qType === 'OPEN') container.innerHTML = `<textarea id="ans-in" class="ans-input" rows="5" placeholder="${isCN ? '输入你的完整答案...' : 'Type full answer...'}"></textarea>`;
-        else if (qType === 'MCQ') {
-            const opts = (q.Options || q.options || "").toString().split('/').map(o => o.trim()).filter(o => o);
-            let html = `<div class="mcq-list">`;
-            opts.forEach(opt => html += `<button class="mcq-btn" onclick="selectMCQ(this, '${opt.replace(/'/g, "\\'").replace(/"/g, "&quot;")}')">${opt}</button>`);
-            container.innerHTML = html + `</div><input type="hidden" id="ans-in" value="">`;
-        } else container.innerHTML = `<input type="text" id="ans-in" class="ans-input" placeholder="${isCN ? '在此输入...' : 'Type here...'}" autocomplete="off">`;
-        document.getElementById('fb-text').innerText = '';
-        document.getElementById('sub-btn').style.display = 'flex'; document.getElementById('next-btn').style.display = 'none';
-        if (curIdx === sessionQs.length - 1) document.getElementById('next-btn').innerText = "Finish ✨";
-        else document.getElementById('next-btn').innerText = "Next ➡️";
-    }
-
-    function selectMCQ(btn, val) {
-        if(document.getElementById('sub-btn').style.display === 'none') return; 
-        document.querySelectorAll('.mcq-btn').forEach(b => { b.classList.remove('active'); b.classList.remove('error'); });
-        btn.classList.add('active'); document.getElementById('ans-in').value = val;
-    }
-
-    function checkAns() {
-        const input = document.getElementById('ans-in'), user = input.value.trim().toLowerCase();
-        const correctRaw = (sessionQs[curIdx]['Correct Answer'] || sessionQs[curIdx]['ANSWER'] || "").toString().trim();
-        const fb = document.getElementById('fb-text'), qType = (sessionQs[curIdx]['Type'] || "").toString().trim().toUpperCase(), isCN = (curSub === '华文');
-        if(user === "") { if(qType === 'MCQ') alert(isCN ? "请选择一个选项！" : "Please select!"); return; }
-        let isCorrect = (user === correctRaw.toLowerCase()), key = getQuestionKey(curSub, curUser, sessionQs[curIdx].Question), mistakes = getMistakes();
-        if (qType === 'OPEN') {
-            input.disabled = true; document.getElementById('sub-btn').style.display = 'none'; document.getElementById('next-btn').style.display = 'flex';
-            fb.innerHTML = `<span style="color:#0f172a;"><b>参考答案：</b></span><br><span style="font-size:24px; font-weight:900; color:#10b981;">${correctRaw}</span>`;
-            return; 
-        }
-        if(isCorrect) {
-            input.disabled = true; document.getElementById('sub-btn').style.display = 'none'; document.getElementById('next-btn').style.display = 'flex';
-            fb.innerHTML = `<span style="color:#10b981;">${isCN ? "✅ 答对啦！" : "✅ Correct!"}</span>`;
-            if (mistakes[key] && !sessionQs[curIdx].isEvaluated) {
-                mistakes[key] += 1; if (mistakes[key] >= 5) delete mistakes[key]; 
-                saveMistakes(mistakes); syncToCloud({type: 'mistake_update', user: curUser, subject: curSub, questionKey: key, level: mistakes[key] || 5});
-            }
-        } else {
-            if (!sessionQs[curIdx].isEvaluated) sessionErrors++; 
-            fb.innerHTML = `<span style="color:#ef4444;">❌ 不对哦！</span><br><span style="font-size:18px; color:#64748b;">答案：<b style="color:#0f172a;">${correctRaw}</b></span>`;
-            input.classList.add('error-shake'); setTimeout(()=> input.classList.remove('error-shake'), 400);
-            if (!sessionQs[curIdx].isEvaluated) {
-                mistakes[key] = mistakes[key] ? Math.max(1, mistakes[key] - 1) : 3;
-                saveMistakes(mistakes); syncToCloud({type: 'mistake_update', user: curUser, subject: curSub, questionKey: key, level: mistakes[key]});
-            }
-        }
-        sessionQs[curIdx].isEvaluated = true; 
-    }
-
-    function nextQ() { if (curIdx < sessionQs.length - 1) { curIdx++; renderQ(); } else { finishQuiz(); } }
-
-    // --- 💰 3.0 终极结算系统 (金币与水晶) ---
-    function finishQuiz() {
-        const timeTakenSec = Math.floor((Date.now() - startTime) / 1000);
-        const isPerfect = sessionErrors <= 1;
-        const isCN = (curSub === '华文');
-        const speedLimit = curUser === 'P3' ? 180 : 360; // 隐藏标准
-
-        badgeQueue = [];
-        let earnedBadgesForCoin = 0;
-
-        // 1. 科目徽章 (<= 3 错)
-        if (sessionErrors <= 3) {
-            earnedBadgesForCoin++;
-            let subIcon = curSub === '华文' ? '🐼' : (curSub === 'Science' ? '🌱' : (curSub === 'Math' ? '🔢' : '🔤'));
-            let subName = curSub === '华文' ? '华文小将' : (curSub === 'Science' ? '科学博士' : (curSub === 'Math' ? '数学天才' : '英语达人'));
-            badgeQueue.push({ icon: subIcon, title: subName, desc: isCN ? `完成高质量练习，专属徽章 +1！` : `Good job! Badge +1!` });
-        }
-
-        // 2. 神射手 & 极速 & 气球 (<= 1 错)
-        if (isPerfect) {
-            earnedBadgesForCoin++;
-            badgeQueue.push({ icon: '🎯', title: isCN ? '神射手！' : 'Sharpshooter!', desc: isCN ? '错题在1道以内，神射手徽章 +1！' : 'Great accuracy! Sharpshooter badge +1!' });
-
-            // 极速突破 (固定时间标准)
-            if (timeTakenSec <= speedLimit) {
-                earnedBadgesForCoin++;
-                badgeQueue.push({ icon: '⚡️', title: isCN ? '极速突破！' : 'Speed Record!', desc: isCN ? `仅用 <span class="epic-highlight">${timeTakenSec}秒</span>！闪电般的速度！` : `Finished in <span class="epic-highlight">${timeTakenSec}s</span>! Lightning fast!` });
-            }
-
-            // 气球游戏 (保留)
-            pendingGameResult = applyPerfectSession();
-            if (pendingGameResult && pendingGameResult.trigger) {
-                badgeQueue.push({ icon: '🎈', title: isCN ? '气球猎人！' : 'Balloon Hunter!', desc: isCN ? '成功解锁打气球游戏！游戏券 +1！' : 'Balloon game unlocked! Ticket +1!' });
-            }
-        } else {
-            pendingGameResult = null; 
-        }
-
-        // --- 计算并记录共享金库 ---
-        if (earnedBadgesForCoin > 0) {
-            let coinMultiplier = curUser === 'P1' ? 2 : 1; // 妹妹双倍光环
-            let coinGain = earnedBadgesForCoin * coinMultiplier;
-            let vaultCoins = parseInt(localStorage.getItem('gold_coins_vault') || "0");
-            localStorage.setItem('gold_coins_vault', vaultCoins + coinGain);
-            syncToCloud({ type: 'coin_update', user: curUser, amount: coinGain, total: vaultCoins + coinGain });
-        }
-
-        // --- 计算个人打卡水晶 ---
-        let today = new Date().toISOString().split('T')[0];
-        let lastDate = localStorage.getItem(`last_date_${curUser}`);
-        let streak = parseInt(localStorage.getItem(`streak_${curUser}`) || "0");
-
-        if (lastDate) {
-            let diff = Math.floor((new Date(today) - new Date(lastDate)) / 864e5);
-            if (diff === 1) {
-                streak++;
-            } else if (diff > 1) {
-                streak = 1; // 中断，重置连击
-            } 
-            // 如果 diff === 0，说明今天其他科目已经打过卡了，连击不变
-        } else {
-            streak = 1;
-        }
-
-        // 防止一天多次触发水晶
-        if (lastDate !== today) {
-            localStorage.setItem(`last_date_${curUser}`, today);
-            localStorage.setItem(`streak_${curUser}`, streak);
-
-            if (streak >= 3) {
-                let crys = parseInt(localStorage.getItem(`crystals_${curUser}`) || "0");
-                localStorage.setItem(`crystals_${curUser}`, crys + 1);
-                badgeQueue.push({ icon: '💎', title: isCN ? '毅力水晶' : 'Crystal', desc: isCN ? `连续打卡 ${streak} 天，水晶 +1！` : `Streak ${streak} days! Crystal +1!` });
-                syncToCloud({ type: 'crystal_update', user: curUser, amount: 1 });
-            }
-        }
-
-        // 触发弹窗
-        if (badgeQueue.length > 0) {
-            document.getElementById('badge-modal').style.display = 'flex';
-            showNextBadge();
-        } else {
-            renderFinalScreen();
-        }
-    }
-
-    function showNextBadge() {
-        if (badgeQueue.length > 0) {
-            let b = badgeQueue.shift(); let m = document.querySelector('.epic-modal');
-            m.style.transform = m.style.opacity = ''; m.style.animation = 'none'; void m.offsetWidth; m.style.animation = 'epicPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-            document.getElementById('badge-icon').innerText = b.icon;
-            document.getElementById('badge-title').innerText = b.title;
-            document.getElementById('badge-desc').innerHTML = b.desc;
-            if (typeof confetti === 'function') confetti({ particleCount: 300, spread: 150, origin: { y: 0.3 }, zIndex: 1001 });
-        } else { document.getElementById('badge-modal').style.display = 'none'; renderFinalScreen(); }
-    }
-
-    function closeBadgeModal() {
-        let m = document.querySelector('.epic-modal'); m.style.transform = 'scale(0.8)'; m.style.opacity = '0';
-        setTimeout(showNextBadge, 150);
-    }
-
-    function renderFinalScreen() {
-        const isPerfect = sessionErrors <= 1, isCN = (curSub === '华文');
-        let title = isPerfect ? (isCN ? '🎉 获得了 6~7！' : '🎉 You got 6~7!') : (isCN ? '💪 挑战完成！' : '💪 Keep trying!');
-        let html = `<div style="text-align:center; padding: 40px 0;"><h1 style="font-size:32px; color:#0f172a; font-weight:900;">${title}</h1>`;
-        if (pendingGameResult && pendingGameResult.msg) html += `<div class="stat-badge">${pendingGameResult.msg}</div>`;
-        if (sessionErrors > 0) html += `<p style="color:#ef4444; font-weight:800; margin-top:25px;">🐞 已将 ${sessionErrors} 道错题关进捉虫日记。</p>`;
-        html += `<button class="btn-action" style="background:#f1f5f9; color:#64748b; width:100%; max-width: 300px; margin: 40px auto 0 auto; border: 4px solid #e2e8f0;" onclick="window.location.href='index.html'">🏠 Back to Hub</button></div>`;
-        document.getElementById('finish-screen').innerHTML = html; showScreen('finish-screen');
-        if (isPerfect && pendingGameResult && pendingGameResult.trigger) setTimeout(() => { window.location.href = "https://andydang2007.github.io/game/popballoons.html?ticket=" + Date.now(); }, 2500);
-    }
-
-    // --- ✍️ 草稿板功能 (完全保留) ---
-    function initDrawPad() {
-        canvas = document.getElementById('pad'); ctx = canvas.getContext('2d');
-        ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.lineWidth = 5; ctx.strokeStyle = '#1e293b';
-        const getP = (e) => { const r = canvas.getBoundingClientRect(), t = e.touches ? e.touches[0] : e; return { x: t.clientX - r.left, y: t.clientY - r.top }; };
-        canvas.addEventListener('mousedown', (e) => { drawing = true; ctx.beginPath(); const p = getP(e); ctx.moveTo(p.x, p.y); });
-        canvas.addEventListener('mousemove', (e) => { if (!drawing) return; e.preventDefault(); const p = getP(e); ctx.lineTo(p.x, p.y); ctx.stroke(); });
-        window.addEventListener('mouseup', () => drawing = false);
-        canvas.addEventListener('touchstart', (e) => { drawing = true; ctx.beginPath(); const p = getP(e); ctx.moveTo(p.x, p.y); }, {passive:false});
-        canvas.addEventListener('touchmove', (e) => { if (!drawing) return; e.preventDefault(); const p = getP(e); ctx.lineTo(p.x, p.y); ctx.stroke(); }, {passive:false});
-        canvas.addEventListener('touchend', () => drawing = false);
-    }
-    function clearPad() { if(ctx) ctx.clearRect(0,0,canvas.width,canvas.height); }
-    function toggleDrawPad() { const p = document.getElementById('draw-panel'); p.style.display = p.style.display === 'none' ? 'flex' : 'none'; if (p.style.display === 'flex' && !ctx) initDrawPad(); }
 
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            if (document.getElementById('quiz-screen').style.display === 'flex') {
-                if (document.getElementById('sub-btn').style.display !== 'none') { e.preventDefault(); checkAns(); }
-                else if (document.getElementById('next-btn').style.display !== 'none') { e.preventDefault(); nextQ(); }
-            } else if (document.getElementById('badge-modal').style.display === 'flex') { e.preventDefault(); closeBadgeModal(); }
-        }
+        if (e.key === 'Enter' && document.getElementById('pin-modal').style.display === 'flex') { verifyHubPin(); }
     });
-    window.onload = init;
+
+    initDate();
+    
+    // 自动加载上次用户
+    let lastUser = localStorage.getItem('currentPlayer');
+    if(lastUser === 'P3' || lastUser === 'P1') {
+        executeSwitchUser(lastUser);
+    } else {
+        showScreen('user-screen');
+    }
 </script>
+
 </body>
 </html>
