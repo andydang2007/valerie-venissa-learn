@@ -28,16 +28,15 @@
         .magic-number { display: inline-block; font-size: 1.4em; color: #f59e0b; font-weight: 900; padding: 0 5px; animation: popPulse 1s infinite alternate cubic-bezier(0.4, 0, 0.2, 1); }
         @keyframes popPulse { 0% { transform: scale(1); } 100% { transform: scale(1.15) translateY(-3px); text-shadow: 0 0 15px rgba(234, 179, 8, 0.5); } }
 
-        /* 用户选择按钮 */
         button.name-btn { width: 100%; max-width: 320px; padding: 20px; border-radius: 30px; border: 4px solid #e2e8f0; background: white; cursor: pointer; font-weight: 900; font-size: 26px; transition: 0.15s; color: #475569; display: flex; align-items: center; justify-content: center; gap: 15px; box-shadow: 0 8px 0 #cbd5e1; outline: none; margin-bottom: 20px; }
         button.name-btn:active { transform: translateY(8px); box-shadow: 0 0 0 transparent; }
         .name-btn .avatar { font-size: 46px; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.1)); }
 
-        /* 🏆 豪华荣誉墙设计 */
         .dashboard-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; width: 100%; justify-content: center; }
         .dashboard-header .avatar { font-size: 50px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.15)); }
         .dashboard-header h2 { margin: 0; font-size: 28px; color: #0f172a; font-weight: 900; }
 
+        /* 🏆 豪华荣誉墙设计 (重构为多层网格) */
         .honor-wall { width: 100%; background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border: 4px solid #fde68a; border-radius: 30px; padding: 20px; margin-bottom: 30px; text-align: left; box-shadow: inset 0 4px 15px rgba(245, 158, 11, 0.1), 0 10px 20px rgba(0,0,0,0.05); position: relative; overflow: hidden; }
         .honor-wall::after { content: '✨'; position: absolute; top: -15px; right: -5px; font-size: 100px; opacity: 0.15; transform: rotate(15deg); pointer-events: none; }
         
@@ -46,32 +45,33 @@
         .total-trophies { font-size: 16px; background: white; padding: 6px 14px; border-radius: 20px; color: #f59e0b; border: 2px solid #fcd34d; box-shadow: 0 4px 0 #fde68a; display: flex; align-items: center; gap: 5px; }
         .total-number { font-size: 20px; font-weight: 900; color: #d97706; }
         
-        .badges-scroll { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 15px; scrollbar-width: none; z-index: 2; position: relative; padding-top: 10px; align-items: flex-start; }
-        .badges-scroll::-webkit-scrollbar { display: none; }
+        /* 全新分层网格布局 */
+        .badges-container { display: flex; flex-direction: column; gap: 20px; position: relative; z-index: 2; }
+        .badge-category { width: 100%; }
+        .badge-category-title { font-size: 16px; color: #b45309; font-weight: 900; margin-bottom: 12px; border-bottom: 2px dashed #fde68a; padding-bottom: 5px; display: flex; align-items: center; gap: 6px; }
         
-        .badge-item { min-width: 90px; display: flex; flex-direction: column; align-items: center; gap: 10px; opacity: 0.5; filter: grayscale(100%); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; }
+        /* 强制 1 排 5 个，自动换行 */
+        .badge-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px 6px; width: 100%; justify-items: center; }
+        
+        .badge-item { display: flex; flex-direction: column; align-items: center; gap: 6px; opacity: 0.5; filter: grayscale(100%); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; width: 100%; }
         .badge-item.unlocked { opacity: 1; filter: grayscale(0%); transform: scale(1.05); }
+        .badge-item.locked-mystery { opacity: 0.8; filter: none; transform: scale(1); }
         
-        .badge-icon-wrapper { position: relative; }
-        .badge-icon { width: 70px; height: 70px; border-radius: 22px; background: white; border: 3px solid #cbd5e1; display: flex; align-items: center; justify-content: center; font-size: 36px; box-shadow: 0 4px 0 #94a3b8; transition: 0.3s; }
+        .badge-icon-wrapper { position: relative; display: flex; justify-content: center; }
+        .badge-icon { width: 48px; height: 48px; border-radius: 16px; background: white; border: 3px solid #cbd5e1; display: flex; align-items: center; justify-content: center; font-size: 26px; box-shadow: 0 4px 0 #94a3b8; transition: 0.3s; }
         
-        /* 根据徽章稀有度给边框上色 */
-        .badge-item.unlocked .badge-icon { border-color: #f59e0b; background: #fffbeb; box-shadow: 0 5px 0 #d97706, 0 0 15px rgba(245, 158, 11, 0.3); }
-        .badge-item.unlocked.bronze .badge-icon { border-color: #cd7f32; box-shadow: 0 5px 0 #8b5a2b; background: #fdf5e6; }
-        .badge-item.unlocked.silver .badge-icon { border-color: #94a3b8; box-shadow: 0 5px 0 #64748b; background: #f1f5f9; }
-        .badge-item.unlocked.gold .badge-icon { border-color: #fbbf24; box-shadow: 0 5px 0 #d97706; background: #fffbeb; }
+        .badge-item.unlocked .badge-icon { border-color: #f59e0b; background: #fffbeb; box-shadow: 0 4px 0 #d97706, 0 0 10px rgba(245, 158, 11, 0.3); }
+        .badge-item.unlocked.bronze .badge-icon { border-color: #cd7f32; box-shadow: 0 4px 0 #8b5a2b; background: #fdf5e6; }
+        .badge-item.unlocked.silver .badge-icon { border-color: #94a3b8; box-shadow: 0 4px 0 #64748b; background: #f1f5f9; }
+        .badge-item.unlocked.gold .badge-icon { border-color: #fbbf24; box-shadow: 0 4px 0 #d97706; background: #fffbeb; }
+        .badge-item.locked-mystery .badge-icon { border: 3px dashed #cbd5e1; background: #f8fafc; box-shadow: none; font-size: 24px; }
+        
+        .badge-count { position: absolute; top: -6px; right: -6px; background: #ef4444; color: white; font-size: 11px; font-weight: 900; padding: 2px 6px; border-radius: 10px; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.2); animation: popPulse 2s infinite alternate; z-index: 3; }
 
-        /* 未解锁盲盒样式 */
-        .badge-item.locked-mystery { opacity: 0.8; filter: none; }
-        .badge-item.locked-mystery .badge-icon { border: 3px dashed #cbd5e1; background: #f8fafc; box-shadow: none; font-size: 28px; }
-        
-        .badge-count { position: absolute; top: -8px; right: -8px; background: #ef4444; color: white; font-size: 13px; font-weight: 900; padding: 2px 8px; border-radius: 12px; border: 2px solid white; box-shadow: 0 3px 6px rgba(0,0,0,0.2); animation: popPulse 2s infinite alternate; z-index: 3; }
-
-        .badge-name { font-size: 13px; font-weight: 900; color: #64748b; text-align: center; line-height: 1.2; }
+        .badge-name { font-size: 11px; font-weight: 900; color: #64748b; text-align: center; line-height: 1.1; width: 100%; word-wrap: break-word; }
         .badge-item.unlocked .badge-name { color: #d97706; }
-        .badge-progress { font-size: 11px; color: #94a3b8; font-weight: 800; margin-top: 2px; }
+        .badge-progress { font-size: 10px; color: #94a3b8; font-weight: 800; margin-top: 2px; }
 
-        /* 紧凑型科目按钮 */
         .section-title { width: 100%; text-align: left; margin: 0 0 15px 5px; font-size: 20px; font-weight: 900; color: #334155; }
         .grid-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; width: 100%; margin-bottom: 25px; }
         
@@ -84,7 +84,6 @@
         .card-btn.cn { border-color: #e9d5ff; }
         .card-btn.sci { border-color: #a7f3d0; }
 
-        /* 小菜单按钮 */
         .menu-row { display: flex; gap: 15px; width: 100%; margin-bottom: 15px; }
         .menu-btn { flex: 1; background: white; border: 4px solid #e2e8f0; border-radius: 20px; padding: 20px 10px; font-size: 18px; font-weight: 900; color: #475569; cursor: pointer; box-shadow: 0 6px 0 #cbd5e1; display: flex; flex-direction: column; align-items: center; gap: 8px; transition: 0.1s; }
         .menu-btn:active { transform: translateY(6px); box-shadow: 0 0 0 transparent; }
@@ -93,14 +92,21 @@
         .btn-action { width: 100%; border-radius: 20px; border: none; font-weight: 900; font-size: 18px; cursor: pointer; transition: 0.15s; display: flex; align-items: center; justify-content: center; outline: none; padding: 18px; box-shadow: 0 6px 0 rgba(0,0,0,0.1); background: #f1f5f9; color: #64748b; border: 4px solid #e2e8f0; }
         .btn-action:active { transform: translateY(6px); box-shadow: 0 0 0 transparent; }
 
-        /* 锁屏 */
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.7); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
         .modal-content { background: white; padding: 40px; border-radius: 40px; text-align: center; width: 90%; max-width: 350px; display: flex; flex-direction: column; align-items: center; border: 5px solid #fff; box-shadow: 0 25px 50px rgba(0,0,0,0.2); }
         .pin-input-hub { font-size: 36px; font-weight: 900; letter-spacing: 10px; padding: 15px; width: 160px; text-align: center; border: 4px solid #e2e8f0; border-radius: 20px; margin: 20px 0; outline: none; color: #1e293b; transition: 0.2s; background: #f8fafc; }
         .pin-input-hub:focus { border-color: #f59e0b; background: #fffbeb; }
         .error-shake { border-color: #ef4444 !important; animation: shake 0.3s; background-color: #fef2f2 !important; }
 
-        @media (min-width: 768px) { .container { padding: 40px 50px; max-width: 750px; } .grid-cards { grid-template-columns: repeat(4, 1fr); } }
+        @media (min-width: 768px) { 
+            .container { padding: 40px 50px; max-width: 750px; } 
+            .grid-cards { grid-template-columns: repeat(4, 1fr); }
+            /* 桌面端放大徽章尺寸 */
+            .badge-grid { gap: 15px 10px; }
+            .badge-icon { width: 56px; height: 56px; font-size: 30px; border-radius: 18px; }
+            .badge-name { font-size: 13px; }
+            .badge-count { font-size: 12px; padding: 2px 8px; top: -8px; right: -8px; }
+        }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
     </style>
 </head>
@@ -131,7 +137,8 @@
             <h3>🏆 My Badges 
                 <div class="total-trophies">Total: <span class="total-number" id="total-badge-count">0</span></div>
             </h3>
-            <div class="badges-scroll" id="badges-container">
+            
+            <div class="badges-container" id="badges-container">
                 </div>
         </div>
 
@@ -202,7 +209,6 @@
     let pendingUser = null;
     let currentUser = '';
 
-    // 初始化日期与学期
     function initDate() {
         const now = new Date();
         const t2 = new Date(2026, 2, 23), t3 = new Date(2026, 5, 29), t4 = new Date(2026, 8, 14);
@@ -266,7 +272,7 @@
     
     function closePinModal() { document.getElementById('pin-modal').style.display = 'none'; document.getElementById('hub-pin-input').value = ''; }
 
-    // 🏆 全新盲盒探路灯引擎
+    // 🏆 分层分类、智能隐藏的徽章渲染引擎
     function renderBadges() {
         const container = document.getElementById('badges-container');
         container.innerHTML = ''; 
@@ -276,7 +282,7 @@
         let activeDates = new Set();
         let subPerfects = { 'English': 0, 'Math': 0, '华文': 0, 'Science': 0 };
         
-        // 扫描并聚合本地数据
+        // 1. 聚合本地数据
         for (let i = 0; i < localStorage.length; i++) {
             let key = localStorage.key(i);
             if (key.startsWith('practice_stats_') && key.includes(`_${currentUser}_`)) {
@@ -297,68 +303,104 @@
         }
 
         let totalDays = activeDates.size;
-
-        // 【探路灯逻辑】计算下一个阶梯打卡目标
-        let nextStreakGoal = 3;
-        let earnedStreaks = [];
-        if (totalDays >= 30) { earnedStreaks = [3, 5, 10, 15, 30]; nextStreakGoal = null; }
-        else if (totalDays >= 15) { earnedStreaks = [3, 5, 10, 15]; nextStreakGoal = 30; }
-        else if (totalDays >= 10) { earnedStreaks = [3, 5, 10]; nextStreakGoal = 15; }
-        else if (totalDays >= 5) { earnedStreaks = [3, 5]; nextStreakGoal = 10; }
-        else if (totalDays >= 3) { earnedStreaks = [3]; nextStreakGoal = 5; }
-
-        // 组装要展示的系统徽章库
-        let badgesToRender = [
-            { icon: '🎯', name: '神射手', count: totalPerfects, showAlways: true },
-            { icon: '🎈', name: '气球猎人', count: totalGames, showAlways: true },
-            { icon: '🔤', name: '英语达人', count: subPerfects['English'], showAlways: true },
-            { icon: '🔢', name: '数学天才', count: subPerfects['Math'], showAlways: true },
-            { icon: '🐼', name: '华文小将', count: subPerfects['华文'], showAlways: true },
-            { icon: '🌱', name: '科学博士', count: subPerfects['Science'], showAlways: true }
-        ];
-
-        // 插入已获得的打卡成就
-        earnedStreaks.forEach(day => {
-            let tier = day >= 15 ? 'gold' : (day >= 10 ? 'silver' : 'bronze');
-            badgesToRender.unshift({ icon: '📅', name: `打卡${day}天`, count: 1, tier: tier, showAlways: true });
-        });
-
-        // 插入盲盒 (下一个未达成的目标)
-        if (nextStreakGoal !== null) {
-            badgesToRender.push({ 
-                icon: '🎁', name: `打卡${nextStreakGoal}天解锁`, count: 0, isMystery: true, 
-                progress: `${totalDays}/${nextStreakGoal}` 
-            });
-        }
-
         let totalTrophies = 0;
 
-        badgesToRender.forEach(b => {
+        // 辅助渲染单个 Badge 的函数
+        const renderItemHTML = (b) => {
             if (!b.isMystery) totalTrophies += b.count;
             
-            const div = document.createElement('div');
             let classes = ['badge-item'];
             if (b.count > 0) classes.push('unlocked');
             if (b.tier) classes.push(b.tier);
             if (b.isMystery) classes.push('locked-mystery');
-            div.className = classes.join(' ');
             
-            // 角标 (只有数量大于1且不是盲盒才显示)
+            // 只有数量 > 1 且不是盲盒才显示角标
             let countHtml = (b.count > 1 && !b.isMystery) ? `<div class="badge-count">x${b.count}</div>` : '';
-            // 盲盒进度
             let progressHtml = b.isMystery ? `<div class="badge-progress">${b.progress}</div>` : '';
             
-            div.innerHTML = `
-                <div class="badge-icon-wrapper">
-                    <div class="badge-icon">${b.icon}</div>
-                    ${countHtml}
+            return `
+                <div class="${classes.join(' ')}">
+                    <div class="badge-icon-wrapper">
+                        <div class="badge-icon">${b.icon}</div>
+                        ${countHtml}
+                    </div>
+                    <div class="badge-name">${b.name}</div>
+                    ${progressHtml}
                 </div>
-                <div class="badge-name">${b.name}</div>
-                ${progressHtml}
             `;
-            container.appendChild(div);
-        });
+        };
 
+        // ==========================================
+        // 层级 1：🌟 核心成就 (只要没拿到，就显示灰色占位，保证墙面不空)
+        // ==========================================
+        const coreBadges = [
+            { icon: '🎯', name: '神射手', count: totalPerfects },
+            { icon: '🎈', name: '气球猎人', count: totalGames }
+        ];
+        let coreHTML = coreBadges.map(renderItemHTML).join('');
+        container.innerHTML += `
+            <div class="badge-category">
+                <div class="badge-category-title">🌟 核心战绩</div>
+                <div class="badge-grid">${coreHTML}</div>
+            </div>`;
+
+        // ==========================================
+        // 层级 2：🎓 学科大师 (没有拿到任何学科徽章前，隐藏整个区域)
+        // ==========================================
+        let subTotalUnlocked = subPerfects['English'] + subPerfects['Math'] + subPerfects['华文'] + subPerfects['Science'];
+        if (subTotalUnlocked > 0) {
+            const subBadges = [
+                { icon: '🔤', name: '英语达人', count: subPerfects['English'] },
+                { icon: '🔢', name: '数学天才', count: subPerfects['Math'] },
+                { icon: '🐼', name: '华文小将', count: subPerfects['华文'] },
+                { icon: '🌱', name: '科学博士', count: subPerfects['Science'] }
+            ];
+            let subHTML = subBadges.map(renderItemHTML).join('');
+            container.innerHTML += `
+                <div class="badge-category">
+                    <div class="badge-category-title">🎓 科目大师</div>
+                    <div class="badge-grid">${subHTML}</div>
+                </div>`;
+        }
+
+        // ==========================================
+        // 层级 3：📅 毅力打卡 (只要开始打卡 1 天，就显示此区域及阶梯盲盒)
+        // ==========================================
+        if (totalDays > 0) {
+            let nextStreakGoal = 3;
+            let earnedStreaks = [];
+            
+            if (totalDays >= 30) { earnedStreaks = [3, 5, 10, 15, 30]; nextStreakGoal = null; }
+            else if (totalDays >= 15) { earnedStreaks = [3, 5, 10, 15]; nextStreakGoal = 30; }
+            else if (totalDays >= 10) { earnedStreaks = [3, 5, 10]; nextStreakGoal = 15; }
+            else if (totalDays >= 5) { earnedStreaks = [3, 5]; nextStreakGoal = 10; }
+            else if (totalDays >= 3) { earnedStreaks = [3]; nextStreakGoal = 5; }
+
+            let streakBadges = [];
+            
+            // 加入已获得的打卡徽章
+            earnedStreaks.forEach(day => {
+                let tier = day >= 15 ? 'gold' : (day >= 10 ? 'silver' : 'bronze');
+                streakBadges.push({ icon: '📅', name: `打卡${day}天`, count: 1, tier: tier });
+            });
+
+            // 加入探路灯盲盒
+            if (nextStreakGoal !== null) {
+                streakBadges.push({ 
+                    icon: '🎁', name: `打卡${nextStreakGoal}天解锁`, count: 0, isMystery: true, 
+                    progress: `${totalDays}/${nextStreakGoal}` 
+                });
+            }
+
+            let streakHTML = streakBadges.map(renderItemHTML).join('');
+            container.innerHTML += `
+                <div class="badge-category">
+                    <div class="badge-category-title">📅 毅力打卡</div>
+                    <div class="badge-grid">${streakHTML}</div>
+                </div>`;
+        }
+
+        // 更新右上角总计数
         document.getElementById('total-badge-count').innerText = totalTrophies;
     }
 
