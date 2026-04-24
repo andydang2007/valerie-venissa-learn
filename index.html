@@ -38,7 +38,6 @@
         .dashboard-header h2 { margin: 0; font-size: 28px; color: #0f172a; font-weight: 900; }
         .streak-badge { font-size: 14px; color: #d97706; background: #fffbeb; padding: 5px 15px; border-radius: 20px; font-weight: 900; border: 2px solid #fde68a; box-shadow: 0 4px 0 #fde68a; }
 
-        /* 🏆 豪华荣誉墙 */
         .honor-wall { width: 100%; background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border: 4px solid #fde68a; border-radius: 30px; padding: 20px; margin-bottom: 30px; text-align: left; box-shadow: inset 0 4px 15px rgba(245, 158, 11, 0.1), 0 10px 20px rgba(0,0,0,0.05); position: relative; overflow: hidden; }
         .honor-wall::after { content: '✨'; position: absolute; top: -15px; right: -5px; font-size: 100px; opacity: 0.15; transform: rotate(15deg); pointer-events: none; }
         
@@ -54,8 +53,6 @@
         .badge-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px 6px; width: 100%; justify-items: center; }
         
         .badge-item { display: flex; flex-direction: column; align-items: center; gap: 6px; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; width: 100%; }
-        
-        /* 解锁与未解锁（灰色）状态 */
         .badge-item.locked { opacity: 0.45; filter: grayscale(100%); transform: scale(0.95); }
         .badge-item.unlocked { opacity: 1; filter: grayscale(0%); transform: scale(1.05); }
         
@@ -66,12 +63,9 @@
         .badge-item.unlocked.bronze .badge-icon { border-color: #cd7f32; box-shadow: 0 4px 0 #8b5a2b; background: #fdf5e6; }
         .badge-item.unlocked.silver .badge-icon { border-color: #94a3b8; box-shadow: 0 4px 0 #64748b; background: #f1f5f9; }
         .badge-item.unlocked.gold .badge-icon { border-color: #fbbf24; box-shadow: 0 4px 0 #d97706; background: #fffbeb; }
-        
-        /* 未解锁时的虚线框样式 */
         .badge-item.locked .badge-icon { border: 3px dashed #94a3b8; background: #f1f5f9; box-shadow: none; font-size: 24px; }
         
         .badge-count { position: absolute; top: -6px; right: -6px; background: #ef4444; color: white; font-size: 11px; font-weight: 900; padding: 2px 6px; border-radius: 10px; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.2); animation: popPulse 2s infinite alternate; z-index: 3; }
-
         .badge-name { font-size: 11px; font-weight: 900; color: #64748b; text-align: center; line-height: 1.1; width: 100%; word-wrap: break-word; }
         .badge-item.unlocked .badge-name { color: #d97706; }
         .badge-progress { font-size: 10px; color: #94a3b8; font-weight: 800; margin-top: 2px; }
@@ -113,12 +107,8 @@
         .shop-item:active { transform: translateY(4px); box-shadow: 0 2px 0 #cbd5e1; }
         .shop-item.active { border-color: #f59e0b; background: #fffbeb; transform: scale(1.05); box-shadow: 0 10px 20px rgba(245,158,11,0.2); }
         
-        /* 🌟 核心修改：去掉阴影防止灰框，使用 mix-blend-mode 消除白底，放大图标 */
         .shop-icon { width: 100px; height: 100px; object-fit: contain; margin-bottom: 15px; mix-blend-mode: multiply; }
-        
         .shop-item .name { font-weight: 900; font-size: 18px; color: #475569; margin-bottom: 12px; }
-        
-        /* 🌟 核心修改：调整价格字体大小与图标比例平衡 */
         .shop-item .price { font-size: 22px; font-weight: 900; border-radius: 15px; padding: 6px 15px; display: inline-flex; align-items: center; gap: 6px; }
         .shop-item.coin-item .price { background: #fef3c7; color: #d97706; border: 2px solid #fde68a; }
         .shop-item.crys-item .price { background: #e0f2fe; color: #0284c7; border: 2px solid #bae6fd; }
@@ -133,7 +123,7 @@
             .badge-name { font-size: 13px; }
             .badge-count { font-size: 12px; padding: 2px 8px; top: -8px; right: -8px; }
             .shop-item-grid { grid-template-columns: repeat(3, 1fr); }
-            .shop-icon { width: 120px; height: 120px; } /* PC端更大 */
+            .shop-icon { width: 120px; height: 120px; }
         }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
     </style>
@@ -141,17 +131,16 @@
 <body>
 
 <div class="container">
-    <div id="school-term-display">
-        </div>
+    <div id="school-term-display"></div>
 
     <div id="user-screen" class="screen" style="display: flex;">
         <h2 style="margin:0 0 5px 0; color:#0f172a; font-size: 30px; font-weight: 900;">Who is learning?</h2>
         <div style="font-size: 16px; color: #64748b; margin-top: 5px; font-weight: 800; margin-bottom: 25px;">Aim for <span class="magic-number" style="font-size:1.1em;">6~7</span> today!</div>
 
-        <button class="name-btn" onclick="switchUser('P3')">
+        <button class="name-btn" onclick="switchUser('Valerie', 'P3')">
             <span class="avatar">👱‍♀️</span> Valerie
         </button>
-        <button class="name-btn" onclick="switchUser('P1')">
+        <button class="name-btn" onclick="switchUser('Venessa', 'P1')">
             <span class="avatar">👧</span> Venessa
         </button>
     </div>
@@ -191,9 +180,7 @@
                     🎁 神秘商店
                 </button>
             </h3>
-            
-            <div class="badges-container" id="badges-container">
-                </div>
+            <div class="badges-container" id="badges-container"></div>
         </div>
         
         <button class="btn-action" onclick="showScreen('user-screen')">👤 Switch User</button>
@@ -300,11 +287,27 @@
 </div>
 
 <script>
-    let pendingUser = null;
+    let pendingUser = { name: null, grade: null };
     let currentUser = '';
+    let currentGrade = '';
     let selectedPrize = null;
     
     const SYNC_API_URL = "https://script.google.com/macros/s/AKfycbyNi-a8VpHLrIpd0x5Fnb_825ZzFrLp4h2oMKot3xefrLGiLe3Pj-d8L-xWQh5w-Kkd/exec";
+
+    // 💡 核心逻辑：数据无损迁移 (把旧的 P1/P3 资产过户到名字名下)
+    function migrateOldData() {
+        const mappings = { 'P3': 'Valerie', 'P1': 'Venessa' };
+        ['crystals', 'streak', 'last_date', 'speed_breaks'].forEach(prefix => {
+            for (let oldId in mappings) {
+                let newName = mappings[oldId];
+                let oldVal = localStorage.getItem(`${prefix}_${oldId}`);
+                if (oldVal !== null && localStorage.getItem(`${prefix}_${newName}`) === null) {
+                    localStorage.setItem(`${prefix}_${newName}`, oldVal);
+                }
+            }
+        });
+    }
+    migrateOldData(); // 页面加载时自动执行
 
     function initDate() {
         const now = new Date();
@@ -334,22 +337,27 @@
         window.location.href = 'practice.html';
     }
 
-    function switchUser(g) {
-        if (g === 'P1') { 
-            pendingUser = g; document.getElementById('pin-modal').style.display = 'flex'; 
+    function switchUser(name, grade) {
+        if (name === 'Venessa') { 
+            pendingUser = { name: name, grade: grade }; 
+            document.getElementById('pin-modal').style.display = 'flex'; 
             const pinInput = document.getElementById('hub-pin-input');
             pinInput.value = ''; setTimeout(() => pinInput.focus(), 100); return; 
         }
-        executeSwitchUser(g);
+        executeSwitchUser(name, grade);
     }
 
-    function executeSwitchUser(g) {
-        currentUser = g;
-        localStorage.setItem('currentPlayer', g);
+    function executeSwitchUser(name, grade) {
+        currentUser = name;
+        currentGrade = grade;
         
-        document.getElementById('dash-avatar').innerText = g === 'P3' ? '👱‍♀️' : '👧';
-        document.getElementById('dash-name').innerText = `Hello, ${g === 'P3' ? 'Valerie' : 'Venessa'}!`;
-        document.getElementById('cn-label').innerText = g === 'P3' ? '高级华文' : '华文';
+        // 💡 存下解耦后的身份和年级
+        localStorage.setItem('currentPlayer', currentUser);
+        localStorage.setItem('currentGrade', currentGrade);
+        
+        document.getElementById('dash-avatar').innerText = name === 'Valerie' ? '👱‍♀️' : '👧';
+        document.getElementById('dash-name').innerText = `Hello, ${name}!`;
+        document.getElementById('cn-label').innerText = name === 'Valerie' ? '高级华文' : '华文';
         
         updateEconomyUI();
         renderBadges();
@@ -365,7 +373,7 @@
         
         if (input === (mmdd + day).toString()) {
             closePinModal();
-            executeSwitchUser(pendingUser);
+            executeSwitchUser(pendingUser.name, pendingUser.grade);
         } else {
             const el = document.getElementById('hub-pin-input'); el.classList.add('error-shake');
             setTimeout(() => { el.classList.remove('error-shake'); el.value = ''; el.focus(); }, 400);
@@ -396,7 +404,6 @@
         showScreen('shop-screen');
     }
 
-    // 更新：将 prefix 统一转为大写，配合后端的核销
     function selectPrize(el, type, price, name, prefix) {
         document.querySelectorAll('.shop-item').forEach(i => i.classList.remove('active'));
         el.classList.add('active');
@@ -462,6 +469,7 @@
         
         for (let i = 0; i < localStorage.length; i++) {
             let key = localStorage.key(i);
+            // 💡 现在读取的是基于 currentUser (名字) 的战绩
             if (key.startsWith('practice_stats_') && key.includes(`_${currentUser}_`)) {
                 try {
                     let parts = key.split('_');
@@ -555,8 +563,9 @@
     
     // 自动加载上次用户
     let lastUser = localStorage.getItem('currentPlayer');
-    if(lastUser === 'P3' || lastUser === 'P1') {
-        executeSwitchUser(lastUser);
+    let lastGrade = localStorage.getItem('currentGrade') || (lastUser === 'Valerie' ? 'P3' : 'P1');
+    if(lastUser === 'Valerie' || lastUser === 'Venessa') {
+        executeSwitchUser(lastUser, lastGrade);
     } else {
         showScreen('user-screen');
     }
