@@ -23,7 +23,6 @@
         
         @keyframes bounceIn { 0% { opacity: 0; transform: scale(0.95); } 100% { opacity: 1; transform: scale(1); } }
         
-        /* 📅 修改后的日期模块（上下居中对齐） */
         #school-term-display { margin-bottom: 25px; background: rgba(255,255,255,0.8); padding: 12px 30px; border-radius: 20px; border: 2px solid #fff; box-shadow: 0 8px 15px rgba(59, 130, 246, 0.1); display: flex; flex-direction: column; align-items: center; gap: 4px; }
 
         .magic-number { display: inline-block; font-size: 1.4em; color: #f59e0b; font-weight: 900; padding: 0 5px; animation: popPulse 1s infinite alternate cubic-bezier(0.4, 0, 0.2, 1); }
@@ -110,17 +109,19 @@
         .shop-bal-crys { background:#f0f9ff; border:3px solid #bae6fd; }
         
         .shop-item-grid { display:grid; grid-template-columns:repeat(2, 1fr); gap:15px; width:100%; margin-bottom:25px; }
-        .shop-item { background: white; border: 4px solid #e2e8f0; border-radius: 25px; padding: 15px; display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: 0.2s; box-shadow: 0 6px 0 #cbd5e1; }
+        .shop-item { background: white; border: 4px solid #e2e8f0; border-radius: 25px; padding: 25px 10px; display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: 0.2s; box-shadow: 0 6px 0 #cbd5e1; }
         .shop-item:active { transform: translateY(4px); box-shadow: 0 2px 0 #cbd5e1; }
         .shop-item.active { border-color: #f59e0b; background: #fffbeb; transform: scale(1.05); box-shadow: 0 10px 20px rgba(245,158,11,0.2); }
         
-        /* 新增：商品图片样式 */
-        .shop-icon { width: 64px; height: 64px; object-fit: contain; margin-bottom: 5px; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.1)); }
+        /* 🌟 核心修改：去掉阴影防止灰框，使用 mix-blend-mode 消除白底，放大图标 */
+        .shop-icon { width: 100px; height: 100px; object-fit: contain; margin-bottom: 15px; mix-blend-mode: multiply; }
         
-        .shop-item .name { font-weight: 900; font-size: 16px; color: #475569; margin-bottom: 8px; }
-        .shop-item .price { font-size: 24px; font-weight: 900; border-radius: 15px; padding: 4px 12px; display: inline-flex; align-items: center; gap: 5px; }
-        .shop-item.coin-item .price { background: #fef3c7; color: #d97706; }
-        .shop-item.crys-item .price { background: #e0f2fe; color: #0284c7; }
+        .shop-item .name { font-weight: 900; font-size: 18px; color: #475569; margin-bottom: 12px; }
+        
+        /* 🌟 核心修改：调整价格字体大小与图标比例平衡 */
+        .shop-item .price { font-size: 22px; font-weight: 900; border-radius: 15px; padding: 6px 15px; display: inline-flex; align-items: center; gap: 6px; }
+        .shop-item.coin-item .price { background: #fef3c7; color: #d97706; border: 2px solid #fde68a; }
+        .shop-item.crys-item .price { background: #e0f2fe; color: #0284c7; border: 2px solid #bae6fd; }
 
         #secret-code { font-family: monospace; font-size: 28px; background: #fffbeb; padding: 15px; border: 3px dashed #f59e0b; margin: 20px 0; color: #b45309; font-weight: 900; letter-spacing: 2px; }
 
@@ -132,6 +133,7 @@
             .badge-name { font-size: 13px; }
             .badge-count { font-size: 12px; padding: 2px 8px; top: -8px; right: -8px; }
             .shop-item-grid { grid-template-columns: repeat(3, 1fr); }
+            .shop-icon { width: 120px; height: 120px; } /* PC端更大 */
         }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
     </style>
@@ -212,27 +214,27 @@
         </div>
 
         <div class="shop-item-grid">
-            <div class="shop-item coin-item" onclick="selectPrize(this, '金币', 67, '汉堡', 'HB')">
+            <div class="shop-item coin-item" onclick="selectPrize(this, '金币', 67, '汉堡', 'hb')">
                 <img src="hb.png" class="shop-icon" alt="汉堡">
                 <div class="name">汉堡</div>
                 <div class="price">💰 67</div>
             </div>
-            <div class="shop-item coin-item" onclick="selectPrize(this, '金币', 134, '套餐', 'TC')">
+            <div class="shop-item coin-item" onclick="selectPrize(this, '金币', 134, '套餐', 'tc')">
                 <img src="tc.png" class="shop-icon" alt="套餐">
                 <div class="name">套餐</div>
                 <div class="price">💰 134</div>
             </div>
-            <div class="shop-item coin-item" onclick="selectPrize(this, '金币', 268, '披萨大餐', 'PZ')">
+            <div class="shop-item coin-item" onclick="selectPrize(this, '金币', 268, '披萨大餐', 'pz')">
                 <img src="pz.png" class="shop-icon" alt="披萨大餐">
                 <div class="name">披萨大餐</div>
                 <div class="price">💰 268</div>
             </div>
-            <div class="shop-item crys-item" onclick="selectPrize(this, '水晶', 7, '甜筒', 'TT')">
+            <div class="shop-item crys-item" onclick="selectPrize(this, '水晶', 7, '甜筒', 'tt')">
                 <img src="tt.png" class="shop-icon" alt="甜筒">
                 <div class="name">甜筒</div>
                 <div class="price">💎 7</div>
             </div>
-            <div class="shop-item crys-item" onclick="selectPrize(this, '水晶', 14, '麦旋风', 'XF')">
+            <div class="shop-item crys-item" onclick="selectPrize(this, '水晶', 14, '麦旋风', 'xf')">
                 <img src="xf.png" class="shop-icon" alt="麦旋风">
                 <div class="name">麦旋风</div>
                 <div class="price">💎 14</div>
@@ -314,7 +316,6 @@
         else if (now >= t3) { const w = Math.floor(diff(now, t3)/7) + 1; termStr = w <= 10 ? `Term 3 Week ${w}` : "Holiday"; }
         else if (now >= t2) { const w = Math.floor(diff(now, t2)/7) + 1; termStr = w <= 10 ? `Term 2 Week ${w}` : "Holiday"; }
         
-        // 修改为上下结构的日期展示
         document.getElementById('school-term-display').innerHTML = `
             <div style="font-size: 14px; color: #64748b;">📅 ${now.toLocaleDateString('en-SG', {month:'short', day:'numeric'})}</div>
             <div style="font-size: 18px; color: #3b82f6; font-weight: 900;">${termStr}</div>
@@ -395,10 +396,11 @@
         showScreen('shop-screen');
     }
 
+    // 更新：将 prefix 统一转为大写，配合后端的核销
     function selectPrize(el, type, price, name, prefix) {
         document.querySelectorAll('.shop-item').forEach(i => i.classList.remove('active'));
         el.classList.add('active');
-        selectedPrize = { type, price, name, prefix };
+        selectedPrize = { type, price, name, prefix: prefix.toUpperCase() };
         
         const btn = document.getElementById('do-redeem-btn');
         btn.style.background = '#10b981';
@@ -448,7 +450,6 @@
         openShop(); 
     }
 
-    // 🏆 全图鉴荣誉墙逻辑
     function renderBadges() {
         const container = document.getElementById('badges-container');
         container.innerHTML = ''; 
@@ -489,7 +490,7 @@
                 classes.push('unlocked');
                 if (b.tier) classes.push(b.tier);
             } else {
-                classes.push('locked'); // 0个时应用灰色锁定状态
+                classes.push('locked'); 
             }
             
             let countHtml = (b.count > 1) ? `<div class="badge-count">x${b.count}</div>` : '';
@@ -507,7 +508,6 @@
             `;
         };
 
-        // 🌟 全图鉴：核心战绩
         const coreBadges = [
             { icon: '🎯', name: '神射手', count: totalPerfects },
             { icon: '⚡️', name: '极速突破', count: totalSpeedBreaks },
@@ -519,7 +519,6 @@
                 <div class="badge-grid">${coreBadges.map(renderItemHTML).join('')}</div>
             </div>`;
 
-        // 🎓 全图鉴：科目大师
         const subBadges = [
             { icon: '🔤', name: '英语达人', count: subPerfects['English'] },
             { icon: '🔢', name: '数学天才', count: subPerfects['Math'] },
@@ -532,7 +531,6 @@
                 <div class="badge-grid">${subBadges.map(renderItemHTML).join('')}</div>
             </div>`;
 
-        // 📅 全图鉴：毅力打卡 (固定的5个阶段图鉴)
         const streakMilestones = [3, 5, 10, 15, 30];
         let streakBadges = streakMilestones.map(day => {
             let count = (totalDays >= day) ? 1 : 0;
