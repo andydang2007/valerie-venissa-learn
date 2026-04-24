@@ -9,7 +9,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script>
-        let currentPlayer = localStorage.getItem('currentPlayer') || 'P3'; 
+        // 💡 与 3.0 主页解耦逻辑对齐
+        let currentUser = localStorage.getItem('currentPlayer') || 'Valerie'; 
+        let currentGrade = localStorage.getItem('currentGrade') || (currentUser === 'Venessa' ? 'P1' : 'P3');
     </script>
     <style>
         :root {
@@ -34,7 +36,6 @@
 
         .sci-fi-text { font-family: 'Orbitron', sans-serif; }
 
-        /* 🔥 将顶部 UI 的 z-index 提高到 200 */
         header {
             display: flex; justify-content: flex-end; align-items: center;
             padding: 10px 20px; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px);
@@ -56,7 +57,6 @@
 
         #combat-area { flex: 1; position: relative; overflow: hidden; display: flex; align-items: center; }
         
-        /* 🔥 将激光画布提高到 150，压在怪物上方 */
         #laser-canvas { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
             pointer-events: none; z-index: 150; 
@@ -78,7 +78,6 @@
         }
         .shake-screen { animation: shake-screen 0.2s; animation-iteration-count: 1; }
 
-        /* 🔥 飞船容器提高到 100 */
         #spaceship-container { 
             position: absolute; left: 30px; top: 50%; 
             width: 100px; height: 100px;
@@ -90,7 +89,6 @@
         #player-ship-img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; filter: contrast(1.8) brightness(0.8); }
         #laser-muzzle { position: absolute; top: 0; left: 50%; width: 1px; height: 1px; pointer-events: none; }
 
-        /* 🔥 飞船核心点击区提高到 120 */
         .ship-core {
             position: absolute; top: 50%; left: -65px; 
             transform: translate(-50%, -50%) rotate(-90deg); 
@@ -104,7 +102,6 @@
         .ship-core.needs-fix { border-color: var(--wrong-color); box-shadow: 0 0 20px var(--wrong-color); animation: pulseRed 0.8s infinite alternate; }
         @keyframes pulseRed { from { opacity: 0.7; } to { opacity: 1; } }
 
-        /* 🔥 提示手指提高到 130 */
         #finger-hint {
             position: absolute; top: -55px; left: 50%; transform: translateX(-50%);
             font-size: 40px; animation: pointDown 0.5s infinite alternate; display: none; z-index: 130;
@@ -119,7 +116,6 @@
         .enemy-img { width: 65px; height: 65px; object-fit: contain; mix-blend-mode: screen; filter: contrast(1.2); }
         .fade-out-fast { opacity: 0 !important; transform: translateY(-50%) scale(0.01) !important; }
 
-        /* 🔥 爆炸和连击文字置顶 */
         .explosion-effect-container { position: fixed; width: 150px; height: 150px; pointer-events: none; z-index: 160; mix-blend-mode: screen; }
         .explosion-layer {
             position: absolute; width: 100%; height: 100%;
@@ -165,8 +161,7 @@
         #btn-fire-action { width: 20vw; max-width: 110px; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #ff4d4d, #b91c1c); border: 6px solid #450a0a; color: white; font-size: 22px; font-weight: 900; cursor: pointer; transition: 0.1s; letter-spacing: 2px; box-shadow: inset 0 5px 10px rgba(255,255,255,0.4), 0 10px 0 #7f1d1d, 0 15px 25px rgba(0,0,0,0.8); text-shadow: -1px -1px 0 rgba(0,0,0,0.4); }
         #btn-fire-action:active { transform: translateY(8px); box-shadow: inset 0 5px 10px rgba(255,255,255,0.4), 0 2px 0 #7f1d1d, 0 5px 10px rgba(0,0,0,0.8); background: radial-gradient(circle at 30% 30%, #cc0000, #7f1d1d); }
 
-        /* 🔥 全局 overlay 置换最高 */
-        #overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.95); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 300; backdrop-filter: blur(10px); }
+        #overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.95); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 300; backdrop-filter: blur(10px); text-align: center; }
         .game-title { display: flex; flex-direction: column; align-items: center; gap: 15px; font-size: 36px; color: #fff; margin-bottom: 60px; text-shadow: 0 0 20px var(--accent-glow); text-align: center; letter-spacing: 4px; }
         .title-line { display: flex; gap: 20px; }
         .psle-cap { color: #fbbf24; font-size: 64px; text-shadow: 0 0 20px rgba(251, 191, 36, 0.6); }
@@ -178,9 +173,11 @@
         .ship-selector { display: none; gap: 25px; margin-bottom: 60px; align-items: center; justify-content: center; }
         .ship-option { width: 80px; height: 80px; padding: 5px; box-sizing: border-box; border-radius: 10px; border: 2px solid #334155; object-fit: contain; cursor: pointer; transition: 0.2s; mix-blend-mode: screen; background: #000; }
         .ship-option.selected { border-color: var(--accent-glow); box-shadow: 0 0 15px var(--accent-glow); transform: scale(1.15); }
-        .start-btn { padding: 18px 50px; border: 2px solid var(--accent-glow); background: rgba(0, 240, 255, 0.05); color: var(--accent-glow); font-size: 26px; font-weight: 900; cursor: pointer; box-shadow: 0 0 15px rgba(0, 240, 255, 0.3), inset 0 0 15px rgba(0, 240, 255, 0.2); letter-spacing: 3px; clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%); transition: all 0.2s; display: none; }
+        .start-btn { padding: 18px 50px; border: 2px solid var(--accent-glow); background: rgba(0, 240, 255, 0.05); color: var(--accent-glow); font-size: 26px; font-weight: 900; cursor: pointer; box-shadow: 0 0 15px rgba(0, 240, 255, 0.3), inset 0 0 15px rgba(0, 240, 255, 0.2); letter-spacing: 3px; clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%); transition: all 0.2s; display: none; margin-top: 15px; }
         .start-btn:active { transform: scale(0.95); }
 
+        /* 🏆 徽章结算样式 */
+        .reward-box { margin-top: 20px; background: rgba(255,255,255,0.1); padding: 15px 25px; border-radius: 20px; border: 2px solid #fde68a; display: inline-block; animation: bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         @media (max-width: 800px) {
             .game-title { font-size: 5vw; margin-bottom: 40px; gap: 10px; } .psle-cap { font-size: 9vw; }
             .ship-selector { margin-bottom: 40px;}
@@ -245,8 +242,14 @@
     </div>
 
 <script>
+    // 💡 同步 API (复用主页的通道)
+    const SYNC_API_URL = "https://script.google.com/macros/s/AKfycbyNi-a8VpHLrIpd0x5Fnb_825ZzFrLp4h2oMKot3xefrLGiLe3Pj-d8L-xWQh5w-Kkd/exec";
     const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQlpdRHnR9ybEHHgX6fouRI-vXOh8KQNLSjsbt0TYh9R3No_9i7QNv_4ELwJZJGQpTe3oZVXaZijaW4/pub?gid=573238154&single=true&output=csv";
     
+    async function syncToCloud(payload) {
+        try { fetch(SYNC_API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) }); } catch (e) {}
+    }
+
     const lessonMap = {
         '第一课': 1, '第二课': 2, '第三课': 3, '第四课': 4, '第五课': 5,
         '第六课': 6, '第七课': 7, '第八课': 8, '第九课': 9, '第十课': 10,
@@ -276,7 +279,7 @@
     let DB_WORDS = [];
     
     let state = {
-        pilot: currentPlayer,
+        pilot: currentUser,
         score: 0, combo: 0, timeLeft: 300, isPlaying: false, hatRemoved: false, dialsTouched: false,
         i: { angle: 0, opts: [], step: 0 }, f: { angle: 0, opts: [], step: 0 }, t: { angle: 0, opts: [], step: 0 },
         targets: [], targetIdCounter: 0, lastSpawnTime: 0, lastTimerTick: 0,
@@ -340,7 +343,8 @@
                 sessionStorage.setItem('pinyin_db_cache', JSON.stringify(ALL_WORDS));
             }
             
-            if (currentPlayer === 'P1') {
+            // 💡 使用 currentGrade (P1 或 P3) 过滤词库
+            if (currentGrade === 'P1') {
                 DB_WORDS = ALL_WORDS.filter(w => w.grade === 'P1' && w.lesson <= 8);
             } else {
                 DB_WORDS = ALL_WORDS.filter(w => w.grade === 'P1' || w.grade === 'P2' || (w.grade === 'P3' && w.lesson <= 7));
@@ -392,20 +396,70 @@
         gameLoop();
     }
 
+    // 💡 终极游戏结算逻辑：每日 1 次拼音高手徽章
     function endGame() {
         state.isPlaying = false;
         document.getElementById('overlay').style.display = 'flex';
         
-        document.getElementById('main-title').innerHTML = `
-            <div style="font-size: 48px; color: #fbbf24; text-shadow: 0 0 20px #fbbf24;">TIME'S UP</div>
-            <div style="font-size: 24px; color: #fff; margin-top: 10px;">FINAL SCORE: ${state.score}</div>
-        `;
+        const threshold = currentUser === 'Venessa' ? 3000 : 7000;
+        const today = new Date().toISOString().split('T')[0];
+        const badgeDateKey = `pinyin_badge_date_${currentUser}`;
+        const badgeCountKey = `pinyin_badge_count_${currentUser}`;
+        const lastBadgeDate = localStorage.getItem(badgeDateKey);
+
+        let resultHTML = "";
+
+        if (state.score >= threshold) {
+            if (lastBadgeDate !== today) {
+                // 🎉 满足条件且今天还没拿过：发徽章发钱！
+                localStorage.setItem(badgeDateKey, today);
+                let currentCount = parseInt(localStorage.getItem(badgeCountKey) || "0");
+                localStorage.setItem(badgeCountKey, currentCount + 1);
+
+                // 算金币：妹妹双倍，姐姐1倍
+                let coinGain = currentUser === 'Venessa' ? 2 : 1;
+                let vaultCoins = parseInt(localStorage.getItem('gold_coins_vault') || "0");
+                localStorage.setItem('gold_coins_vault', vaultCoins + coinGain);
+
+                // 同步云端
+                syncToCloud({ type: 'badge', user: currentUser, subject: '拼音', icon: '🎮', title: '拼音高手', desc: `镭射射击达到 ${state.score} 分！` });
+                syncToCloud({ type: 'coin_update', user: currentUser, amount: coinGain, total: vaultCoins + coinGain });
+
+                resultHTML = `
+                    <div style="font-size: 48px; color: #39ff14; text-shadow: 0 0 20px #39ff14;">MISSION ACCOMPLISHED</div>
+                    <div style="font-size: 24px; color: #fff; margin-top: 10px;">FINAL SCORE: ${state.score}</div>
+                    <div class="reward-box">
+                        <div style="font-size: 45px; margin-bottom: 5px;">🎮</div>
+                        <div style="font-size: 22px; color: #fde68a; font-weight: 900;">【拼音高手】徽章 +1！</div>
+                        <div style="font-size: 16px; color: #f59e0b; margin-top: 5px;">💰 金币 +${coinGain} 已存入家庭金库</div>
+                    </div>
+                `;
+                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+            } else {
+                // 🛑 达到分数，但今天已经拿过了（防刷金币机制）
+                resultHTML = `
+                    <div style="font-size: 48px; color: #39ff14; text-shadow: 0 0 20px #39ff14;">MISSION ACCOMPLISHED</div>
+                    <div style="font-size: 24px; color: #fff; margin-top: 10px;">FINAL SCORE: ${state.score}</div>
+                    <div style="font-size: 16px; color: #94a3b8; margin-top: 25px; max-width: 300px;">(你太棒了！但【拼音高手】每天只能获得 1 枚，明天再来赚金币吧！)</div>
+                `;
+            }
+        } else {
+            // ❌ 未达到分数
+            resultHTML = `
+                <div style="font-size: 48px; color: #ff003c; text-shadow: 0 0 20px #ff003c;">TIME'S UP</div>
+                <div style="font-size: 24px; color: #fff; margin-top: 10px;">FINAL SCORE: ${state.score}</div>
+                <div style="font-size: 16px; color: #94a3b8; margin-top: 25px;">(目标：${threshold} 分。继续努力！)</div>
+            `;
+        }
+
+        document.getElementById('main-title').innerHTML = resultHTML;
         document.getElementById('selector-title').style.display = 'none';
         document.getElementById('ship-selector').style.display = 'none';
         
         let startBtn = document.getElementById('btn-start');
-        startBtn.innerText = "BACK TO HUB";
-        startBtn.onclick = () => { window.location.href = 'index.html'; }; 
+        startBtn.innerText = "PLAY AGAIN";
+        startBtn.style.display = "block";
+        startBtn.onclick = () => { window.location.reload(); }; 
     }
 
     function getFixedOpts(correct, allArr) {
@@ -463,8 +517,6 @@
         div.className = 'enemy-container';
         div.style.top = top + '%';
         div.style.right = '-100px';
-
-        // 🔥 新增动态图层逻辑：速度越快，z-index越小，就会钻到慢怪下面
         div.style.zIndex = Math.floor(100 - speed * 1000);
 
         div.innerHTML = `
