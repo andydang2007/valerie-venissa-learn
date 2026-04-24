@@ -430,35 +430,77 @@
         
         pendingGameResult = recordGameLogic(isPerfect);
 
-        // ⚡️ 检查是否打破速度记录（仅在获得6~7分时计算）
+        // 如果表现完美，开始往队列里塞徽章！
         if (isPerfect) {
+            // 1. 必定获得：🎯 神射手
+            badgeQueue.push({
+                icon: '🎯',
+                title: isCN ? '神射手！' : 'Sharpshooter!',
+                desc: isCN ? '太准了！错题控制在1道以内，【神射手】徽章 +1！' : 'Great accuracy! You earned a Sharpshooter badge!'
+            });
+
+            // 2. 必定获得：科目专属大师
+            let subIcon = curSub === '华文' ? '🐼' : (curSub === 'Science' ? '🌱' : (curSub === 'Math' ? '🔢' : '🔤'));
+            let subName = curSub === '华文' ? '华文小将' : (curSub === 'Science' ? '科学博士' : (curSub === 'Math' ? '数学天才' : '英语达人'));
+            badgeQueue.push({
+                icon: subIcon,
+                title: subName,
+                desc: isCN ? `在 ${curSub} 练习中表现优异，专属徽章 +1！` : `Excellent performance in ${curSub}! Badge +1!`
+            });
+
+            // 3. 条件获得：⚡️ 极速突破（打破记录）
             let speedStats = checkAndRecordSpeed(timeTakenSec);
             if (speedStats.isNewRecord) {
-                showBadgeModal(
-                    "⚡️", 
-                    isCN ? "极速突破！" : "New Speed Record!", 
-                    isCN ? `太厉害了！你只用了 <span class="epic-highlight">${timeTakenSec}秒</span> 就完成了练习！<br><br>打破了之前的 ${speedStats.oldRecord ? speedStats.oldRecord : '初始'}秒 记录！` 
-                         : `Amazing! You finished in <span class="epic-highlight">${timeTakenSec}s</span>!<br><br>Beating your old record of ${speedStats.oldRecord ? speedStats.oldRecord : 'N/A'}s!`
-                );
-                return; // 暂停流程，等待用户点击Awesome
+                badgeQueue.push({
+                    icon: '⚡️',
+                    title: isCN ? '极速突破！' : 'New Speed Record!',
+                    desc: isCN ? `只用了 <span class="epic-highlight">${timeTakenSec}秒</span>！打破了之前的 ${speedStats.oldRecord ? speedStats.oldRecord : '初始'}秒 记录！` 
+                               : `Finished in <span class="epic-highlight">${timeTakenSec}s</span>! Beating your old record of ${speedStats.oldRecord ? speedStats.oldRecord : 'N/A'}s!`
+                });
             }
-        }
 
-        // 如果没有触发史诗级徽章，直接跳到最终结算
-        renderFinalScreen();
+            // 4. 条件获得：🎈 气球猎人（解锁游戏）
+            if (pendingGameResult && pendingGameResult.trigger) {
+                badgeQueue.push({
+                    icon: '🎈',
+                    title: isCN ? '气球猎人！' : 'Balloon Hunter!',
+                    desc: isCN ? '成功解锁打气球游戏！游戏券 +1！' : 'Balloon game unlocked! Ticket +1!'
+                });
+            }
+
+            // 发动队列，弹出第一个徽章！
+            showNextBadge();
+        } else {
+            // 没有获得徽章，直接跳到最终结算
+            renderFinalScreen();
+        }
     }
 
-    function showBadgeModal(icon, title, desc) {
-        document.getElementById('badge-icon').innerText = icon;
-        document.getElementById('badge-title').innerText = title;
-        document.getElementById('badge-desc').innerHTML = desc;
-        document.getElementById('badge-modal').style.display = 'flex';
-        if (typeof confetti === 'function') confetti({ particleCount: 300, spread: 150, origin: { y: 0.3 }, zIndex: 1001 });
+    // 🌟 核心队列发射器
+    function showNextBadge() {
+        if (badgeQueue.length > 0) {
+            let nextBadge = badgeQueue.shift(); // 从队列头部拿出一个徽章
+            
+            document.getElementById('badge-icon').innerText = nextBadge.icon;
+            document.getElementById('badge-title').innerText = nextBadge.title;
+            document.getElementById('badge-desc').innerHTML = nextBadge.desc;
+            document.getElementById('badge-modal').style.display = 'flex';
+            
+            // 每次弹窗都放一次烟花！
+            if (typeof confetti === 'function') confetti({ particleCount: 300, spread: 150, origin: { y: 0.3 }, zIndex: 1001 });
+        } else {
+            // 队列空了，所有徽章都展示完了，进入最终的结算界面
+            renderFinalScreen();
+        }
     }
 
     function closeBadgeModal() {
         document.getElementById('badge-modal').style.display = 'none';
-        renderFinalScreen(); // 继续跳转到结算
+        
+        // 稍微延迟 300 毫秒再弹下一个，产生“呼吸感”，避免闪烁过快
+        setTimeout(() => {
+            showNextBadge(); 
+        }, 300);
     }
 
     function renderFinalScreen() {
