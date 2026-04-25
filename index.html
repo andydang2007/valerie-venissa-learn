@@ -513,7 +513,7 @@
         openShop(); 
     }
 
-    // 🏆 全图鉴徽章渲染系统
+    // 🏆 全图鉴徽章渲染系统 (含彩蛋逻辑)
     function renderBadges() {
         const container = document.getElementById('badges-container');
         container.innerHTML = ''; 
@@ -618,6 +618,27 @@
                 <div class="badge-category-title">📅 毅力打卡</div>
                 <div class="badge-grid">${streakBadges.map(renderItemHTML).join('')}</div>
             </div>`;
+
+        // 🎁 隐藏彩蛋 (特别徽章逻辑)
+        const easterBadgesData = [
+            { icon: '🌅', name: '早鸟', count: parseInt(localStorage.getItem(`easter_earlybird_${currentUser}`) || '0'), tier: 'gold' },
+            { icon: '🦉', name: '夜猫', count: parseInt(localStorage.getItem(`easter_nightowl_${currentUser}`) || '0'), tier: 'gold' },
+            { icon: '🔥', name: '全对三连', count: parseInt(localStorage.getItem(`easter_hattrick_${currentUser}`) || '0'), tier: 'gold' },
+            { icon: '🎉', name: '周末狂人', count: parseInt(localStorage.getItem(`easter_weekend_${currentUser}`) || '0'), tier: 'gold' },
+            { icon: '🔋', name: '假期充电', count: parseInt(localStorage.getItem(`easter_holiday_${currentUser}`) || '0'), tier: 'gold' }
+        ];
+
+        // 只挑选出已经解锁的彩蛋
+        const unlockedEasterBadges = easterBadgesData.filter(b => b.count > 0);
+
+        // 如果解锁了至少一个，就显示这个特殊的紫色栏目
+        if (unlockedEasterBadges.length > 0) {
+            container.innerHTML += `
+                <div class="badge-category">
+                    <div class="badge-category-title" style="color: #9333ea; border-bottom-color: #d8b4fe;">🎁 特别彩蛋</div>
+                    <div class="badge-grid">${unlockedEasterBadges.map(renderItemHTML).join('')}</div>
+                </div>`;
+        }
 
         document.getElementById('total-badge-count').innerText = totalTrophies;
     }
