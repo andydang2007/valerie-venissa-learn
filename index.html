@@ -527,18 +527,25 @@
                 <div class="badge-grid">${coreBadges.map(renderItemHTML).join('')}</div>
             </div>`;
 
-// 💡 提取拼音高手的数量
+        // 🎓 全图鉴：科目大师
+        
+        // 统计听写大王数量
+        let tingxieKingCount = 0;
+        for (let i = 0; i < localStorage.length; i++) {
+            if (localStorage.key(i).startsWith(`tingxie_badge_${currentUser}_`)) tingxieKingCount++;
+        }
+        
+        // 统计拼音高手数量
         let pinyinCount = parseInt(localStorage.getItem(`pinyin_badge_count_${currentUser}`) || '0');
 
-        // 🎓 全图鉴：科目大师
         const subBadges = [
             { icon: '🔤', name: '英语达人', count: subPerfects['English'] },
             { icon: '🔢', name: '数学天才', count: subPerfects['Math'] },
             { icon: '🐼', name: '华文小将', count: subPerfects['华文'] },
             { icon: '🌱', name: '科学博士', count: subPerfects['Science'] },
-            { icon: '🎮', name: '拼音高手', count: pinyinCount } // 🌟 这一行是新加的！
+            { icon: '🎮', name: '拼音高手', count: pinyinCount },
+            { icon: '👑', name: '听写大王', count: tingxieKingCount } // 🌟 成功移到这里！
         ];
-
         container.innerHTML += `
             <div class="badge-category">
                 <div class="badge-category-title">🎓 科目大师</div>
