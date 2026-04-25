@@ -392,6 +392,7 @@
 
     function nextQ() { if (curIdx < sessionQs.length - 1) { curIdx++; renderQ(); } else { finishQuiz(); } }
 
+
     function finishQuiz() {
         const timeTakenSec = Math.floor((Date.now() - startTime) / 1000);
         const isPerfect = sessionErrors <= 1;
@@ -401,30 +402,49 @@
         badgeQueue = [];
         let earnedBadgesForCoin = 0;
 
+        // 1. 科目徽章
         if (sessionErrors <= 3) {
             earnedBadgesForCoin++;
             let subIcon = curSub === '华文' ? '🐼' : (curSub === 'Science' ? '🌱' : (curSub === 'Math' ? '🔢' : '🔤'));
             let subName = curSub === '华文' ? '华文小将' : (curSub === 'Science' ? '科学博士' : (curSub === 'Math' ? '数学天才' : '英语达人'));
             badgeQueue.push({ icon: subIcon, title: subName, desc: isCN ? `完成高质量练习，专属徽章 +1！` : `Good job! Badge +1!` });
+            
+            // 💡 修复：补回徽章同步
+            syncToCloud({ type: 'badge', user: curUser, grade: curGrade, subject: curSub, icon: subIcon, title: subName, desc: '高质量练习' });
         }
 
+        // 2. 神射手 & 极速 & 气球
         if (isPerfect) {
             earnedBadgesForCoin++;
             badgeQueue.push({ icon: '🎯', title: isCN ? '神射手！' : 'Sharpshooter!', desc: isCN ? '错题在1道以内，神射手徽章 +1！' : 'Great accuracy! Sharpshooter badge +1!' });
+            
+            // 💡 修复：补回徽章同步
+            syncToCloud({ type: 'badge', user: curUser, grade: curGrade, subject: curSub, icon: '🎯', title: '神射手', desc: '错题<=1' });
 
             if (timeTakenSec <= speedLimit) {
                 earnedBadgesForCoin++;
+                
+                // 💡 修复：正确累加并保存极速突破的次数，彻底消灭幽灵数据
+                let currentBreaks = parseInt(localStorage.getItem(`speed_breaks_${curUser}`) || '0');
+                localStorage.setItem(`speed_breaks_${curUser}`, currentBreaks + 1);
+
                 badgeQueue.push({ icon: '⚡️', title: isCN ? '极速突破！' : 'Speed Record!', desc: isCN ? `仅用 <span class="epic-highlight">${timeTakenSec}秒</span>！闪电般的速度！` : `Finished in <span class="epic-highlight">${timeTakenSec}s</span>! Lightning fast!` });
+                
+                // 💡 修复：补回徽章同步
+                syncToCloud({ type: 'badge', user: curUser, grade: curGrade, subject: curSub, icon: '⚡️', title: '极速突破', desc: `耗时: ${timeTakenSec}秒` });
             }
 
             pendingGameResult = applyBalloonLogic(sessionErrors);
             if (pendingGameResult && pendingGameResult.trigger) {
                 badgeQueue.push({ icon: '🎈', title: isCN ? '气球猎人！' : 'Balloon Hunter!', desc: pendingGameResult.msg });
+                // 💡 修复：补回徽章同步
+                syncToCloud({ type: 'badge', user: curUser, grade: curGrade, subject: curSub, icon: '🎈', title: '气球猎人', desc: '解锁气球游戏' });
             }
         } else {
             pendingGameResult = null; 
         }
 
+        // 3. 计算共享金库
         if (earnedBadgesForCoin > 0) {
             let coinMultiplier = curUser === 'Venessa' ? 2 : 1; 
             let coinGain = earnedBadgesForCoin * coinMultiplier;
@@ -433,6 +453,7 @@
             syncToCloud({ type: 'coin_update', user: curUser, amount: coinGain, total: vaultCoins + coinGain });
         }
 
+        // 4. 计算个人打卡水晶
         let today = new Date().toISOString().split('T')[0];
         let lastDate = localStorage.getItem(`last_date_${curUser}`);
         let streak = parseInt(localStorage.getItem(`streak_${curUser}`) || "0");
