@@ -150,7 +150,7 @@
                 <h2 id="dash-name">Welcome!</h2>
             </div>
             <div class="streak-info-box">
-                <div class="streak-badge" id="dash-streak">📅 今天是你第 0 天打卡</div>
+                <div class="streak-badge" id="dash-streak">📅 今天是你第 1 天打卡</div>
             </div>
         </div>
 
@@ -310,6 +310,8 @@
         `;
     }
 
+
+    
     // ☁️ 云端全量对账
     async function syncFromCloud() {
         if (!currentUser) return;
@@ -393,7 +395,14 @@
 
     function updateEconomyUI() {
         let streak = parseInt(localStorage.getItem(`streak_${currentUser}`) || "0");
-        document.getElementById('dash-streak').innerText = `📅 今天是你第 ${streak} 天打卡`;
+        
+        // 💡 修复第 0 天的尴尬文案：如果是 0，就鼓励她们开启第 1 天！
+        if (streak === 0) {
+            document.getElementById('dash-streak').innerText = `📅 开启你的第 1 天打卡吧！`;
+        } else {
+            document.getElementById('dash-streak').innerText = `📅 今天是你第 ${streak} 天打卡`;
+        }
+        
         document.getElementById('shop-vault-total').innerText = localStorage.getItem('gold_coins_vault') || "0";
         document.getElementById('shop-user-crys').innerText = localStorage.getItem(`crystals_${currentUser}`) || "0";
     }
