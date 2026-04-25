@@ -94,15 +94,17 @@
         .shop-bal-vault { background: #fffbeb; border: 3px solid #fde68a; }
         .shop-bal-crys { background: #f0f9ff; border: 3px solid #bae6fd; }
         
-        /* 商店物品一排显示 5 个的小巧布局 */
+        /* 商店物品网格 (优化自适应宽度) */
         .shop-item-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; width: 100%; margin-bottom: 25px; overflow-x: auto; padding-bottom: 10px; }
-        .shop-item { background: white; border: 3px solid #e2e8f0; border-radius: 15px; padding: 10px 5px; display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 0 #cbd5e1; min-width: 65px; }
+        .shop-item { background: white; border: 3px solid #e2e8f0; border-radius: 15px; padding: 10px 5px; display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 0 #cbd5e1; }
         .shop-item:active { transform: translateY(4px); box-shadow: 0 0 0 transparent; }
         .shop-item.active { border-color: #f59e0b; background: #fffbeb; transform: scale(1.05); box-shadow: 0 6px 15px rgba(245,158,11,0.2); }
         
-        .shop-icon { width: 40px; height: 40px; object-fit: contain; margin-bottom: 8px; mix-blend-mode: multiply; }
-        .shop-item .name { font-weight: 900; font-size: 11px; color: #475569; margin-bottom: 6px; text-align: center; line-height: 1.1; }
-        .shop-item .price { font-size: 12px; font-weight: 900; border-radius: 10px; padding: 3px 6px; display: inline-flex; align-items: center; gap: 2px; }
+        /* 💡 终极图片放大逻辑：横向填满卡片极限，宽高比 1:1 绝对不留白 */
+        .shop-icon { width: 100%; max-width: 90px; aspect-ratio: 1/1; object-fit: contain; margin-bottom: 8px; mix-blend-mode: multiply; }
+        
+        .shop-item .name { font-weight: 900; font-size: 11px; color: #475569; margin-bottom: 6px; text-align: center; line-height: 1.1; width: 100%; }
+        .shop-item .price { font-size: 12px; font-weight: 900; border-radius: 10px; padding: 3px 6px; display: inline-flex; align-items: center; justify-content: center; gap: 2px; width: 100%; }
         .shop-item.coin-item .price { background: #fef3c7; color: #d97706; border: 1.5px solid #fde68a; }
         .shop-item.crys-item .price { background: #e0f2fe; color: #0284c7; border: 1.5px solid #bae6fd; }
 
@@ -115,8 +117,10 @@
             .badge-icon { width: 56px; height: 56px; font-size: 30px; border-radius: 18px; }
             .badge-name { font-size: 13px; }
             .badge-count { font-size: 12px; padding: 2px 8px; top: -8px; right: -8px; }
-            .shop-icon { width: 50px; height: 50px; }
-            .shop-item .name { font-size: 13px; }
+            /* iPad/电脑上，彻底放飞尺寸，达到惊人的 110px */
+            .shop-icon { max-width: 110px; }
+            .shop-item .name { font-size: 14px; }
+            .shop-item .price { font-size: 14px; }
         }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
     </style>
@@ -445,7 +449,7 @@
         const container = document.getElementById('badges-container');
         container.innerHTML = ''; 
 
-        // 收集旧的历史练习天数用于提取子科目的战绩
+        // 收集历史战绩
         let localPerfects = 0, localGames = 0;
         let subPerfects = { 'English': 0, 'Math': 0, '华文': 0, 'Science': 0 };
         for (let i = 0; i < localStorage.length; i++) {
@@ -491,20 +495,20 @@
         ];
         container.innerHTML += `<div class="badge-category"><div class="badge-category-title">🎓 科目大师</div><div class="badge-grid">${subBadges.map(renderItemHTML).join('')}</div></div>`;
 
-        // 📅 毅力打卡 (逻辑修改：达到天数的同时点亮所有已达标的徽章)
+        // 📅 毅力打卡
         const cloudStreak = parseInt(localStorage.getItem(`streak_${currentUser}`)||'0');
         const streakMilestones = [3, 5, 10, 15, 30];
         let streakBadges = [];
         
         streakMilestones.forEach(day => {
-            let isAchieved = (cloudStreak >= day); // 只要云端连击大于等于目标天数，这个徽章就解锁
-            let count = isAchieved ? 1 : 0; // 每个阶段拿一个
+            let isAchieved = (cloudStreak >= day);
+            let count = isAchieved ? 1 : 0;
             let tier = day >= 15 ? 'gold' : (day >= 10 ? 'silver' : 'bronze');
             streakBadges.push({ icon: '📅', name: `打卡${day}天`, count: count, tier: tier, targetStreak: day, currentStreak: cloudStreak });
         });
         container.innerHTML += `<div class="badge-category"><div class="badge-category-title">📅 毅力打卡 (已连续 ${cloudStreak} 天)</div><div class="badge-grid">${streakBadges.map(renderItemHTML).join('')}</div></div>`;
 
-        // 🎁 隐藏彩蛋 (特别徽章逻辑)
+        // 🎁 隐藏彩蛋
         const easterBadgesData = [
             { icon: '🌅', name: '早起鸟儿', count: parseInt(localStorage.getItem(`easter_earlybird_${currentUser}`) || '0'), tier: 'gold' },
             { icon: '🦉', name: '小猫头鹰', count: parseInt(localStorage.getItem(`easter_nightowl_${currentUser}`) || '0'), tier: 'gold' },
