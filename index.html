@@ -4,32 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Family Learning Hub</title>
-
     <link rel="apple-touch-icon" href="https://img.icons8.com/fluency/240/paper-plane.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="LearningHub">
-    
-
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
-    
     <style>
         :root { --primary: #10b981; --bg: #f8fafc; --text-main: #1e293b; --text-muted: #64748b; }
         * { box-sizing: border-box; font-family: 'Nunito', 'Microsoft YaHei', sans-serif; -webkit-tap-highlight-color: transparent; }
-        
         body { background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); margin: 0; padding: 20px; color: var(--text-main); display: flex; flex-direction: column; align-items: center; justify-content: flex-start; min-height: 100vh; overflow-x: hidden; }
-        
         .container { width: 100%; max-width: 700px; background: rgba(255,255,255,0.95); padding: 30px 25px 40px 25px; border-radius: 40px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); text-align: center; position: relative; border: 4px solid #ffffff; backdrop-filter: blur(12px); display: flex; flex-direction: column; align-items: center; margin-top: 5vh; margin-bottom: auto; }
         .screen { display: none; width: 100%; animation: bounceIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); flex-direction: column; align-items: center; }
-        
         @keyframes bounceIn { 0% { opacity: 0; transform: scale(0.95); } 100% { opacity: 1; transform: scale(1); } }
         
         #school-term-display { margin-bottom: 25px; background: rgba(255,255,255,0.8); padding: 12px 30px; border-radius: 20px; border: 2px solid #fff; box-shadow: 0 8px 15px rgba(59, 130, 246, 0.1); display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; transition: 0.1s; }
         #school-term-display:active { transform: scale(0.95); }
-
         #cloud-sync-indicator { font-size: 11px; color: #94a3b8; font-weight: 800; margin-top: -15px; margin-bottom: 15px; display: none; align-items: center; justify-content: center; gap: 4px; }
-
         .magic-number { display: inline-block; font-size: 1.4em; color: #f59e0b; font-weight: 900; padding: 0 5px; animation: popPulse 1s infinite alternate cubic-bezier(0.4, 0, 0.2, 1); }
         @keyframes popPulse { 0% { transform: scale(1); } 100% { transform: scale(1.15) translateY(-3px); text-shadow: 0 0 15px rgba(234, 179, 8, 0.5); } }
 
@@ -41,11 +31,13 @@
         .dashboard-header .avatar-row { display: flex; align-items: center; gap: 15px; }
         .dashboard-header .avatar { font-size: 50px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.15)); }
         .dashboard-header h2 { margin: 0; font-size: 28px; color: #0f172a; font-weight: 900; }
-        .streak-badge { font-size: 14px; color: #d97706; background: #fffbeb; padding: 5px 15px; border-radius: 20px; font-weight: 900; border: 2px solid #fde68a; box-shadow: 0 4px 0 #fde68a; }
+        
+        .streak-info-box { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        .total-days-badge { font-size: 12px; color: #64748b; font-weight: 800; }
+        .streak-badge { font-size: 15px; color: #d97706; background: #fffbeb; padding: 6px 18px; border-radius: 20px; font-weight: 900; border: 2px solid #fde68a; box-shadow: 0 4px 0 #fde68a; }
 
         .honor-wall { width: 100%; background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border: 4px solid #fde68a; border-radius: 30px; padding: 20px; margin-bottom: 30px; text-align: left; box-shadow: inset 0 4px 15px rgba(245, 158, 11, 0.1), 0 10px 20px rgba(0,0,0,0.05); position: relative; overflow: hidden; }
         .honor-wall::after { content: '✨'; position: absolute; top: -15px; right: -5px; font-size: 100px; opacity: 0.15; transform: rotate(15deg); pointer-events: none; }
-        
         .honor-wall h3 { margin: 0 0 15px 0; font-size: 22px; color: #d97706; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; font-weight: 900; z-index: 2; position: relative; }
         
         .total-trophies { font-size: 14px; background: white; padding: 6px 12px; border-radius: 20px; color: #f59e0b; border: 2px solid #fcd34d; box-shadow: 0 4px 0 #fde68a; display: flex; align-items: center; gap: 5px; }
@@ -54,7 +46,6 @@
         .badges-container { display: flex; flex-direction: column; gap: 20px; position: relative; z-index: 2; }
         .badge-category { width: 100%; }
         .badge-category-title { font-size: 16px; color: #b45309; font-weight: 900; margin-bottom: 12px; border-bottom: 2px dashed #fde68a; padding-bottom: 5px; display: flex; align-items: center; gap: 6px; }
-        
         .badge-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px 6px; width: 100%; justify-items: center; }
         
         .badge-item { display: flex; flex-direction: column; align-items: center; gap: 6px; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; width: 100%; }
@@ -63,7 +54,6 @@
         
         .badge-icon-wrapper { position: relative; display: flex; justify-content: center; }
         .badge-icon { width: 48px; height: 48px; border-radius: 16px; background: white; border: 3px solid #cbd5e1; display: flex; align-items: center; justify-content: center; font-size: 26px; box-shadow: 0 4px 0 #94a3b8; transition: 0.3s; }
-        
         .badge-item.unlocked .badge-icon { border-color: #f59e0b; background: #fffbeb; box-shadow: 0 4px 0 #d97706, 0 0 10px rgba(245, 158, 11, 0.3); }
         .badge-item.unlocked.bronze .badge-icon { border-color: #cd7f32; box-shadow: 0 4px 0 #8b5a2b; background: #fdf5e6; }
         .badge-item.unlocked.silver .badge-icon { border-color: #94a3b8; box-shadow: 0 4px 0 #64748b; background: #f1f5f9; }
@@ -77,7 +67,6 @@
 
         .section-title { width: 100%; text-align: left; margin: 0 0 15px 5px; font-size: 20px; font-weight: 900; color: #334155; }
         .grid-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; width: 100%; margin-bottom: 25px; }
-        
         .card-btn { background: white; border: 4px solid #e2e8f0; border-radius: 25px; padding: 20px 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: 0.15s; color: #475569; font-weight: 900; font-size: 18px; box-shadow: 0 6px 0 #cbd5e1; }
         .card-btn:active { transform: translateY(6px); box-shadow: 0 0 0 transparent; }
         .card-btn .emoji { font-size: 38px; filter: drop-shadow(0 3px 3px rgba(0,0,0,0.1)); }
@@ -101,20 +90,22 @@
         .pin-input-hub:focus { border-color: #f59e0b; background: #fffbeb; }
         .error-shake { border-color: #ef4444 !important; animation: shake 0.3s; background-color: #fef2f2 !important; }
 
-        .shop-bal-card { flex:1; border-radius:20px; padding:15px; text-align:center; }
-        .shop-bal-vault { background:#fffbeb; border:3px solid #fde68a; }
-        .shop-bal-crys { background:#f0f9ff; border:3px solid #bae6fd; }
+        .shop-header { display: flex; gap: 15px; width: 100%; margin-bottom: 25px; }
+        .shop-bal-card { flex: 1; border-radius: 20px; padding: 15px; text-align: center; display: flex; flex-direction: column; justify-content: center; }
+        .shop-bal-vault { background: #fffbeb; border: 3px solid #fde68a; }
+        .shop-bal-crys { background: #f0f9ff; border: 3px solid #bae6fd; }
         
-        .shop-item-grid { display:grid; grid-template-columns:repeat(2, 1fr); gap:15px; width:100%; margin-bottom:25px; }
-        .shop-item { background: white; border: 4px solid #e2e8f0; border-radius: 25px; padding: 25px 10px; display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: 0.2s; box-shadow: 0 6px 0 #cbd5e1; }
-        .shop-item:active { transform: translateY(4px); box-shadow: 0 2px 0 #cbd5e1; }
-        .shop-item.active { border-color: #f59e0b; background: #fffbeb; transform: scale(1.05); box-shadow: 0 10px 20px rgba(245,158,11,0.2); }
+        /* 商店物品一排显示 5 个的小巧布局 */
+        .shop-item-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; width: 100%; margin-bottom: 25px; overflow-x: auto; padding-bottom: 10px; }
+        .shop-item { background: white; border: 3px solid #e2e8f0; border-radius: 15px; padding: 10px 5px; display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 0 #cbd5e1; min-width: 65px; }
+        .shop-item:active { transform: translateY(4px); box-shadow: 0 0 0 transparent; }
+        .shop-item.active { border-color: #f59e0b; background: #fffbeb; transform: scale(1.05); box-shadow: 0 6px 15px rgba(245,158,11,0.2); }
         
-        .shop-icon { width: 100px; height: 100px; object-fit: contain; margin-bottom: 15px; mix-blend-mode: multiply; }
-        .shop-item .name { font-weight: 900; font-size: 18px; color: #475569; margin-bottom: 12px; }
-        .shop-item .price { font-size: 22px; font-weight: 900; border-radius: 15px; padding: 6px 15px; display: inline-flex; align-items: center; gap: 6px; }
-        .shop-item.coin-item .price { background: #fef3c7; color: #d97706; border: 2px solid #fde68a; }
-        .shop-item.crys-item .price { background: #e0f2fe; color: #0284c7; border: 2px solid #bae6fd; }
+        .shop-icon { width: 40px; height: 40px; object-fit: contain; margin-bottom: 8px; mix-blend-mode: multiply; }
+        .shop-item .name { font-weight: 900; font-size: 11px; color: #475569; margin-bottom: 6px; text-align: center; line-height: 1.1; }
+        .shop-item .price { font-size: 12px; font-weight: 900; border-radius: 10px; padding: 3px 6px; display: inline-flex; align-items: center; gap: 2px; }
+        .shop-item.coin-item .price { background: #fef3c7; color: #d97706; border: 1.5px solid #fde68a; }
+        .shop-item.crys-item .price { background: #e0f2fe; color: #0284c7; border: 1.5px solid #bae6fd; }
 
         #secret-code { font-family: monospace; font-size: 28px; background: #fffbeb; padding: 15px; border: 3px dashed #f59e0b; margin: 20px 0; color: #b45309; font-weight: 900; letter-spacing: 2px; }
 
@@ -125,8 +116,8 @@
             .badge-icon { width: 56px; height: 56px; font-size: 30px; border-radius: 18px; }
             .badge-name { font-size: 13px; }
             .badge-count { font-size: 12px; padding: 2px 8px; top: -8px; right: -8px; }
-            .shop-item-grid { grid-template-columns: repeat(3, 1fr); }
-            .shop-icon { width: 120px; height: 120px; }
+            .shop-icon { width: 50px; height: 50px; }
+            .shop-item .name { font-size: 13px; }
         }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
     </style>
@@ -155,7 +146,10 @@
                 <div class="avatar" id="dash-avatar">👱‍♀️</div>
                 <h2 id="dash-name">Welcome!</h2>
             </div>
-            <div class="streak-badge" id="dash-streak">🔥 连续打卡第 0 天</div>
+            <div class="streak-info-box">
+                <div class="total-days-badge" id="dash-total-days">累计学习 0 天</div>
+                <div class="streak-badge" id="dash-streak">🔥 连续打卡 0 天</div>
+            </div>
         </div>
 
         <div class="section-title">Select Subject</div>
@@ -191,41 +185,41 @@
     </div>
 
     <div id="shop-screen" class="screen">
-        <h2 style="margin:0 0 20px 0; font-size: 32px; font-weight: 900; color: #b45309; text-shadow: 0 2px 4px rgba(245,158,11,0.2);">🎁 神秘兑换中心</h2>
+        <h2 style="margin:0 0 20px 0; font-size: 28px; font-weight: 900; color: #b45309; text-shadow: 0 2px 4px rgba(245,158,11,0.2);">🎁 神秘兑换中心</h2>
         
         <div class="shop-header">
             <div class="shop-bal-card shop-bal-vault">
-                <div style="font-size:14px; color:#d97706; font-weight:900;">家庭金币</div>
-                <div style="font-size:36px; font-weight:900; color:#b45309;">💰 <span id="shop-vault-total">0</span></div>
+                <div style="font-size:14px; color:#d97706; font-weight:900; margin-bottom:4px;">团队金币</div>
+                <div style="font-size:32px; font-weight:900; color:#b45309;">💰 <span id="shop-vault-total">0</span></div>
             </div>
             <div class="shop-bal-card shop-bal-crys">
-                <div style="font-size:14px; color:#0369a1; font-weight:900;">个人水晶</div>
-                <div style="font-size:36px; font-weight:900; color:#0ea5e9;">💎 <span id="shop-user-crys">0</span></div>
+                <div style="font-size:14px; color:#0369a1; font-weight:900; margin-bottom:4px;">个人水晶</div>
+                <div style="font-size:32px; font-weight:900; color:#0ea5e9;">💎 <span id="shop-user-crys">0</span></div>
             </div>
         </div>
 
         <div class="shop-item-grid">
-            <div class="shop-item coin-item" onclick="selectPrize(this, '金币', 67, '汉堡', 'hb')">
+            <div class="shop-item coin-item" onclick="selectPrize(this, '团队金币', 67, '汉堡', 'hb')">
                 <img src="hb.png" class="shop-icon" alt="汉堡">
                 <div class="name">汉堡</div>
                 <div class="price">💰 67</div>
             </div>
-            <div class="shop-item coin-item" onclick="selectPrize(this, '金币', 134, '套餐', 'tc')">
+            <div class="shop-item coin-item" onclick="selectPrize(this, '团队金币', 134, '套餐', 'tc')">
                 <img src="tc.png" class="shop-icon" alt="套餐">
                 <div class="name">套餐</div>
                 <div class="price">💰 134</div>
             </div>
-            <div class="shop-item coin-item" onclick="selectPrize(this, '金币', 268, '披萨大餐', 'pz')">
+            <div class="shop-item coin-item" onclick="selectPrize(this, '团队金币', 268, '披萨大餐', 'pz')">
                 <img src="pz.png" class="shop-icon" alt="披萨大餐">
                 <div class="name">披萨大餐</div>
                 <div class="price">💰 268</div>
             </div>
-            <div class="shop-item crys-item" onclick="selectPrize(this, '水晶', 7, '甜筒', 'tt')">
+            <div class="shop-item crys-item" onclick="selectPrize(this, '个人水晶', 7, '甜筒', 'tt')">
                 <img src="tt.png" class="shop-icon" alt="甜筒">
                 <div class="name">甜筒</div>
                 <div class="price">💎 7</div>
             </div>
-            <div class="shop-item crys-item" onclick="selectPrize(this, '水晶', 14, '麦旋风', 'xf')">
+            <div class="shop-item crys-item" onclick="selectPrize(this, '个人水晶', 14, '麦旋风', 'xf')">
                 <img src="xf.png" class="shop-icon" alt="麦旋风">
                 <div class="name">麦旋风</div>
                 <div class="price">💎 14</div>
@@ -297,14 +291,13 @@
     let selectedPrize = null;
     
     // 🔗 请确保这是你的真实后端地址
-    const SYNC_API_URL = "https://script.google.com/macros/s/AKfycbwIQq01IMBXicYTFbRljuzx3_n85GXvqksv96QXqbZecDQa9GL5orZl550Csbdu1ZUf/exec";
-  
+    const SYNC_API_URL = "https://script.google.com/macros/s/你的真实ID/exec"; // 💡 必须修改！
+
     function initDate() {
         const now = new Date();
         const t2 = new Date(2026, 2, 23), t3 = new Date(2026, 5, 29), t4 = new Date(2026, 8, 14);
         const diff = (d1, d2) => Math.floor((d1 - d2) / 864e5);
         let termStr = "Term 1";
-        
         if (now >= t4) { const w = Math.floor(diff(now, t4)/7) + 1; termStr = w <= 10 ? `Term 4 Week ${w}` : "Holiday"; }
         else if (now >= t3) { const w = Math.floor(diff(now, t3)/7) + 1; termStr = w <= 10 ? `Term 3 Week ${w}` : "Holiday"; }
         else if (now >= t2) { const w = Math.floor(diff(now, t2)/7) + 1; termStr = w <= 10 ? `Term 2 Week ${w}` : "Holiday"; }
@@ -315,29 +308,28 @@
         `;
     }
 
-    // ☁️ 核心逻辑：SWR 后台全量静默对账 (GET 方式)
+    // ☁️ 云端全量对账
     async function syncFromCloud() {
         if (!currentUser) return;
         const indicator = document.getElementById('cloud-sync-indicator');
         indicator.style.display = 'flex';
         
         try {
-            const targetUrl = `${SYNC_API_URL}?type=fetch_user_data&user=${currentUser}`;
-            const resp = await fetch(targetUrl);
+            const resp = await fetch(`${SYNC_API_URL}?type=fetch_user_data&user=${currentUser}`);
             const cloudData = await resp.json();
             
             if (cloudData && Object.keys(cloudData).length > 0) {
-                // 1. 基础资产同步
+                // 1. 基础资产
                 if (cloudData.vaultCoins !== undefined) localStorage.setItem('gold_coins_vault', cloudData.vaultCoins);
                 if (cloudData.userCrystals !== undefined) localStorage.setItem(`crystals_${currentUser}`, cloudData.userCrystals);
                 if (cloudData.userStreak !== undefined) localStorage.setItem(`streak_${currentUser}`, cloudData.userStreak);
                 
-                // 2. 常规特殊徽章同步
+                // 2. 常规特殊徽章
                 if (cloudData.pinyin !== undefined) localStorage.setItem(`pinyin_badge_count_${currentUser}`, cloudData.pinyin);
                 if (cloudData.speed !== undefined) localStorage.setItem(`speed_breaks_${currentUser}`, cloudData.speed);
                 if (cloudData.tingxie !== undefined) localStorage.setItem(`tingxie_badge_count_${currentUser}`, cloudData.tingxie);
                 
-                // 3. 常规科目/成就徽章同步
+                // 3. 常规成就
                 if (cloudData.perfects !== undefined) localStorage.setItem(`perfects_count_${currentUser}`, cloudData.perfects);
                 if (cloudData.games !== undefined) localStorage.setItem(`games_count_${currentUser}`, cloudData.games);
                 if (cloudData.eng !== undefined) localStorage.setItem(`eng_badge_count_${currentUser}`, cloudData.eng);
@@ -352,28 +344,18 @@
                 if (cloudData.weekend !== undefined) localStorage.setItem(`easter_weekend_${currentUser}`, cloudData.weekend);
                 if (cloudData.holiday !== undefined) localStorage.setItem(`easter_holiday_${currentUser}`, cloudData.holiday);
                 
-                // 刷新 UI 展现最新数据
                 updateEconomyUI();
                 renderBadges();
             }
         } catch (e) {
             console.log("云端同步失败，继续使用本地数据:", e);
         }
-        
         setTimeout(() => { indicator.style.display = 'none'; }, 800);
     }
 
-    function showScreen(id) {
-        document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
-        document.getElementById(id).style.display = 'flex';
-    }
-
+    function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.style.display = 'none'); document.getElementById(id).style.display = 'flex'; }
     function showSubMenu(menuId) { showScreen(menuId); }
-
-    function launchPractice(subject) {
-        localStorage.setItem('currentSubject', subject);
-        window.location.href = 'practice.html';
-    }
+    function launchPractice(subject) { localStorage.setItem('currentSubject', subject); window.location.href = 'practice.html'; }
 
     function switchUser(name, grade) {
         if (name === 'Venessa') { 
@@ -386,23 +368,12 @@
     }
 
     function executeSwitchUser(name, grade) {
-        currentUser = name;
-        currentGrade = grade;
-        
-        localStorage.setItem('currentPlayer', currentUser);
-        localStorage.setItem('currentGrade', currentGrade);
-        
+        currentUser = name; currentGrade = grade;
+        localStorage.setItem('currentPlayer', currentUser); localStorage.setItem('currentGrade', currentGrade);
         document.getElementById('dash-avatar').innerText = name === 'Valerie' ? '👱‍♀️' : '👧';
         document.getElementById('dash-name').innerText = `Hello, ${name}!`;
         document.getElementById('cn-label').innerText = name === 'Valerie' ? '高级华文' : '华文';
-        
-        // 第一阶段：瞬间渲染本地数据
-        updateEconomyUI();
-        renderBadges();
-        showScreen('dashboard-screen');
-        
-        // 第二阶段：触发后台静默对账
-        syncFromCloud();
+        updateEconomyUI(); renderBadges(); showScreen('dashboard-screen'); syncFromCloud();
     }
 
     function verifyHubPin() {
@@ -410,37 +381,25 @@
         const now = new Date();
         const mmdd = (now.getMonth() + 1) * 100 + now.getDate();
         const day = now.getDay() === 0 ? 7 : now.getDay();
-        
-        if (input === (mmdd + day).toString()) {
-            closePinModal();
-            executeSwitchUser(pendingUser.name, pendingUser.grade);
-        } else {
+        if (input === (mmdd + day).toString()) { closePinModal(); executeSwitchUser(pendingUser.name, pendingUser.grade); } 
+        else {
             const el = document.getElementById('hub-pin-input'); el.classList.add('error-shake');
             setTimeout(() => { el.classList.remove('error-shake'); el.value = ''; el.focus(); }, 400);
         }
     }
-    
     function closePinModal() { document.getElementById('pin-modal').style.display = 'none'; document.getElementById('hub-pin-input').value = ''; }
 
     function updateEconomyUI() {
-        let streak = localStorage.getItem(`streak_${currentUser}`) || "0";
-        document.getElementById('dash-streak').innerText = `🔥 连续打卡第 ${streak} 天`;
-        
+        let streak = parseInt(localStorage.getItem(`streak_${currentUser}`) || "0");
+        document.getElementById('dash-streak').innerText = `🔥 连续打卡 ${streak} 天`;
         document.getElementById('shop-vault-total').innerText = localStorage.getItem('gold_coins_vault') || "0";
         document.getElementById('shop-user-crys').innerText = localStorage.getItem(`crystals_${currentUser}`) || "0";
     }
 
     function openShop() {
         updateEconomyUI();
-        selectedPrize = null;
-        document.querySelectorAll('.shop-item').forEach(i => i.classList.remove('active'));
-        
-        const btn = document.getElementById('do-redeem-btn');
-        btn.style.background = '#cbd5e1'; 
-        btn.style.borderColor = '#94a3b8'; 
-        btn.style.boxShadow = '0 6px 0 #94a3b8'; 
-        btn.disabled = true;
-        
+        selectedPrize = null; document.querySelectorAll('.shop-item').forEach(i => i.classList.remove('active'));
+        const btn = document.getElementById('do-redeem-btn'); btn.style.background = '#cbd5e1'; btn.style.borderColor = '#94a3b8'; btn.style.boxShadow = '0 6px 0 #94a3b8'; btn.disabled = true;
         showScreen('shop-screen');
     }
 
@@ -448,12 +407,7 @@
         document.querySelectorAll('.shop-item').forEach(i => i.classList.remove('active'));
         el.classList.add('active');
         selectedPrize = { type, price, name, prefix: prefix.toUpperCase() };
-        
-        const btn = document.getElementById('do-redeem-btn');
-        btn.style.background = '#10b981';
-        btn.style.borderColor = '#059669';
-        btn.style.boxShadow = '0 6px 0 #059669';
-        btn.disabled = false;
+        const btn = document.getElementById('do-redeem-btn'); btn.style.background = '#10b981'; btn.style.borderColor = '#059669'; btn.style.boxShadow = '0 6px 0 #059669'; btn.disabled = false;
     }
 
     function executeRedeem() {
@@ -462,17 +416,12 @@
     }
 
     function confirmRedeem(type, price, name, prefix) {
-        let balanceKey = type === '金币' ? 'gold_coins_vault' : `crystals_${currentUser}`;
+        let balanceKey = type === '团队金币' ? 'gold_coins_vault' : `crystals_${currentUser}`;
         let currentBalance = parseInt(localStorage.getItem(balanceKey) || "0");
-
-        if (currentBalance < price) {
-            alert(`🚫 余额不足！你的${type}还差 ${price - currentBalance} 个，继续努力哦！`);
-            return;
-        }
+        if (currentBalance < price) { alert(`🚫 余额不足！你的${type}还差 ${price - currentBalance} 个，继续努力哦！`); return; }
 
         if (confirm(`确定要消耗 ${price} ${type} 兑换【${name}】吗？`)) {
             localStorage.setItem(balanceKey, currentBalance - price);
-            
             const now = new Date();
             const datePart = (now.getMonth() + 1).toString().padStart(2, '0') + now.getDate().toString().padStart(2, '0');
             const checkSum = (now.getDate() + price).toString().padStart(3, '0'); 
@@ -480,196 +429,128 @@
 
             try {
                 fetch(SYNC_API_URL, {
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'text/plain' }, 
+                    method: 'POST', headers: { 'Content-Type': 'text/plain' }, 
                     body: JSON.stringify({ 
-                        type: 'redemption', 
-                        user: currentUser, 
-                        rewardName: name, 
-                        price: price, 
-                        code: code,
-                        balanceType: type === '金币' ? 'coin' : 'crystal', 
-                        newBalance: currentBalance - price 
+                        type: 'redemption', user: currentUser, rewardName: name, price: price, code: code,
+                        balanceType: type === '团队金币' ? 'coin' : 'crystal', newBalance: currentBalance - price 
                     })
                 });
             } catch(e) {}
-
-            document.getElementById('secret-code').innerText = code;
-            document.getElementById('redeem-modal').style.display = 'flex';
-            
+            document.getElementById('secret-code').innerText = code; document.getElementById('redeem-modal').style.display = 'flex';
             updateEconomyUI(); 
         }
     }
-    
-    function closeRedeemModal() {
-        document.getElementById('redeem-modal').style.display = 'none';
-        openShop(); 
-    }
+    function closeRedeemModal() { document.getElementById('redeem-modal').style.display = 'none'; openShop(); }
 
-    // 🏆 全图鉴徽章渲染系统 (含云端直接拉取 + 彩蛋展示)
+    // 🏆 全图鉴徽章渲染系统
     function renderBadges() {
         const container = document.getElementById('badges-container');
         container.innerHTML = ''; 
 
-        // 兼容处理：依然读取本地未上云的零散 practice_stats
-        let localPerfects = 0;
-        let localGames = 0;
+        // 收集旧的历史练习天数，用于显示“累计总天数”
+        let localPerfects = 0, localGames = 0;
         let activeDates = new Set();
         let subPerfects = { 'English': 0, 'Math': 0, '华文': 0, 'Science': 0 };
-        
         for (let i = 0; i < localStorage.length; i++) {
             let key = localStorage.key(i);
             if (key.startsWith('practice_stats_') && key.includes(`_${currentUser}_`)) {
                 try {
-                    let parts = key.split('_');
-                    let date = parts[2];
-                    let sub = parts[4];
+                    let date = key.split('_')[2]; let sub = key.split('_')[4];
                     let stats = JSON.parse(localStorage.getItem(key));
-                    let perf = stats.perfects || 0;
-                    let games = stats.gamesPlayed || 0;
-                    
-                    localPerfects += perf;
-                    localGames += games;
-                    if (perf > 0 || games > 0) activeDates.add(date);
-                    if (sub && subPerfects[sub] !== undefined) subPerfects[sub] += perf;
+                    localPerfects += (stats.perfects||0); localGames += (stats.gamesPlayed||0);
+                    if (stats.perfects > 0 || stats.gamesPlayed > 0) activeDates.add(date);
+                    if (sub && subPerfects[sub] !== undefined) subPerfects[sub] += (stats.perfects||0);
                 } catch(e) {}
             }
         }
 
-        let totalDays = activeDates.size;
-        let totalTrophies = 0;
+        // 显示累计天数
+        document.getElementById('dash-total-days').innerText = `累计学习 ${activeDates.size} 天`;
 
+        let totalTrophies = 0;
         const renderItemHTML = (b) => {
             totalTrophies += b.count;
-            
             let classes = ['badge-item'];
-            if (b.count > 0) {
-                classes.push('unlocked');
-                if (b.tier) classes.push(b.tier);
-            } else {
-                classes.push('locked'); 
-            }
+            if (b.count > 0) { classes.push('unlocked'); if (b.tier) classes.push(b.tier); } 
+            else { classes.push('locked'); }
             
             let countHtml = (b.count > 1) ? `<div class="badge-count">x${b.count}</div>` : '';
-            let progressHtml = (b.count === 0 && b.targetDays) ? `<div class="badge-progress">${totalDays}/${b.targetDays}</div>` : '';
-            
-            return `
-                <div class="${classes.join(' ')}">
-                    <div class="badge-icon-wrapper">
-                        <div class="badge-icon">${b.icon}</div>
-                        ${countHtml}
-                    </div>
-                    <div class="badge-name">${b.name}</div>
-                    ${progressHtml}
-                </div>
-            `;
+            let progressHtml = (b.count === 0 && b.targetStreak) ? `<div class="badge-progress">${b.currentStreak}/${b.targetStreak}</div>` : '';
+            return `<div class="${classes.join(' ')}"><div class="badge-icon-wrapper"><div class="badge-icon">${b.icon}</div>${countHtml}</div><div class="badge-name">${b.name}</div>${progressHtml}</div>`;
         };
 
-        // 🌟 核心战绩 (合并云端数据与本地零散数据)
-        const totalPerfects = Math.max(localPerfects, parseInt(localStorage.getItem(`perfects_count_${currentUser}`) || '0'));
-        const totalGamesPlayed = Math.max(localGames, parseInt(localStorage.getItem(`games_count_${currentUser}`) || '0'));
-        const totalSpeedBreaks = parseInt(localStorage.getItem(`speed_breaks_${currentUser}`) || '0');
-
+        // 🌟 核心战绩
         const coreBadges = [
-            { icon: '🎯', name: '神射手', count: totalPerfects },
-            { icon: '⚡️', name: '极速突破', count: totalSpeedBreaks },
-            { icon: '🎈', name: '气球猎人', count: totalGamesPlayed }
+            { icon: '🎯', name: '神射手', count: Math.max(localPerfects, parseInt(localStorage.getItem(`perfects_count_${currentUser}`)||'0')) },
+            { icon: '⚡️', name: '极速突破', count: parseInt(localStorage.getItem(`speed_breaks_${currentUser}`)||'0') },
+            { icon: '🎈', name: '气球猎人', count: Math.max(localGames, parseInt(localStorage.getItem(`games_count_${currentUser}`)||'0')) }
         ];
-        container.innerHTML += `
-            <div class="badge-category">
-                <div class="badge-category-title">🌟 核心战绩</div>
-                <div class="badge-grid">${coreBadges.map(renderItemHTML).join('')}</div>
-            </div>`;
+        container.innerHTML += `<div class="badge-category"><div class="badge-category-title">🌟 核心战绩</div><div class="badge-grid">${coreBadges.map(renderItemHTML).join('')}</div></div>`;
 
-        // 🎓 科目大师 (包含听写和拼音)
-        const tingxieKingCount = parseInt(localStorage.getItem(`tingxie_badge_count_${currentUser}`) || '0');
-        const pinyinCount = parseInt(localStorage.getItem(`pinyin_badge_count_${currentUser}`) || '0');
-
+        // 🎓 科目大师
         const subBadges = [
             { icon: '🔤', name: '英语达人', count: Math.max(subPerfects['English'], parseInt(localStorage.getItem(`eng_badge_count_${currentUser}`)||'0')) },
             { icon: '🔢', name: '数学天才', count: Math.max(subPerfects['Math'], parseInt(localStorage.getItem(`math_badge_count_${currentUser}`)||'0')) },
             { icon: '🐼', name: '华文小将', count: Math.max(subPerfects['华文'], parseInt(localStorage.getItem(`cn_badge_count_${currentUser}`)||'0')) },
             { icon: '🌱', name: '科学博士', count: Math.max(subPerfects['Science'], parseInt(localStorage.getItem(`sci_badge_count_${currentUser}`)||'0')) },
-            { icon: '🎮', name: '拼音高手', count: pinyinCount },
-            { icon: '👑', name: '听写大王', count: tingxieKingCount } 
+            { icon: '🎮', name: '拼音高手', count: parseInt(localStorage.getItem(`pinyin_badge_count_${currentUser}`)||'0') },
+            { icon: '👑', name: '听写大王', count: parseInt(localStorage.getItem(`tingxie_badge_count_${currentUser}`)||'0') } 
         ];
-        container.innerHTML += `
-            <div class="badge-category">
-                <div class="badge-category-title">🎓 科目大师</div>
-                <div class="badge-grid">${subBadges.map(renderItemHTML).join('')}</div>
-            </div>`;
+        container.innerHTML += `<div class="badge-category"><div class="badge-category-title">🎓 科目大师</div><div class="badge-grid">${subBadges.map(renderItemHTML).join('')}</div></div>`;
 
-        // 📅 毅力打卡
+        // 📅 毅力打卡 (逻辑修改：现在看的是云端真实的连击 streak)
+        const cloudStreak = parseInt(localStorage.getItem(`streak_${currentUser}`)||'0');
         const streakMilestones = [3, 5, 10, 15, 30];
-        let streakBadges = streakMilestones.map(day => {
-            let count = (totalDays >= day) ? 1 : 0;
+        let streakBadges = [];
+        // 只给当前达到的最高的一块徽章，不重复发
+        let highestAchieved = 0;
+        for (let i=streakMilestones.length-1; i>=0; i--) { if (cloudStreak >= streakMilestones[i]) { highestAchieved = streakMilestones[i]; break; } }
+        
+        streakMilestones.forEach(day => {
+            let isAchieved = (day === highestAchieved);
+            let count = isAchieved ? 1 : 0;
             let tier = day >= 15 ? 'gold' : (day >= 10 ? 'silver' : 'bronze');
-            return { icon: '📅', name: `打卡${day}天`, count: count, tier: tier, targetDays: day };
+            streakBadges.push({ icon: '📅', name: `连击${day}天`, count: count, tier: tier, targetStreak: day, currentStreak: cloudStreak });
         });
-
-        container.innerHTML += `
-            <div class="badge-category">
-                <div class="badge-category-title">📅 毅力打卡</div>
-                <div class="badge-grid">${streakBadges.map(renderItemHTML).join('')}</div>
-            </div>`;
+        container.innerHTML += `<div class="badge-category"><div class="badge-category-title">📅 毅力打卡 (当前连击: ${cloudStreak})</div><div class="badge-grid">${streakBadges.map(renderItemHTML).join('')}</div></div>`;
 
         // 🎁 隐藏彩蛋 (特别徽章逻辑)
         const easterBadgesData = [
-            { icon: '🌅', name: '早鸟', count: parseInt(localStorage.getItem(`easter_earlybird_${currentUser}`) || '0'), tier: 'gold' },
-            { icon: '🦉', name: '夜猫', count: parseInt(localStorage.getItem(`easter_nightowl_${currentUser}`) || '0'), tier: 'gold' },
+            { icon: '🌅', name: '早起鸟儿', count: parseInt(localStorage.getItem(`easter_earlybird_${currentUser}`) || '0'), tier: 'gold' },
+            { icon: '🦉', name: '小猫头鹰', count: parseInt(localStorage.getItem(`easter_nightowl_${currentUser}`) || '0'), tier: 'gold' },
             { icon: '🔥', name: '全对三连', count: parseInt(localStorage.getItem(`easter_hattrick_${currentUser}`) || '0'), tier: 'gold' },
             { icon: '🎉', name: '周末狂人', count: parseInt(localStorage.getItem(`easter_weekend_${currentUser}`) || '0'), tier: 'gold' },
             { icon: '🔋', name: '假期充电', count: parseInt(localStorage.getItem(`easter_holiday_${currentUser}`) || '0'), tier: 'gold' }
         ];
 
-        // 只挑选出已经解锁的彩蛋
         const unlockedEasterBadges = easterBadgesData.filter(b => b.count > 0);
-
-        // 如果解锁了至少一个，就显示这个特殊的紫色栏目
         if (unlockedEasterBadges.length > 0) {
-            container.innerHTML += `
-                <div class="badge-category">
-                    <div class="badge-category-title" style="color: #9333ea; border-bottom-color: #d8b4fe;">🎁 特别彩蛋</div>
-                    <div class="badge-grid">${unlockedEasterBadges.map(renderItemHTML).join('')}</div>
-                </div>`;
+            container.innerHTML += `<div class="badge-category"><div class="badge-category-title" style="color: #9333ea; border-bottom-color: #d8b4fe;">🎁 特别彩蛋</div><div class="badge-grid">${unlockedEasterBadges.map(renderItemHTML).join('')}</div></div>`;
         }
 
         document.getElementById('total-badge-count').innerText = totalTrophies;
     }
 
-    // 🤫 隐秘重置按钮（代替原本的老爸控制台）
-    let clickCount = 0;
-    let clickTimer = null;
+    // 🤫 隐秘重置按钮
+    let clickCount = 0, clickTimer = null;
     function triggerNuclearReset() {
         clickCount++;
         if (clickTimer) clearTimeout(clickTimer);
         clickTimer = setTimeout(() => { clickCount = 0; }, 2000); 
-
         if (clickCount >= 5) { 
             clickCount = 0;
-            if(confirm("☢️ 警告：此操作将清空本地所有测试数据！\n（下次刷新将重新从云端对账）\n\n确定要执行吗？")) {
-                localStorage.clear();
-                sessionStorage.clear();
-                alert("🧹 所有本地数据已清零。");
-                window.location.reload();
+            if(confirm("☢️ 警告：此操作将清空本地所有测试数据（Ticket将重置）！\n\n确定要执行吗？")) {
+                localStorage.clear(); sessionStorage.clear(); alert("🧹 所有本地数据已清零。"); window.location.reload();
             }
         }
     }
 
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && document.getElementById('pin-modal').style.display === 'flex') { verifyHubPin(); }
-    });
-
+    document.addEventListener('keydown', (e) => { if (e.key === 'Enter' && document.getElementById('pin-modal').style.display === 'flex') { verifyHubPin(); } });
     initDate();
-    
-    // 自动加载上次用户
     let lastUser = localStorage.getItem('currentPlayer');
     let lastGrade = localStorage.getItem('currentGrade') || (lastUser === 'Valerie' ? 'P3' : 'P1');
-    if(lastUser === 'Valerie' || lastUser === 'Venessa') {
-        executeSwitchUser(lastUser, lastGrade);
-    } else {
-        showScreen('user-screen');
-    }
+    if(lastUser === 'Valerie' || lastUser === 'Venessa') { executeSwitchUser(lastUser, lastGrade); } 
+    else { showScreen('user-screen'); }
 </script>
 
 </body>
