@@ -24,48 +24,64 @@
         :root { --text-main: #1e293b; --text-muted: #64748b; }
         * { box-sizing: border-box; font-family: 'Nunito', 'Microsoft YaHei', 'Comic Sans MS', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); margin: 0; padding: 15px; color: var(--text-main); display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100dvh; overflow: hidden; }
-        .container { width: 100%; max-width: 750px; background: rgba(255,255,255,0.95); padding: 30px; border-radius: 40px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); text-align: center; margin: auto; position: relative; border: 4px solid #ffffff; display: flex; flex-direction: column; max-height: 96dvh; }
+        .container { width: 100%; max-width: 750px; background: rgba(255,255,255,0.95); padding: 20px; border-radius: 40px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); text-align: center; margin: auto; position: relative; border: 4px solid #ffffff; display: flex; flex-direction: column; max-height: 96dvh; }
         .screen { display: none; flex: 1; flex-direction: column; width: 100%; overflow: hidden; animation: bounceIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
         #finish-screen { justify-content: center; overflow-y: auto; }
-        h1 { color: #3b82f6; margin-top: 0; font-size: 32px; margin-bottom: 25px; font-weight: 900; letter-spacing: 1px; text-shadow: 2px 2px 0px #dbeafe; flex: none; }
-        .btn-group { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px; flex: none; }
-        .btn-choice { padding: 14px 28px; border-radius: 25px; border: 3px solid #e2e8f0; background: white; cursor: pointer; font-weight: 900; font-size: 20px; color: var(--text-muted); transition: 0.15s; min-width: 120px; box-shadow: 0 6px 0 #e2e8f0; outline: none; }
-        .btn-choice.active { border-color: #3b82f6; background: #eff6ff; color: #1d4ed8; box-shadow: 0 6px 0 #93c5fd; }
-        .checkbox-grid { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-bottom: 10px; padding: 10px; flex: 1; overflow-y: auto; align-content: flex-start; }
-        .checkbox-label { padding: 14px 22px; border-radius: 30px; border: 3px solid #e2e8f0; background: white; cursor: pointer; font-weight: 900; font-size: 16px; color: var(--text-muted); transition: all 0.15s; user-select: none; box-shadow: 0 5px 0 #cbd5e1; height: fit-content; }
-        .checkbox-label.selected { border-color: #a855f7; background: #faf5ff; color: #7e22ce; box-shadow: 0 5px 0 #d8b4fe; }
-        .action-panel { display: flex; gap: 15px; margin-top: 10px; min-height: 130px; padding-bottom: 20px; width: 100%; flex: none; }
-        .btn-square { flex: 0 0 120px; border-radius: 30px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #f1f5f9; color: #64748b; border: 3px solid #e2e8f0; box-shadow: 0 6px 0 #cbd5e1; font-weight: 900; cursor: pointer; transition: 0.15s; }
-        .btn-stacked-col { display: flex; flex-direction: column; gap: 15px; flex: 1; }
-        .btn-stacked { flex: 1; width: 100%; border-radius: 25px; font-size: 22px; font-weight: 900; border: none; cursor: pointer; transition: 0.15s; display: flex; align-items: center; justify-content: center; color: white; }
+        
+        h1 { color: #3b82f6; margin-top: 0; font-size: 28px; margin-bottom: 15px; font-weight: 900; letter-spacing: 1px; text-shadow: 2px 2px 0px #dbeafe; flex: none; }
+        
+        .btn-group { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 15px; flex: none; }
+        .btn-choice { padding: 12px 24px; border-radius: 30px; border: 3px solid #e2e8f0; background: white; cursor: pointer; font-weight: 900; font-size: 18px; color: var(--text-muted); transition: 0.15s; min-width: 100px; box-shadow: 0 4px 0 #e2e8f0; outline: none; }
+        .btn-choice.active { border-color: #3b82f6; background: #eff6ff; color: #1d4ed8; box-shadow: 0 4px 0 #93c5fd; }
+        
+        /* 💡 改为无边框胶囊样式 */
+        .checkbox-grid { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 15px; padding: 5px; flex: 1; overflow-y: auto; align-content: flex-start; }
+        .checkbox-label { padding: 10px 20px; border-radius: 20px; background: #f1f5f9; cursor: pointer; font-weight: 800; font-size: 16px; color: var(--text-muted); transition: all 0.15s; user-select: none; height: fit-content; border: none; }
+        .checkbox-label.selected { background: #3b82f6; color: #ffffff; font-weight: 900; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.4); transform: scale(1.05); }
+        
+        .action-panel { display: flex; flex-direction: column; gap: 15px; width: 100%; flex: none; }
+        .btn-stacked-row { display: flex; gap: 15px; justify-content: center; }
+        
+        /* 💡 按钮变宽润 */
+        .btn-stacked { flex: 1; padding: 18px 0; border-radius: 20px; font-size: 20px; font-weight: 900; border: none; cursor: pointer; transition: 0.15s; display: flex; align-items: center; justify-content: center; color: white; }
         .btn-review-stacked { background: #f59e0b; box-shadow: 0 6px 0 #d97706; }
         .btn-practice-stacked { background: #10b981; box-shadow: 0 6px 0 #059669; }
-        .progress-container { width: 100%; background: #f1f5f9; height: 18px; border-radius: 10px; margin-bottom: 25px; overflow: hidden; border: 3px solid #e2e8f0; flex: none; }
+        .btn-home { background: #f1f5f9; color: #64748b; font-size: 18px; border: 3px solid #e2e8f0; box-shadow: 0 6px 0 #cbd5e1; width: 100%; border-radius: 20px; padding: 12px 0; font-weight: 900; cursor: pointer;}
+
+        .progress-container { width: 100%; background: #f1f5f9; height: 16px; border-radius: 10px; margin-bottom: 20px; overflow: hidden; border: 2px solid #e2e8f0; flex: none; }
         .progress-bar { height: 100%; background: linear-gradient(90deg, #34d399, #10b981); width: 0%; transition: width 0.4s; }
-        .progress-text { font-size: 20px; color: #94a3b8; margin-bottom: 20px; font-weight: 900; flex: none; }
-        .hint-display { font-size: 32px; font-weight: bold; color: #334155; margin-bottom: 20px; min-height: 90px; display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; align-content: center; flex: none; }
+        .progress-text { font-size: 18px; color: #94a3b8; margin-bottom: 15px; font-weight: 900; flex: none; }
+        
+        .hint-display { font-size: 32px; font-weight: bold; color: #334155; margin-bottom: 15px; min-height: 80px; display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; align-content: center; flex: none; }
         .hint-unit { cursor: pointer; padding: 10px 18px; border-radius: 20px; border: 4px solid #e2e8f0; background: #fff; min-width: 60px; text-align: center; font-size: 26px; transition: 0.2s; box-shadow: 0 5px 0 #cbd5e1; }
         .hint-unit.active { color: #ea580c; background: #fff7ed; border-color: #fb923c; transform: scale(1.1); box-shadow: 0 6px 0 #f97316; z-index: 2; }
         .hint-unit.done { color: #10b981; background: #ecfdf5; border-color: #6ee7b7; box-shadow: 0 0 0 transparent; transform: translateY(5px); }
+        
         .practice-main { display: flex; flex-direction: column; flex: 1; width: 100%; min-height: 0; }
-        .practice-area { background: #f8fafc; padding: 25px 15px; border-radius: 35px; border: 4px dashed #cbd5e1; margin-bottom: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; position: relative; overflow: hidden; min-height: 250px;}
-        .hanzi-box { width: 260px; height: 260px; border: 4px solid #94a3b8; border-radius: 25px; background: white; }
-        .helper-row { display: flex; gap: 15px; margin-top: 20px; justify-content: center; width: 100%; }
-        .btn-helper { font-size: 16px; padding: 12px 24px; border-radius: 25px; font-weight: 900; cursor: pointer; transition: 0.15s; outline: none; display: none; }
+        .practice-area { background: #f8fafc; padding: 20px 10px; border-radius: 30px; border: 4px dashed #cbd5e1; margin-bottom: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; position: relative; overflow: hidden; min-height: 250px;}
+        .hanzi-box { width: 240px; height: 240px; border: 4px solid #94a3b8; border-radius: 25px; background: white; }
+        
+        .helper-row { display: flex; gap: 15px; margin-top: 15px; justify-content: center; width: 100%; }
+        .btn-helper { font-size: 16px; padding: 10px 20px; border-radius: 20px; font-weight: 900; cursor: pointer; transition: 0.15s; outline: none; display: none; }
         #peek-btn { background: #fef08a; color: #a16207; border: 3px solid #fde047; box-shadow: 0 5px 0 #facc15; }
         #skip-char-btn { background: #f1f5f9; color: #64748b; border: 3px solid #e2e8f0; box-shadow: 0 5px 0 #cbd5e1; }
-        .controls-row { display: flex; gap: 16px; width: 100%; height: 75px; flex: none; }
-        .btn-action { border-radius: 22px; border: none; font-weight: 900; font-size: 22px; cursor: pointer; transition: 0.15s; display: flex; align-items: center; justify-content: center; outline: none; }
-        .btn-quit { flex: 1; background: #f1f5f9; color: #64748b; font-size: 18px; border: 3px solid #e2e8f0; box-shadow: 0 6px 0 #cbd5e1; } 
-        .btn-nav { flex: 2; background: #38bdf8; color: white; box-shadow: 0 6px 0 #0284c7; } 
+        
+        .controls-row { display: flex; gap: 12px; width: 100%; height: 65px; flex: none; }
+        .btn-action { border-radius: 20px; border: none; font-weight: 900; font-size: 20px; cursor: pointer; transition: 0.15s; display: flex; align-items: center; justify-content: center; outline: none; }
+        .btn-quit { flex: 1; background: #f1f5f9; color: #64748b; font-size: 16px; border: 3px solid #e2e8f0; box-shadow: 0 5px 0 #cbd5e1; } 
+        .btn-nav { flex: 1.5; background: #38bdf8; color: white; box-shadow: 0 5px 0 #0284c7; } 
+        /* 💡 灰色不可用状态 */
+        .btn-nav:disabled { background: #cbd5e1 !important; color: #f8fafc !important; box-shadow: 0 5px 0 #94a3b8 !important; cursor: not-allowed; transform: none !important; }
+
         @keyframes bounceIn { 0% { opacity: 0; transform: scale(0.9); } 100% { opacity: 1; transform: scale(1); } }
+        
         @media (orientation: landscape) and (min-width: 768px) {
-            .container { max-width: 1000px; padding: 35px 40px; height: 95dvh; border-radius: 50px;}
-            .practice-main { flex-direction: row; align-items: flex-start; gap: 30px; }
-            .practice-area { margin-bottom: 0; height: 100%; min-height: 300px; flex: 1; }
-            .practice-main .controls-row { display: grid; grid-template-columns: 1fr 1fr; width: 320px; height: auto; gap: 18px; flex: none; }
-            .practice-main .btn-action { height: 85px; width: 100%; border-radius: 25px; }
-            .practice-main .btn-quit { grid-column: 1 / 3; font-size: 24px; }
+            .container { max-width: 900px; padding: 25px 30px; height: 95dvh; border-radius: 40px;}
+            .practice-main { flex-direction: row; align-items: flex-start; gap: 20px; }
+            .practice-area { margin-bottom: 0; height: 100%; min-height: 280px; flex: 1; }
+            .practice-main .controls-row { display: grid; grid-template-columns: 1fr 1fr; width: 280px; height: auto; gap: 15px; flex: none; }
+            .practice-main .btn-action { height: 75px; width: 100%; border-radius: 20px; }
+            .practice-main .btn-quit { grid-column: 1 / 3; font-size: 20px; }
         }
     </style>
 </head>
@@ -78,16 +94,14 @@
 
     <div id="topic-screen" class="screen">
         <h1 id="topic-header">📝 听写任务</h1>
-        <div id="semester-group" class="btn-group" style="margin-bottom: 10px;"></div>
+        <div id="semester-group" class="btn-group"></div>
         <div id="topic-list" class="checkbox-grid"></div>
         <div class="action-panel">
-            <button class="btn-square" onclick="window.location.href='index.html'">
-                <span style="font-size: 40px;">🏠</span>
-            </button>
-            <div class="btn-stacked-col">
-                <button class="btn-stacked btn-review-stacked" onclick="startReview(this)">🔥 挑战 (考试测验)</button>
-                <button class="btn-stacked btn-practice-stacked" onclick="startPractice()">🚀 练习 (可偷看)</button>
+            <div class="btn-stacked-row">
+                <button class="btn-stacked btn-review-stacked" onclick="startReview(this)">🔥 挑战</button>
+                <button class="btn-stacked btn-practice-stacked" onclick="startPractice()">🚀 练习</button>
             </div>
+            <button class="btn-home" onclick="window.location.href='index.html'">🏠 返回主页</button>
         </div>
     </div>
 
@@ -100,14 +114,14 @@
                 <div id="thumb-up" style="position:absolute; font-size:110px; display:none; z-index:10;">👍</div>
                 <div id="draw-target"></div>
                 <div class="helper-row">
-                    <button id="peek-btn" class="btn-helper">👀 看一下 (按住)</button>
-                    <button id="skip-char-btn" class="btn-helper" onclick="skipCurrentChar()">不会写，跳过 ⏭️</button>
+                    <button id="peek-btn" class="btn-helper">👀 看一下</button>
+                    <button id="skip-char-btn" class="btn-helper" onclick="skipCurrentChar()">太简单，跳过 ⏭️</button>
                 </div>
             </div>
             <div class="controls-row">
                 <button id="quit-btn" class="btn-action btn-quit" onclick="window.location.href='index.html'">退出 🏠</button>
-                <button id="prev-btn" class="btn-action btn-nav" onclick="moveQuestion(-1)">⬅️ 上一步</button>
-                <button id="next-btn" class="btn-action btn-nav" onclick="moveQuestion(1)">下一步 ➡️</button>
+                <button id="prev-btn" class="btn-action btn-nav" onclick="moveQuestion(-1)">⬅️ 上一个</button>
+                <button id="next-btn" class="btn-action btn-nav" onclick="moveQuestion(1)">下一个 ➡️</button>
             </div>
         </div>
     </div>
@@ -116,22 +130,19 @@
 </div>
 
 <script>
-    // 💡 必须用公共发布链接，不能用 /edit 链接！
     const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQlpdRHnR9ybEHHgX6fouRI-vXOh8KQNLSjsbt0TYh9R3No_9i7QNv_4ELwJZJGQpTe3oZVXaZijaW4/pub?gid=266851979&single=true&output=csv";
     const SYNC_API_URL = "https://script.google.com/macros/s/AKfycbzbNOgg7deW9uVVyfYGTfKGOtVgNs_9ZfUQ9J_9cYpG2Ufow9KLDICHgsinBXrPJlmz/exec";
     const LIMIT = 5; 
 
     let db = {}, curUser = currentGrade, practiceList = [], curIdx = 0;
     let hzWriter = null, practiceChars = [];
-    let totalCorrectCount = 0, sessionErrors = 0;
+    let sessionErrors = 0;
     let currentMode = 'practice';
 
-    // 🏆 云端同步
     async function syncToCloud(payload) {
         try { fetch(SYNC_API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) }); } catch (e) {}
     }
 
-    // 防沉迷限制
     function checkAndIncrementLimit(lessons, mode) {
         const today = new Date().toISOString().split('T')[0];
         const storageKey = `spelling_usage_${today}`;
@@ -139,7 +150,7 @@
         for (let lesson of lessons) {
             if (!usage[lesson]) usage[lesson] = { practice: 0, challenge: 0 };
             if (usage[lesson][mode] >= LIMIT) {
-                alert(`「${lesson}」你今天已经学过很多次了，学点别的吧！`);
+                alert(`「${lesson}」今天练得够多了，休息一下吧！`);
                 return false;
             }
         }
@@ -148,26 +159,20 @@
         return true;
     }
 
-    // 💡 拼音游戏进度无缝解锁
     function unlockPinyinLessons(selArray) {
         const cnNum = {'一':1,'二':2,'三':3,'四':4,'五':5,'六':6,'七':7,'八':8,'九':9,'十':10,'十一':11,'十二':12,'十三':13,'十四':14,'十五':15,'十六':16,'十七':17,'十八':18,'十九':19,'二十':20};
-        let savedMax = parseInt(localStorage.getItem(`max_lesson_${currentPlayer}`) || "8"); // 默认保底 8 课
+        let savedMax = parseInt(localStorage.getItem(`max_lesson_${currentPlayer}`) || "8"); 
         let updated = false;
 
         selArray.forEach(lessonName => {
             let num = NaN;
             let match = lessonName.match(/第(.+)课/);
-            if (match && cnNum[match[1]]) {
-                num = cnNum[match[1]];
-            } else {
+            if (match && cnNum[match[1]]) num = cnNum[match[1]];
+            else {
                 let numMatch = lessonName.match(/\d+/);
                 if (numMatch) num = parseInt(numMatch[0]);
             }
-            
-            if (!isNaN(num) && num > savedMax) {
-                savedMax = num;
-                updated = true;
-            }
+            if (!isNaN(num) && num > savedMax) { savedMax = num; updated = true; }
         });
 
         if (updated) {
@@ -190,13 +195,7 @@
                     if(!g || (!hint && !ans)) return;
                     if(!db[g]) db[g] = []; 
                     
-                    db[g].push({
-                        Topic: topic || "Default",
-                        Hint: hint,
-                        Answer: ans,
-                        isWrong: false,
-                        originalIndex: index 
-                    });
+                    db[g].push({ Topic: topic || "Default", Hint: hint, Answer: ans, isWrong: false, originalIndex: index });
                 });
                 document.getElementById('loading').style.display = 'none';
                 loadTopics();
@@ -206,10 +205,9 @@
 
     function loadTopics() {
         document.getElementById('topic-header').innerText = `🎈 ${currentPlayer} 的听写 🎈`;
-        
         let pool = db[curUser] || [];
         if (pool.length === 0) {
-            document.getElementById('topic-list').innerHTML = `<p style="color:#ef4444; font-weight:900;">⚠️ 找不到 ${curUser} 的课文数据，请检查表格链接。</p>`;
+            document.getElementById('topic-list').innerHTML = `<p style="color:#ef4444; font-weight:900;">⚠️ 找不到 ${curUser} 的数据</p>`;
             showScreen('topic-screen');
             return;
         }
@@ -218,18 +216,16 @@
         const gradeMap = {'P1': '一', 'P2': '二', 'P3': '三', 'P4': '四', 'P5': '五', 'P6': '六'};
         let gradeStr = gradeMap[curUser] || curUser;
         
-        let semGroup = document.getElementById('semester-group');
-        semGroup.innerHTML = `
+        document.getElementById('semester-group').innerHTML = `
             <button class="btn-choice" onclick="selectSemester('A', this)">📖 ${gradeStr}上</button>
             <button class="btn-choice" onclick="selectSemester('B', this)">📘 ${gradeStr}下</button>
         `;
         
-        const list = document.getElementById('topic-list'); 
-        list.innerHTML = '';
+        const list = document.getElementById('topic-list'); list.innerHTML = '';
         topics.forEach(t => {
             const lbl = document.createElement('label');
             lbl.className = 'checkbox-label';
-            lbl.innerHTML = `<input type="checkbox" value="${t}" onchange="this.parentElement.classList.toggle('selected', this.checked)"> ${t}`;
+            lbl.innerHTML = `<input type="checkbox" value="${t}" onchange="this.classList.toggle('selected', this.checked)"> ${t}`;
             list.appendChild(lbl);
         });
         showScreen('topic-screen');
@@ -256,12 +252,10 @@
         if(sel.length === 0) return;
         if (!checkAndIncrementLimit(sel, 'practice')) return;
         
-        unlockPinyinLessons(sel); // 💡 点击开始立刻解锁拼音进度
-
+        unlockPinyinLessons(sel);
         currentMode = 'practice'; 
         let pool = db[curUser] || [];
         practiceList = pool.filter(q => sel.includes(q.Topic)).sort((a,b) => a.originalIndex - b.originalIndex);
-        
         curIdx = 0; sessionErrors = 0; showScreen('practice-screen'); renderQuestion();
     }
 
@@ -274,14 +268,11 @@
         }
         if (!checkAndIncrementLimit(sel, 'challenge')) return;
 
-        unlockPinyinLessons(sel); // 💡 点击开始立刻解锁拼音进度
-
+        unlockPinyinLessons(sel);
         currentMode = 'challenge'; 
         let pool = db[curUser] || [];
-        // 挑战模式打乱顺序抽 10 题
         let filtered = pool.filter(q => sel.includes(q.Topic)).sort(() => 0.5 - Math.random());
         practiceList = filtered.slice(0, Math.min(10, filtered.length));
-        
         curIdx = 0; sessionErrors = 0; showScreen('practice-screen'); renderQuestion();
     }
 
@@ -295,7 +286,11 @@
         const q = practiceList[curIdx];
         document.getElementById('prog-bar').style.width = `${((curIdx + 1) / practiceList.length) * 100}%`;
         document.getElementById('prog-text').innerText = `${curIdx + 1} / ${practiceList.length}`;
-        document.getElementById('prev-btn').style.visibility = (curIdx === 0) ? 'hidden' : 'visible';
+        
+        // 💡 第一题时，按钮置灰且不可点
+        const prevBtn = document.getElementById('prev-btn');
+        if (curIdx === 0) { prevBtn.disabled = true; } else { prevBtn.disabled = false; }
+        
         document.getElementById('next-btn').innerText = (curIdx === practiceList.length - 1) ? "交卷 ✨" : "下一个 ➡️";
         
         document.getElementById('draw-target').innerHTML = '';
@@ -322,7 +317,7 @@
         if(practiceChars[idx].done) return; 
         document.querySelectorAll('.hint-unit').forEach((el, i) => el.classList.toggle('active', i === idx));
         document.getElementById('draw-target').innerHTML = `<div id="hz-box" class="hanzi-box"></div>`;
-        let boxSize = window.innerWidth <= 768 ? 200 : 260;
+        let boxSize = window.innerWidth <= 768 ? 200 : 240;
         hzWriter = HanziWriter.create('hz-box', practiceChars[idx].char, { width: boxSize, height: boxSize, padding: 15, showOutline: false, showCharacter: false, strokeColor: '#1e293b', drawingColor: '#3b82f6', outlineColor: '#cbd5e1' });
         hzWriter.quiz({ 
             onMistake: () => { sessionErrors++; practiceList[curIdx].isWrong = true; },
@@ -359,19 +354,16 @@
         let badgeEarned = false;
         let newBadgedTopics = [];
 
-        // 💰 结算奖励（仅挑战模式 且 全对）
         if (currentMode === 'challenge' && isPerfect) {
             let involvedTopics = [...new Set(practiceList.map(q => q.Topic))];
             
             involvedTopics.forEach(topic => {
                 let badgeKey = `tingxie_badge_${currentPlayer}_${topic}`;
-                // 💡 确保这节课以前从来没拿过徽章
                 if (!localStorage.getItem(badgeKey)) {
                     localStorage.setItem(badgeKey, "true");
                     badgeEarned = true;
-                    earnedCoins += 1; // 统一发薪：1 个金币
+                    earnedCoins += 1; 
                     newBadgedTopics.push(topic);
-                    
                     syncToCloud({ type: 'badge', user: currentPlayer, subject: '听写', icon: '👑', title: '听写大王', desc: `完美攻克《${topic}》` });
                 }
             });
@@ -398,13 +390,12 @@
                         <div style="font-size:20px; color:#b45309; margin-top:10px;">💰 +${earnedCoins} 金币已存入金库</div>
                      </div>`;
         } else if (currentMode === 'challenge' && isPerfect) {
-            html += `<div style="color:#94a3b8; margin:20px 0; font-weight:800;">(这几课的【听写大王】你已经拿过啦，金币不再重复发放哦~ 去挑战新课文吧！)</div>`;
+            html += `<div style="color:#94a3b8; margin:20px 0; font-weight:800;">(这几课的【听写大王】你已经拿过啦，去挑战新课文吧！)</div>`;
         }
         
         html += `<button class="btn-action btn-quit" style="width:200px; margin:30px auto;" onclick="window.location.href='index.html'">返回主页 🏠</button></div>`;
         document.getElementById('finish-screen').innerHTML = html; showScreen('finish-screen');
         
-        // 全对后前往打气球！
         if (isPerfect) setTimeout(() => { window.location.href = "https://andydang2007.github.io/game/popballoons.html?ticket=" + Date.now(); }, 3000);
     }
 
