@@ -1,124 +1,115 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>听写大挑战</title>
-    
-    <link rel="apple-touch-icon" href="https://img.icons8.com/fluency/240/paper-plane.png">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-M04YCD1PQK"></script>
     <script>
-        let currentUser = localStorage.getItem('currentPlayer') || 'Valerie'; 
-        let currentGrade = localStorage.getItem('currentGrade');
-        if (!currentGrade) {
-            currentGrade = (currentUser === 'Venessa' || currentUser === 'P1') ? 'P1' : 'P3';
-        }
-        let isSister = (currentGrade === 'P1' || currentUser === 'Venessa' || currentUser === 'P1');
+        // 💡 适配主页的变量名
+        let currentPlayer = localStorage.getItem('currentPlayer') || 'Valerie'; 
+        let currentGrade = localStorage.getItem('currentGrade') || 'P3';
+        let currentSubject = '听写'; // 固定为听写模块
+
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-M04YCD1PQK');
     </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5/dist/hanzi-writer.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
-        :root { --primary: #10b981; --bg: #f8fafc; --text-main: #1e293b; --text-muted: #64748b; }
-        * { box-sizing: border-box; font-family: 'Nunito', 'Microsoft YaHei', sans-serif; -webkit-tap-highlight-color: transparent; }
-        
-        body { background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); margin: 0; padding: 15px; color: var(--text-main); display: flex; flex-direction: column; align-items: center; justify-content: flex-start; min-height: 100vh; overflow-x: hidden; }
-        
-        .container { width: 100%; max-width: 650px; background: rgba(255,255,255,0.95); padding: 30px 25px; border-radius: 35px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); text-align: center; position: relative; border: 4px solid #ffffff; backdrop-filter: blur(12px); display: flex; flex-direction: column; align-items: center; margin-top: 4vh; margin-bottom: auto; }
-        
-        .screen { display: none; width: 100%; flex-direction: column; align-items: center; animation: bounceIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+        :root { --text-main: #1e293b; --text-muted: #64748b; }
+        * { box-sizing: border-box; font-family: 'Nunito', 'Microsoft YaHei', 'Comic Sans MS', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); margin: 0; padding: 15px; color: var(--text-main); display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100dvh; overflow: hidden; }
+        .container { width: 100%; max-width: 750px; background: rgba(255,255,255,0.95); padding: 30px; border-radius: 40px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); text-align: center; margin: auto; position: relative; border: 4px solid #ffffff; display: flex; flex-direction: column; max-height: 96dvh; }
+        .screen { display: none; flex: 1; flex-direction: column; width: 100%; overflow: hidden; animation: bounceIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+        #finish-screen { justify-content: center; overflow-y: auto; }
+        h1 { color: #3b82f6; margin-top: 0; font-size: 32px; margin-bottom: 25px; font-weight: 900; letter-spacing: 1px; text-shadow: 2px 2px 0px #dbeafe; flex: none; }
+        .btn-group { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px; flex: none; }
+        .btn-choice { padding: 14px 28px; border-radius: 25px; border: 3px solid #e2e8f0; background: white; cursor: pointer; font-weight: 900; font-size: 20px; color: var(--text-muted); transition: 0.15s; min-width: 120px; box-shadow: 0 6px 0 #e2e8f0; outline: none; }
+        .btn-choice.active { border-color: #3b82f6; background: #eff6ff; color: #1d4ed8; box-shadow: 0 6px 0 #93c5fd; }
+        .checkbox-grid { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-bottom: 10px; padding: 10px; flex: 1; overflow-y: auto; align-content: flex-start; }
+        .checkbox-label { padding: 14px 22px; border-radius: 30px; border: 3px solid #e2e8f0; background: white; cursor: pointer; font-weight: 900; font-size: 16px; color: var(--text-muted); transition: all 0.15s; user-select: none; box-shadow: 0 5px 0 #cbd5e1; height: fit-content; }
+        .checkbox-label.selected { border-color: #a855f7; background: #faf5ff; color: #7e22ce; box-shadow: 0 5px 0 #d8b4fe; }
+        .action-panel { display: flex; gap: 15px; margin-top: 10px; min-height: 130px; padding-bottom: 20px; width: 100%; flex: none; }
+        .btn-square { flex: 0 0 120px; border-radius: 30px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #f1f5f9; color: #64748b; border: 3px solid #e2e8f0; box-shadow: 0 6px 0 #cbd5e1; font-weight: 900; cursor: pointer; transition: 0.15s; }
+        .btn-stacked-col { display: flex; flex-direction: column; gap: 15px; flex: 1; }
+        .btn-stacked { flex: 1; width: 100%; border-radius: 25px; font-size: 22px; font-weight: 900; border: none; cursor: pointer; transition: 0.15s; display: flex; align-items: center; justify-content: center; color: white; }
+        .btn-review-stacked { background: #f59e0b; box-shadow: 0 6px 0 #d97706; }
+        .btn-practice-stacked { background: #10b981; box-shadow: 0 6px 0 #059669; }
+        .progress-container { width: 100%; background: #f1f5f9; height: 18px; border-radius: 10px; margin-bottom: 25px; overflow: hidden; border: 3px solid #e2e8f0; flex: none; }
+        .progress-bar { height: 100%; background: linear-gradient(90deg, #34d399, #10b981); width: 0%; transition: width 0.4s; }
+        .progress-text { font-size: 20px; color: #94a3b8; margin-bottom: 20px; font-weight: 900; flex: none; }
+        .hint-display { font-size: 32px; font-weight: bold; color: #334155; margin-bottom: 20px; min-height: 90px; display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; align-content: center; flex: none; }
+        .hint-unit { cursor: pointer; padding: 10px 18px; border-radius: 20px; border: 4px solid #e2e8f0; background: #fff; min-width: 60px; text-align: center; font-size: 26px; transition: 0.2s; box-shadow: 0 5px 0 #cbd5e1; }
+        .hint-unit.active { color: #ea580c; background: #fff7ed; border-color: #fb923c; transform: scale(1.1); box-shadow: 0 6px 0 #f97316; z-index: 2; }
+        .hint-unit.done { color: #10b981; background: #ecfdf5; border-color: #6ee7b7; box-shadow: 0 0 0 transparent; transform: translateY(5px); }
+        .practice-main { display: flex; flex-direction: column; flex: 1; width: 100%; min-height: 0; }
+        .practice-area { background: #f8fafc; padding: 25px 15px; border-radius: 35px; border: 4px dashed #cbd5e1; margin-bottom: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; position: relative; overflow: hidden; min-height: 250px;}
+        .hanzi-box { width: 260px; height: 260px; border: 4px solid #94a3b8; border-radius: 25px; background: white; }
+        .helper-row { display: flex; gap: 15px; margin-top: 20px; justify-content: center; width: 100%; }
+        .btn-helper { font-size: 16px; padding: 12px 24px; border-radius: 25px; font-weight: 900; cursor: pointer; transition: 0.15s; outline: none; display: none; }
+        #peek-btn { background: #fef08a; color: #a16207; border: 3px solid #fde047; box-shadow: 0 5px 0 #facc15; }
+        #skip-char-btn { background: #f1f5f9; color: #64748b; border: 3px solid #e2e8f0; box-shadow: 0 5px 0 #cbd5e1; }
+        .controls-row { display: flex; gap: 16px; width: 100%; height: 75px; flex: none; }
+        .btn-action { border-radius: 22px; border: none; font-weight: 900; font-size: 22px; cursor: pointer; transition: 0.15s; display: flex; align-items: center; justify-content: center; outline: none; }
+        .btn-quit { flex: 1; background: #f1f5f9; color: #64748b; font-size: 18px; border: 3px solid #e2e8f0; box-shadow: 0 6px 0 #cbd5e1; } 
+        .btn-nav { flex: 2; background: #38bdf8; color: white; box-shadow: 0 6px 0 #0284c7; } 
         @keyframes bounceIn { 0% { opacity: 0; transform: scale(0.9); } 100% { opacity: 1; transform: scale(1); } }
-        
-        .header-tag { background: #f8fafc; color: #3b82f6; padding: 8px 20px; border-radius: 30px; font-weight: 900; font-size: 16px; border: 3px solid #e2e8f0; box-shadow: 0 3px 0 #cbd5e1; margin-bottom: 15px; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; transition: 0.15s; }
-        .header-tag:active { transform: translateY(3px); box-shadow: none; }
-
-        .progress-col { width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 25px; }
-        .milestone-track { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; width: 100%; margin-bottom: 8px; }
-        
-        .milestone { width: 24px; height: 24px; background: #f8fafc; border: 2px solid #cbd5e1; border-radius: 50%; z-index: 2; display: flex; align-items: center; justify-content: center; font-size: 11px; transition: 0.4s; box-sizing: border-box; flex-shrink: 0; }
-        .milestone.done { border-color: #10b981; background: #d1fae5; }
-        .milestone.active { border-color: #3b82f6; background: #eff6ff; font-size: 14px; transform: scale(1.2); box-shadow: 0 0 8px rgba(59,130,246,0.3); animation: bounceActive 1s infinite alternate; }
-        @keyframes bounceActive { 0% { transform: scale(1.2) translateY(0); } 100% { transform: scale(1.2) translateY(-2px); } }
-
-        .quiz-main-col { width: 100%; display: flex; flex-direction: column; align-items: center; }
-
-        .audio-btn { width: 100px; height: 100px; border-radius: 50%; background: #3b82f6; border: 6px solid #bfdbfe; color: white; font-size: 40px; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 10px 20px rgba(59,130,246,0.3), inset 0 -5px 10px rgba(0,0,0,0.2); transition: 0.2s; margin: 10px 0 25px 0; }
-        .audio-btn:active { transform: scale(0.9) translateY(5px); box-shadow: 0 2px 5px rgba(59,130,246,0.3); }
-        .audio-btn.playing { animation: pulseAudio 1s infinite; background: #10b981; border-color: #a7f3d0; }
-        @keyframes pulseAudio { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); } 70% { transform: scale(1.05); box-shadow: 0 0 0 20px rgba(16, 185, 129, 0); } 100% { transform: scale(1); } }
-
-        input.ans-input { font-size: 32px; padding: 15px; width: 100%; max-width: 300px; border: 4px solid #e2e8f0; border-radius: 20px; box-sizing: border-box; outline: none; font-family: 'Microsoft YaHei', sans-serif; font-weight: 900; color: #1e293b; text-align: center; margin-bottom: 20px; letter-spacing: 4px; }
-        input.ans-input:focus { border-color: #3b82f6; background: #f8fafc; }
-        input.ans-input.error-shake { border-color: #ef4444; animation: shake 0.3s; background-color: #fef2f2; color: #ef4444; }
-
-        .hint-text { color: #94a3b8; font-size: 16px; font-weight: 800; margin-bottom: 10px; opacity: 0; transition: opacity 0.3s; }
-        .hint-text.visible { opacity: 1; }
-
-        .feedback { font-size: 20px; margin: 5px 0 20px 0; min-height: 28px; font-weight: 900; width: 100%; }
-
-        .btn-action { width: 100%; border-radius: 20px; border: none; font-weight: 900; font-size: 18px; cursor: pointer; transition: 0.15s; display: flex; align-items: center; justify-content: center; outline: none; padding: 15px; box-shadow: 0 5px 0 rgba(0,0,0,0.1); }
-        .btn-action:active { transform: translateY(4px); box-shadow: 0 1px 0 rgba(0,0,0,0.1); }
-
-        .lesson-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 100%; margin-top: 20px; }
-        .lesson-btn { background: white; border: 3px solid #e2e8f0; border-radius: 15px; padding: 15px 5px; font-weight: 900; color: #475569; font-size: 16px; cursor: pointer; box-shadow: 0 4px 0 #cbd5e1; transition: 0.15s; }
-        .lesson-btn:active { transform: translateY(4px); box-shadow: none; }
-        .lesson-btn.locked { opacity: 0.5; cursor: not-allowed; background: #f1f5f9; }
-
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.85); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(10px); }
-        .epic-modal { background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); padding: 40px; border-radius: 40px; text-align: center; width: 90%; max-width: 400px; border: 6px solid #fde68a; box-shadow: inset 0 0 30px rgba(245, 158, 11, 0.2), 0 30px 60px rgba(0,0,0,0.4); display: flex; flex-direction: column; align-items: center; position: relative; transition: 0.2s; }
-        @keyframes epicPop { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-        
-        .epic-icon { font-size: 80px; margin-top: -80px; background: white; width: 120px; height: 120px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 6px solid #fde68a; box-shadow: 0 10px 20px rgba(245, 158, 11, 0.3); z-index: 2; animation: float 3s ease-in-out infinite; }
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-        
-        .epic-title { font-size: 28px; font-weight: 900; color: #b45309; margin: 20px 0 10px 0; }
-        .epic-desc { font-size: 16px; font-weight: 800; color: #92400e; line-height: 1.5; margin-bottom: 25px; }
-        
-        .stat-badge { background: #fffbeb; color: #d97706; padding: 8px 15px; border-radius: 20px; font-weight: 900; font-size: 16px; border: 2px solid #fde68a; display: inline-block; margin-top: 10px; }
-
-        @media (min-width: 768px) { .container { padding: 40px 60px; max-width: 750px; } }
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
+        @media (orientation: landscape) and (min-width: 768px) {
+            .container { max-width: 1000px; padding: 35px 40px; height: 95dvh; border-radius: 50px;}
+            .practice-main { flex-direction: row; align-items: flex-start; gap: 30px; }
+            .practice-area { margin-bottom: 0; height: 100%; min-height: 300px; flex: 1; }
+            .practice-main .controls-row { display: grid; grid-template-columns: 1fr 1fr; width: 320px; height: auto; gap: 18px; flex: none; }
+            .practice-main .btn-action { height: 85px; width: 100%; border-radius: 25px; }
+            .practice-main .btn-quit { grid-column: 1 / 3; font-size: 24px; }
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div id="loading" class="screen" style="display:flex; justify-content:center; align-items:center; padding: 60px 0; font-size: 20px; font-weight: 900; color: #3b82f6;">
-        🌟 题库载入中... 
+    <div id="loading" class="screen" style="display:flex; justify-content:center; align-items:center; padding: 60px 0; font-size: 24px; font-weight: 900; color: #3b82f6;">
+        🌟 魔法书正在加载... 
     </div>
 
-    <div id="lesson-screen" class="screen">
-        <h2 style="font-size: 28px; color: #0f172a; font-weight: 900; margin: 0 0 10px 0;">选择听写课文</h2>
-        <div style="color: #64748b; font-weight: 800; margin-bottom: 10px;" id="lesson-subtitle"></div>
-        <div class="lesson-grid" id="lesson-grid"></div>
-        <button class="btn-action" style="background:#f1f5f9; color:#64748b; border: 3px solid #e2e8f0; box-shadow: 0 4px 0 #cbd5e1; margin-top: 30px;" onclick="window.location.href='index.html'">返回主页 🏠</button>
-    </div>
-
-    <div id="quiz-screen" class="screen">
-        <div class="header-tag" id="header-info" onclick="backToLesson()"></div>
-        
-        <div class="progress-col">
-            <div id="progress-bar" class="milestone-track"></div>
-            <div id="progress-text" style="font-size:14px; font-weight: 900; color:#94a3b8; margin-top: 5px;"></div>
-        </div>
-
-        <div class="quiz-main-col">
-            <div class="audio-btn" id="audio-btn" onclick="playCurrentAudio()">
-                🔊
+    <div id="topic-screen" class="screen">
+        <h1 id="topic-header">📝 听写任务</h1>
+        <div id="semester-group" class="btn-group" style="margin-bottom: 10px;"></div>
+        <div id="topic-list" class="checkbox-grid"></div>
+        <div class="action-panel">
+            <button class="btn-square" onclick="window.location.href='index.html'">
+                <span style="font-size: 40px;">🏠</span>
+            </button>
+            <div class="btn-stacked-col">
+                <button class="btn-stacked btn-review-stacked" onclick="startReview(this)">🔥 挑战 (10题)</button>
+                <button class="btn-stacked btn-practice-stacked" onclick="startPractice()">🚀 练习 (全练)</button>
             </div>
-            
-            <div id="hint-text" class="hint-text">拼音提示会在这里显示</div>
-            
-            <input type="text" id="ans-in" class="ans-input" placeholder="输入汉字..." autocomplete="off">
-            
-            <div id="fb-text" class="feedback"></div>
-            
-            <div style="display:flex; gap:12px; margin-top: 5px; width: 100%;">
-                <button id="hint-btn" class="btn-action" style="background:#f1f5f9; color:#64748b; border: 3px solid #e2e8f0; box-shadow: 0 4px 0 #cbd5e1; flex: 0.8;" onclick="showHint()">提示 💡</button>
-                <button id="sub-btn" class="btn-action" style="background:#3b82f6; color:white; box-shadow: 0 4px 0 #2563eb; flex: 1.2;" onclick="checkAns()">提交</button>
-                <button id="next-btn" class="btn-action" style="background:#10b981; color:white; box-shadow: 0 4px 0 #059669; flex: 1.2; display:none;" onclick="nextQ()">下一题 ➡️</button>
+        </div>
+    </div>
+
+    <div id="practice-screen" class="screen">
+        <div class="progress-container"><div id="prog-bar" class="progress-bar"></div></div>
+        <div id="prog-text" class="progress-text">1 / 10</div>
+        <div id="hint-area" class="hint-display"></div>
+        <div class="practice-main">
+            <div id="work-area" class="practice-area">
+                <div id="thumb-up" style="position:absolute; font-size:110px; display:none; z-index:10;">👍</div>
+                <div id="draw-target"></div>
+                <div class="helper-row">
+                    <button id="peek-btn" class="btn-helper">👀 看一下 (按住)</button>
+                    <button id="skip-char-btn" class="btn-helper" onclick="skipCurrentChar()">太简单，跳过 ⏭️</button>
+                </div>
+            </div>
+            <div class="controls-row">
+                <button id="quit-btn" class="btn-action btn-quit" onclick="window.location.href='index.html'">退出 🏠</button>
+                <button id="prev-btn" class="btn-action btn-nav" onclick="moveQuestion(-1)">⬅️ 上一步</button>
+                <button id="next-btn" class="btn-action btn-nav" onclick="moveQuestion(1)">下一步 ➡️</button>
             </div>
         </div>
     </div>
@@ -126,414 +117,217 @@
     <div id="finish-screen" class="screen"></div>
 </div>
 
-<div id="badge-modal" class="modal-overlay">
-    <div class="epic-modal">
-        <div class="epic-icon" id="badge-icon">⚡️</div>
-        <div class="epic-title" id="badge-title">新纪录诞生！</div>
-        <div class="epic-desc" id="badge-desc"></div>
-        <div style="font-size:12px; color:#b45309; font-weight:800; margin-bottom: 20px;">☁️ 荣誉已存入云端荣誉墙...</div>
-        <button class="btn-action" style="background:#f59e0b; color:white; box-shadow: 0 6px 0 #d97706;" onclick="closeBadgeModal()">Awesome! 🚀</button>
-    </div>
-</div>
-
 <script>
-    const SYNC_API_URL = "https://script.google.com/macros/s/AKfycbzbNOgg7deW9uVVyfYGTfKGOtVgNs_9ZfUQ9J_9cYpG2Ufow9KLDICHgsinBXrPJlmz/exec"; // 换上了最新的后端API
-    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQlpdRHnR9ybEHHgX6fouRI-vXOh8KQNLSjsbt0TYh9R3No_9i7QNv_4ELwJZJGQpTe3oZVXaZijaW4/pub?gid=266851979&single=true&output=csv"; // 换上了老爸给的确切听写GID
-    
-    let db = {}, sessionQs = [], curIdx = 0, sessionErrors = 0;
-    let selectedLesson = "";
-    let synth = window.speechSynthesis;
-    let badgeQueue = [], pendingGameResult = null;
+    // 💡 换成了老爸要求的 gid=266851979
+    const SHEET_URL = "https://docs.google.com/spreadsheets/d/1MJHkk7HaKRJgY3LQ-Y3IeHemC-keJJWtH7zh-5K_eec/export?format=csv&gid=266851979";
+    const SYNC_API_URL = "https://script.google.com/macros/s/AKfycbzbNOgg7deW9uVVyfYGTfKGOtVgNs_9ZfUQ9J_9cYpG2Ufow9KLDICHgsinBXrPJlmz/exec";
+    const LIMIT = 5; 
 
+    let db = {}, curUser = currentGrade, curSub = '华文', practiceList = [], curIdx = 0;
+    let hzWriter = null, practiceChars = [];
+    let totalCorrectCount = 0, sessionErrors = 0;
+    let currentMode = 'practice';
+
+    // 🏆 云端同步函数
     async function syncToCloud(payload) {
         try { fetch(SYNC_API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) }); } catch (e) {}
     }
 
-    function showScreen(id) {
-        document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
-        document.getElementById(id).style.display = 'flex';
-    }
-
-    function backToLesson() {
-        if(confirm("确定要退出当前听写吗？进度将不会保存。")) {
-            showScreen('lesson-screen');
-            if (synth.speaking) synth.cancel();
-        }
-    }
-
-    // 💡 气球逻辑接口 (和练习复用)
-    function applyBalloonLogic(errors) {
+    function checkAndIncrementLimit(lessons, mode) {
         const today = new Date().toISOString().split('T')[0];
-        const key = `balloon_stats_${today}_${currentUser}`;
-        let stats = JSON.parse(localStorage.getItem(key) || '{"goodCount":0, "date":""}');
-        if (stats.date !== today) stats = { goodCount: 0, date: today }; 
-
-        let trigger = false;
-        let msg = "";
-
-        if (errors <= 1) {
-            stats.goodCount += 1; 
-
-            if (errors === 0) {
-                trigger = true;
-                msg = "🎉 满分达成！直接奖励气球大作战！🎈";
-            } else if (stats.goodCount % 2 === 0) {
-                trigger = true;
-                msg = "🎉 累计两次高质量完成！解锁气球大作战！🎈";
-            } else {
-                msg = "🔥 表现不错！再获得一次全对就能玩气球啦！";
+        const storageKey = `spelling_usage_${today}`;
+        let usage = JSON.parse(localStorage.getItem(storageKey) || "{}");
+        for (let lesson of lessons) {
+            if (!usage[lesson]) usage[lesson] = { practice: 0, challenge: 0 };
+            if (usage[lesson][mode] >= LIMIT) {
+                alert(`「${lesson}」你今天已经学过很多次了，学点别的吧！`);
+                return false;
             }
         }
-
-        localStorage.setItem(key, JSON.stringify(stats));
-        return { trigger, msg };
+        lessons.forEach(l => usage[l][mode]++);
+        localStorage.setItem(storageKey, JSON.stringify(usage));
+        return true;
     }
 
-    async function init() {
-        document.getElementById('lesson-subtitle').innerText = `${currentUser} (${currentGrade})`;
-
-        let cached = sessionStorage.getItem('tingxie_db_cache');
-        if (cached) { 
-            try { 
-                db = JSON.parse(cached); 
-                if (Object.keys(db).length > 0) { renderLessonMenu(); return; } 
-            } catch(e) { sessionStorage.removeItem('tingxie_db_cache'); } 
-        }
-
-        Papa.parse(CSV_URL, {
-            download: true,
-            header: true,
-            skipEmptyLines: 'greedy',
+    function init() {
+        Papa.parse(SHEET_URL + "&t=" + Date.now(), {
+            download: true, header: true, skipEmptyLines: 'greedy',
+            transformHeader: h => h.replace(/^\uFEFF/, '').trim().toUpperCase(),
             complete: function(results) {
-                db = {};
-                results.data.forEach(row => {
-                    let keys = Object.keys(row);
-                    let kGrade = keys.find(k => /grade|年级/i.test(k)) || keys[0];
-                    let kTopic = keys.find(k => /topic|lesson|课/i.test(k)) || keys[2];
-                    let kType = keys.find(k => /type|类型/i.test(k)) || keys[3]; 
-                    let kChar = keys.find(k => /chinese|char|word|question|汉字|词|题目/i.test(k)) || keys[4];
-                    let kPy = keys.find(k => /pinyin|correct|answer|拼音|答案/i.test(k)) || keys[6];
-                    
-                    let typeVal = (row[kType] || "").toString().trim().toUpperCase();
-                    // 只要不是专门的 PINYIN 题，都算作听写题词库
-                    if (typeVal === 'PINYIN') return;
-
-                    let grade = (row[kGrade] || "").trim().toUpperCase();
-                    let topic = (row[kTopic] || "").trim();
-                    let charRaw = (row[kChar] || "").trim();
-                    let pyStr = (row[kPy] || "").trim();
-                    
-                    if (!charRaw || !topic || !grade) return;
-                    
-                    let char = charRaw.replace(/[^\u4e00-\u9fa5]/g, '') || charRaw; 
-                    
-                    if(!db[grade]) db[grade] = {};
-                    if(!db[grade][topic]) db[grade][topic] = [];
-                    db[grade][topic].push({ char: char, pinyin: pyStr });
-                });
-                
-                if (Object.keys(db).length > 0) { 
-                    sessionStorage.setItem('tingxie_db_cache', JSON.stringify(db)); 
-                    renderLessonMenu(); 
-                } else { 
-                    document.getElementById('loading').innerText = "⚠️ 题库格式错误。"; 
-                }
-            },
-            error: function() {
-                document.getElementById('loading').innerText = "⚠️ 网络慢，请重试。";
-            }
-        });
-    }
-
-    function renderLessonMenu() {
-        const grid = document.getElementById('lesson-grid');
-        grid.innerHTML = '';
-        
-        let topics = db[currentGrade] ? Object.keys(db[currentGrade]) : [];
-        if (topics.length === 0) {
-            grid.innerHTML = `<div style="grid-column: span 3; color: #ef4444; font-weight: bold;">没有找到 ${currentGrade} 的课文数据。</div>`;
-            showScreen('lesson-screen');
-            return;
-        }
-
-        // 提取课文数字并排序
-        let sortedTopics = topics.map(t => {
-            let match = t.match(/\d+/);
-            let num = match ? parseInt(match[0]) : (t.includes('一') ? 1 : (t.includes('二') ? 2 : (t.includes('三') ? 3 : 99)));
-            return { raw: t, num: num };
-        }).sort((a, b) => a.num - b.num);
-
-        // 获取错题本里属于听写的错题 (提取这学期的)
-        let mistakes = JSON.parse(localStorage.getItem('hub_mistakes') || '{}');
-        let hasMistakes = false;
-        for (let key in mistakes) {
-            if (key.includes(`${currentUser}_华文`) && !key.includes('PINYIN')) {
-                hasMistakes = true; break;
-            }
-        }
-
-        if (hasMistakes) {
-            let btn = document.createElement('button');
-            btn.className = 'lesson-btn';
-            btn.style.borderColor = '#ef4444';
-            btn.style.color = '#ef4444';
-            btn.style.gridColumn = 'span 3';
-            btn.innerHTML = `🐞 错题重听`;
-            btn.onclick = () => startTingxie('MISTAKES');
-            grid.appendChild(btn);
-        }
-
-        sortedTopics.forEach(tObj => {
-            let btn = document.createElement('button');
-            btn.className = 'lesson-btn';
-            btn.innerText = tObj.raw;
-            btn.onclick = () => startTingxie(tObj.raw);
-            grid.appendChild(btn);
-        });
-
-        showScreen('lesson-screen');
-    }
-
-    function startTingxie(topic) {
-        selectedLesson = topic;
-        sessionQs = [];
-        
-        if (topic === 'MISTAKES') {
-            let mistakes = JSON.parse(localStorage.getItem('hub_mistakes') || '{}');
-            let pool = [];
-            // 把所有这学期的华文错题捞出来听写
-            if (db[currentGrade]) {
-                for (let t in db[currentGrade]) {
-                    db[currentGrade][t].forEach(q => {
-                        let key = `${currentUser}_华文_${q.char}`;
-                        if (mistakes[key]) pool.push(q);
+                results.data.forEach((row, index) => { 
+                    let g = (row['GRADE'] || "").toUpperCase(), sub = (row['SUBJECT'] || "").trim();
+                    if(!g || !sub) return;
+                    if(!db[g]) db[g] = {}; 
+                    if(!db[g][sub]) db[g][sub] = []; 
+                    db[g][sub].push({
+                        Topic: row['TOPIC'] || row['LESSON'] || "Default",
+                        Hint: row['QUESTION'] || row['HINT'] || "",
+                        Answer: row['CORRECT ANSWER'] || row['ANSWER'] || "",
+                        isWrong: false,
+                        originalIndex: index 
                     });
-                }
+                });
+                document.getElementById('loading').style.display = 'none';
+                loadTopics();
             }
-            if (pool.length === 0) { alert("错题本已清空！"); return; }
-            sessionQs = pool.sort(() => 0.5 - Math.random()).slice(0, 15);
-            document.getElementById('header-info').innerHTML = `← 🐞 错题听写`;
-        } else {
-            let pool = db[currentGrade][topic];
-            sessionQs = [...pool].sort(() => 0.5 - Math.random());
-            document.getElementById('header-info').innerHTML = `← 🐼 ${topic}`;
+        });
+    }
+
+    function loadTopics() {
+        let childName = currentPlayer;
+        document.getElementById('topic-header').innerText = `🎈 ${childName} 的听写 🎈`;
+        let pool = db[curUser]['华文'] || [];
+        let topics = [...new Set(pool.map(q => q.Topic))].sort((a,b) => getWeight(a) - getWeight(b));
+        const gradeMap = {'P1': '一', 'P2': '二', 'P3': '三', 'P4': '四', 'P5': '五', 'P6': '六'};
+        let gradeStr = gradeMap[curUser] || curUser;
+        let semGroup = document.getElementById('semester-group');
+        semGroup.innerHTML = `
+            <button class="btn-choice" onclick="selectSemester('A', this)">📖 ${gradeStr}上</button>
+            <button class="btn-choice" onclick="selectSemester('B', this)">📘 ${gradeStr}下</button>
+        `;
+        const list = document.getElementById('topic-list'); list.innerHTML = '';
+        topics.forEach(t => {
+            const lbl = document.createElement('label');
+            lbl.className = 'checkbox-label';
+            lbl.innerHTML = `<input type="checkbox" value="${t}" onchange="this.parentElement.classList.toggle('selected', this.checked)"> ${t}`;
+            list.appendChild(lbl);
+        });
+        showScreen('topic-screen');
+    }
+
+    function selectSemester(type, btn) {
+        btn.classList.toggle('active');
+        let isActive = btn.classList.contains('active');
+        document.querySelectorAll('#topic-list input').forEach(cb => {
+            let weight = getWeight(cb.value);
+            if (type === 'A' && weight <= 10) { cb.checked = isActive; cb.parentElement.classList.toggle('selected', isActive); }
+            else if (type === 'B' && weight > 10) { cb.checked = isActive; cb.parentElement.classList.toggle('selected', isActive); }
+        });
+    }
+
+    function getWeight(s) {
+        const dict = {'一':1,'二':2,'三':3,'四':4,'五':5,'六':6,'七':7,'八':8,'九':9,'十':10,'十一':11,'十二':12,'十三':13,'十四':14,'十五':15,'十六':16,'十七':17,'十八':18,'十九':19,'二十':20};
+        let m = s.match(/第(.+)课/); if(m && dict[m[1]]) return dict[m[1]];
+        let n = s.match(/\d+/); return n ? parseInt(n[0]) : 999;
+    }
+
+    function startPractice() {
+        let sel = [...document.querySelectorAll('#topic-list input:checked')].map(i => i.value);
+        if(sel.length === 0) return;
+        if (!checkAndIncrementLimit(sel, 'practice')) return;
+        currentMode = 'practice'; 
+        let pool = db[curUser]['华文'].filter(q => sel.includes(q.Topic));
+        practiceList = pool.sort((a,b) => a.originalIndex - b.originalIndex);
+        curIdx = 0; sessionErrors = 0; showScreen('practice-screen'); renderQuestion();
+    }
+
+    function startReview(btn) {
+        let sel = [...document.querySelectorAll('#topic-list input:checked')].map(i => i.value);
+        if(sel.length < 2) return;
+        if (!checkAndIncrementLimit(sel, 'challenge')) return;
+        currentMode = 'challenge'; 
+        let pool = db[curUser]['华文'].filter(q => sel.includes(q.Topic));
+        practiceList = pool.sort(() => 0.5 - Math.random()).slice(0, 10);
+        curIdx = 0; sessionErrors = 0; showScreen('practice-screen'); renderQuestion();
+    }
+
+    function moveQuestion(step) {
+        let target = curIdx + step;
+        if(target >= 0 && target < practiceList.length) { curIdx = target; renderQuestion(); }
+        else if (target >= practiceList.length) { finish(); }
+    }
+
+    function renderQuestion() {
+        const q = practiceList[curIdx];
+        document.getElementById('prog-bar').style.width = `${((curIdx + 1) / practiceList.length) * 100}%`;
+        document.getElementById('prog-text').innerText = `${curIdx + 1} / ${practiceList.length}`;
+        document.getElementById('prev-btn').style.visibility = (curIdx === 0) ? 'hidden' : 'visible';
+        document.getElementById('next-btn').innerText = (curIdx === practiceList.length - 1) ? "完成 ✨" : "下一个 ➡️";
+        
+        document.getElementById('draw-target').innerHTML = '';
+        const skb = document.getElementById('skip-char-btn');
+        const pkb = document.getElementById('peek-btn');
+        skb.style.display = 'block'; 
+        pkb.style.display = currentMode === 'challenge' ? 'none' : 'block';
+
+        const word = q.Answer.trim(); const pinyins = q.Hint.trim().split(/\s+/);
+        q.charsData = []; let pIdx = 0;
+        for(let char of word) {
+            let isP = /[，。！？、：；（）《》“”" "]/u.test(char);
+            q.charsData.push({ char, pinyin: isP ? char : (pinyins[pIdx++] || ''), isP, done: isP });
         }
-        
-        curIdx = 0; sessionErrors = 0;
-        showScreen('quiz-screen');
-        renderQ();
+        practiceChars = q.charsData;
+        document.getElementById('hint-area').innerHTML = practiceChars.map((item, i) => {
+            let innerHtml = item.isP ? item.char : (item.done && currentMode !== 'challenge' ? item.char : item.pinyin);
+            return `<div class="hint-unit ${item.done?'done':''}" id="py-${i}" onclick="jumpTo(${i})">${innerHtml}</div>`;
+        }).join('');
+        autoJump();
     }
 
-    function updateProgress() {
-        const bar = document.getElementById('progress-bar');
-        let html = '';
-        for(let i=0; i<sessionQs.length; i++) {
-            html += `<div class="milestone${i < curIdx ? ' done' : (i === curIdx ? ' active' : '')}">${i < curIdx ? '⭐' : (i === curIdx ? '🐼' : '☁️')}</div>`;
-        }
-        bar.innerHTML = html;
-        document.getElementById('progress-text').innerText = `${curIdx + 1} / ${sessionQs.length}`;
-    }
-
-    function renderQ() {
-        updateProgress();
-        document.getElementById('ans-in').value = '';
-        document.getElementById('ans-in').disabled = false;
-        document.getElementById('fb-text').innerText = '';
-        
-        document.getElementById('hint-text').innerText = sessionQs[curIdx].pinyin || "无拼音提示";
-        document.getElementById('hint-text').classList.remove('visible');
-
-        document.getElementById('hint-btn').style.display = 'flex';
-        document.getElementById('sub-btn').style.display = 'flex'; 
-        document.getElementById('next-btn').style.display = 'none';
-        
-        if (curIdx === sessionQs.length - 1) document.getElementById('next-btn').innerText = "完成听写 ✨";
-        else document.getElementById('next-btn').innerText = "下一个 ➡️";
-        
-        document.getElementById('ans-in').focus();
-        
-        setTimeout(playCurrentAudio, 300);
-    }
-
-    function playCurrentAudio() {
-        if (synth.speaking) synth.cancel();
-        
-        const btn = document.getElementById('audio-btn');
-        btn.classList.add('playing');
-        
-        let utterThis = new SpeechSynthesisUtterance(sessionQs[curIdx].char);
-        utterThis.lang = 'zh-CN';
-        utterThis.rate = 0.75; 
-        
-        utterThis.onend = function() { btn.classList.remove('playing'); }
-        utterThis.onerror = function() { btn.classList.remove('playing'); }
-        
-        synth.speak(utterThis);
-    }
-
-    function showHint() {
-        document.getElementById('hint-text').classList.add('visible');
-        document.getElementById('ans-in').focus();
-    }
-
-    function checkAns() {
-        const input = document.getElementById('ans-in');
-        const user = input.value.trim();
-        const correctRaw = sessionQs[curIdx].char;
-        const fb = document.getElementById('fb-text');
-        
-        if(user === "") { alert("请写下听到的词语！"); return; }
-        
-        let isCorrect = (user === correctRaw);
-        let key = `${currentUser}_华文_${correctRaw}`;
-        let mistakes = JSON.parse(localStorage.getItem('hub_mistakes') || '{}');
-        let mData = mistakes[key] || { level: 3, wrongs: [] };
-        if (typeof mData === 'number') mData = { level: mData, wrongs: [] };
-
-        if(isCorrect) {
-            input.disabled = true; 
-            document.getElementById('hint-btn').style.display = 'none';
-            document.getElementById('sub-btn').style.display = 'none'; 
-            document.getElementById('next-btn').style.display = 'flex';
-            fb.innerHTML = `<span style="color:#10b981;">✅ 拼写正确！</span>`;
-            
-            // 答对了，如果是错题库里的，减弱权重
-            if (mistakes[key]) {
-                mData.level += 1; 
-                if (mData.level >= 5) delete mistakes[key]; 
-                else mistakes[key] = mData;
-                localStorage.setItem('hub_mistakes', JSON.stringify(mistakes));
-                syncToCloud({type: 'mistake_update', user: currentUser, grade: currentGrade, subject: '华文', questionKey: key, level: mData.level});
+    function jumpTo(idx) {
+        if(practiceChars[idx].done) return; 
+        document.querySelectorAll('.hint-unit').forEach((el, i) => el.classList.toggle('active', i === idx));
+        document.getElementById('draw-target').innerHTML = `<div id="hz-box" class="hanzi-box"></div>`;
+        let boxSize = window.innerWidth <= 768 ? 200 : 260;
+        hzWriter = HanziWriter.create('hz-box', practiceChars[idx].char, { width: boxSize, height: boxSize, padding: 15, showOutline: false, showCharacter: false, strokeColor: '#1e293b', drawingColor: '#3b82f6', outlineColor: '#cbd5e1' });
+        hzWriter.quiz({ 
+            onMistake: () => { sessionErrors++; practiceList[curIdx].isWrong = true; },
+            onComplete: () => {
+                showThumb(); practiceChars[idx].done = true;
+                let pyEl = document.getElementById(`py-${idx}`); pyEl.classList.add('done');
+                pyEl.innerText = currentMode === 'challenge' ? practiceChars[idx].pinyin : practiceChars[idx].char;
+                setTimeout(autoJump, 600);
             }
-        } else {
-            sessionErrors++; 
-            fb.innerHTML = `<span style="color:#ef4444;">❌ 不对哦！</span><br><span style="font-size:16px; color:#64748b;">正确写法：<b style="color:#0f172a; font-size:24px;">${correctRaw}</b></span>`;
-            input.classList.add('error-shake'); 
-            setTimeout(()=> input.classList.remove('error-shake'), 400);
-            
-            input.disabled = true; 
-            document.getElementById('hint-btn').style.display = 'none';
-            document.getElementById('sub-btn').style.display = 'none'; 
-            document.getElementById('next-btn').style.display = 'flex';
-            
-            // 答错了，加进错题本
-            mData.level = Math.max(1, mData.level - 1);
-            if (mData.wrongs[mData.wrongs.length - 1] !== user) mData.wrongs.push(user);
-            mistakes[key] = mData;
-            localStorage.setItem('hub_mistakes', JSON.stringify(mistakes));
-            syncToCloud({type: 'mistake_update', user: currentUser, grade: currentGrade, subject: '华文', questionKey: key, level: mData.level, wrongAns: user});
+        });
+        if (currentMode !== 'challenge') {
+            const peek = document.getElementById('peek-btn');
+            peek.onmousedown = peek.ontouchstart = () => hzWriter.showOutline();
+            peek.onmouseup = peek.ontouchend = () => hzWriter.hideOutline();
         }
     }
 
-    function nextQ() { 
-        if (synth.speaking) synth.cancel();
-        if (curIdx < sessionQs.length - 1) { curIdx++; renderQ(); } 
-        else { finishTingxie(); } 
+    function skipCurrentChar() {
+        let idx = practiceChars.findIndex(i => !i.done);
+        if(idx !== -1) { practiceChars[idx].done = true; document.getElementById(`py-${idx}`).classList.add('done'); autoJump(); }
     }
 
-    // 💡 终极联动结算逻辑
-    function finishTingxie() {
+    function autoJump() { let next = practiceChars.findIndex(i => !i.done); if(next !== -1) jumpTo(next); }
+    function showThumb() { const t = document.getElementById('thumb-up'); t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 600); }
+
+    function finish() {
         const isPerfect = sessionErrors === 0;
-        badgeQueue = [];
+        let earnedCoins = 0;
+        let badgeEarned = false;
 
-        // ---------------- 1. 自动解锁拼音游戏进度 ----------------
-        try {
-            if (selectedLesson !== 'MISTAKES') {
-                let currentLessonNum = parseInt(selectedLesson.replace(/\D/g, ''));
-                if (!isNaN(currentLessonNum)) {
-                    let savedMax = parseInt(localStorage.getItem(`max_lesson_${currentUser}`) || "8");
-                    if (currentLessonNum > savedMax) {
-                        localStorage.setItem(`max_lesson_${currentUser}`, currentLessonNum);
-                        console.log(`自动解锁拼音：${currentLessonNum}`);
-                    }
-                }
-            }
-        } catch(e) {}
+        // 💰 结算奖励（仅挑战模式）
+        if (currentMode === 'challenge' && isPerfect) {
+            earnedCoins = (currentPlayer === 'Venessa' || currentGrade === 'P1') ? 4 : 2;
+            let vault = parseInt(localStorage.getItem('gold_coins_vault') || "0");
+            localStorage.setItem('gold_coins_vault', vault + earnedCoins);
+            badgeEarned = true;
 
-        // ---------------- 2. 听写大王徽章 (全对且首次) ----------------
-        if (isPerfect && selectedLesson !== 'MISTAKES') {
-            const badgeKey = `tingxie_badge_${currentUser}_${selectedLesson}`;
-            if (!localStorage.getItem(badgeKey)) {
-                localStorage.setItem(badgeKey, "true");
-                
-                let coinGain = isSister ? 4 : 2; // 听写给多点金币！妹妹4个，姐姐2个
-                let vaultCoins = parseInt(localStorage.getItem('gold_coins_vault') || "0");
-                localStorage.setItem('gold_coins_vault', vaultCoins + coinGain);
-
-                badgeQueue.push({ icon: '👑', title: '听写大王', desc: `完美默写了《${selectedLesson}》！<br>金币 +${coinGain}！` });
-                syncToCloud({ type: 'badge', user: currentUser, subject: '听写', icon: '👑', title: '听写大王', desc: `完美默写《${selectedLesson}》` });
-                syncToCloud({ type: 'coin_update', user: currentUser, amount: coinGain, total: vaultCoins + coinGain });
-            }
+            // 同步金币
+            syncToCloud({ type: 'coin_update', user: currentPlayer, amount: earnedCoins, total: vault + earnedCoins });
+            // 同步徽章
+            syncToCloud({ type: 'badge', user: currentPlayer, subject: '听写', icon: '👑', title: '听写大王', desc: '完美完成挑战' });
         }
 
-        // ---------------- 3. 气球大作战逻辑 (全对触发) ----------------
         if (isPerfect) {
-            pendingGameResult = applyBalloonLogic(sessionErrors);
-            if (pendingGameResult && pendingGameResult.trigger) {
-                badgeQueue.push({ icon: '🎈', title: '气球猎人！', desc: pendingGameResult.msg });
-            }
-        } else {
-            pendingGameResult = null; 
+            confetti({ particleCount: 250, spread: 100 });
+            new Audio("https://actions.google.com/sounds/v1/foley/cheer_short.ogg").play().catch(()=>{});
         }
 
-        if (badgeQueue.length > 0) {
-            document.getElementById('badge-modal').style.display = 'flex';
-            showNextBadge();
-        } else {
-            renderFinalScreen();
-        }
+        let html = `<div style="padding:40px 0;"><h1>${isPerfect?'🏆':'💪'}</h1><h2 style="font-size:36px;">${isPerfect?'太厉害了！':'继续加油！'}</h2>`;
+        if (badgeEarned) html += `<div style="background:#fffbeb; padding:15px; border-radius:20px; border:3px solid #fde68a; margin:20px 0;"><div style="font-size:40px;">👑</div><div style="font-weight:900; color:#d97706;">获得【听写大王】徽章</div><div style="font-size:20px; color:#b45309;">💰 +${earnedCoins} 金币已存入金库</div></div>`;
+        html += `<button class="btn-action btn-quit" style="width:200px; margin:30px auto;" onclick="window.location.href='index.html'">返回主页 🏠</button></div>`;
+        document.getElementById('finish-screen').innerHTML = html; showScreen('finish-screen');
+        
+        if (isPerfect) setTimeout(() => { window.location.href = "https://andydang2007.github.io/game/popballoons.html?ticket=" + Date.now(); }, 3000);
     }
 
-    function showNextBadge() {
-        if (badgeQueue.length > 0) {
-            let b = badgeQueue.shift(); let m = document.querySelector('.epic-modal');
-            m.style.transform = m.style.opacity = ''; m.style.animation = 'none'; void m.offsetWidth; m.style.animation = 'epicPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-            document.getElementById('badge-icon').innerText = b.icon;
-            document.getElementById('badge-title').innerText = b.title;
-            document.getElementById('badge-desc').innerHTML = b.desc;
-            if (typeof confetti === 'function') confetti({ particleCount: 300, spread: 150, origin: { y: 0.3 }, zIndex: 1001 });
-        } else { document.getElementById('badge-modal').style.display = 'none'; renderFinalScreen(); }
-    }
-
-    function closeBadgeModal() {
-        let m = document.querySelector('.epic-modal'); m.style.transform = 'scale(0.8)'; m.style.opacity = '0';
-        setTimeout(showNextBadge, 150);
-    }
-
-    function renderFinalScreen() {
-        const isPerfect = sessionErrors === 0;
-        let title = isPerfect ? '🎉 听写全对！' : '💪 听写完成！';
-        
-        let html = `<div style="text-align:center; padding: 40px 0;"><h1 style="font-size:30px; color:#0f172a; font-weight:900;">${title}</h1>`;
-        
-        if (pendingGameResult && pendingGameResult.msg) {
-            html += `<div class="stat-badge">${pendingGameResult.msg}</div>`;
-        }
-        
-        if (sessionErrors > 0) {
-            html += `<p style="color:#ef4444; font-weight:800; margin-top:20px; font-size: 16px;">🐞 已将 ${sessionErrors} 个易错字关进捉虫日记。</p>`;
-        }
-        
-        html += `<button class="btn-action" style="background:#f1f5f9; color:#64748b; width:100%; max-width: 250px; margin: 30px auto 0 auto; border: 3px solid #e2e8f0;" onclick="window.location.href='index.html'">🏠 返回主页</button></div>`;
-        
-        document.getElementById('finish-screen').innerHTML = html; 
-        showScreen('finish-screen');
-        
-        if (isPerfect && pendingGameResult && pendingGameResult.trigger) {
-            setTimeout(() => { window.location.href = "https://andydang2007.github.io/game/popballoons.html?ticket=" + Date.now(); }, 2500);
-        }
-    }
-
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            if (document.getElementById('quiz-screen').style.display === 'flex') {
-                if (document.getElementById('sub-btn').style.display !== 'none') { e.preventDefault(); checkAns(); }
-                else if (document.getElementById('next-btn').style.display !== 'none') { e.preventDefault(); nextQ(); }
-            } else if (document.getElementById('badge-modal').style.display === 'flex') { e.preventDefault(); closeBadgeModal(); }
-        }
-    });
-
-    window.onload = init;
+    function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.style.display='none'); document.getElementById(id).style.display='flex'; }
+    init();
 </script>
+
 </body>
 </html>
