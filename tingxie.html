@@ -24,29 +24,31 @@
         :root { --text-main: #1e293b; --text-muted: #64748b; }
         * { box-sizing: border-box; font-family: 'Nunito', 'Microsoft YaHei', 'Comic Sans MS', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); margin: 0; padding: 15px; color: var(--text-main); display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100dvh; overflow: hidden; }
-        .container { width: 100%; max-width: 750px; background: rgba(255,255,255,0.95); padding: 20px; border-radius: 40px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); text-align: center; margin: auto; position: relative; border: 4px solid #ffffff; display: flex; flex-direction: column; max-height: 96dvh; }
+        .container { width: 100%; max-width: 750px; background: rgba(255,255,255,0.95); padding: 25px; border-radius: 40px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); text-align: center; margin: auto; position: relative; border: 4px solid #ffffff; display: flex; flex-direction: column; max-height: 96dvh; }
         .screen { display: none; flex: 1; flex-direction: column; width: 100%; overflow: hidden; animation: bounceIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
         #finish-screen { justify-content: center; overflow-y: auto; }
         
-        h1 { color: #3b82f6; margin-top: 0; font-size: 28px; margin-bottom: 15px; font-weight: 900; letter-spacing: 1px; text-shadow: 2px 2px 0px #dbeafe; flex: none; }
+        h1 { color: #3b82f6; margin-top: 0; font-size: 32px; margin-bottom: 20px; font-weight: 900; letter-spacing: 1px; text-shadow: 2px 2px 0px #dbeafe; flex: none; }
         
         .btn-group { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 15px; flex: none; }
         .btn-choice { padding: 12px 24px; border-radius: 30px; border: 3px solid #e2e8f0; background: white; cursor: pointer; font-weight: 900; font-size: 18px; color: var(--text-muted); transition: 0.15s; min-width: 100px; box-shadow: 0 4px 0 #e2e8f0; outline: none; }
         .btn-choice.active { border-color: #3b82f6; background: #eff6ff; color: #1d4ed8; box-shadow: 0 4px 0 #93c5fd; }
         
-        /* 💡 改为无边框胶囊样式 */
-        .checkbox-grid { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 15px; padding: 5px; flex: 1; overflow-y: auto; align-content: flex-start; }
-        .checkbox-label { padding: 10px 20px; border-radius: 20px; background: #f1f5f9; cursor: pointer; font-weight: 800; font-size: 16px; color: var(--text-muted); transition: all 0.15s; user-select: none; height: fit-content; border: none; }
-        .checkbox-label.selected { background: #3b82f6; color: #ffffff; font-weight: 900; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.4); transform: scale(1.05); }
+        /* 💡 绝美紫色胶囊选框，自动居中排版 */
+        .checkbox-grid { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-bottom: 20px; padding: 5px; flex: 1; overflow-y: auto; align-content: flex-start; }
+        .checkbox-label { padding: 12px 20px; border-radius: 25px; background: #f1f5f9; cursor: pointer; font-weight: 900; font-size: 18px; color: var(--text-muted); transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); user-select: none; border: 3px solid transparent; box-shadow: 0 4px 0 #cbd5e1; text-align: center; }
+        .checkbox-label input { display: none; } /* 彻底隐藏原生方框 */
+        .checkbox-label:active { transform: translateY(4px); box-shadow: 0 0 0 transparent; }
+        .checkbox-label.selected { background: #a855f7; color: #ffffff; border-color: #9333ea; box-shadow: 0 6px 15px rgba(168, 85, 247, 0.4); transform: scale(1.08); }
         
-        .action-panel { display: flex; flex-direction: column; gap: 15px; width: 100%; flex: none; }
-        .btn-stacked-row { display: flex; gap: 15px; justify-content: center; }
+        .action-panel { display: flex; flex-direction: column; gap: 15px; width: 100%; flex: none; margin-top: 10px; }
+        .btn-stacked-row { display: flex; gap: 15px; justify-content: center; width: 100%; }
         
-        /* 💡 按钮变宽润 */
-        .btn-stacked { flex: 1; padding: 18px 0; border-radius: 20px; font-size: 20px; font-weight: 900; border: none; cursor: pointer; transition: 0.15s; display: flex; align-items: center; justify-content: center; color: white; }
+        .btn-stacked { flex: 1; padding: 20px 0; border-radius: 25px; font-size: 22px; font-weight: 900; border: none; cursor: pointer; transition: 0.15s; display: flex; align-items: center; justify-content: center; color: white; }
         .btn-review-stacked { background: #f59e0b; box-shadow: 0 6px 0 #d97706; }
         .btn-practice-stacked { background: #10b981; box-shadow: 0 6px 0 #059669; }
-        .btn-home { background: #f1f5f9; color: #64748b; font-size: 18px; border: 3px solid #e2e8f0; box-shadow: 0 6px 0 #cbd5e1; width: 100%; border-radius: 20px; padding: 12px 0; font-weight: 900; cursor: pointer;}
+        .btn-home { background: #f1f5f9; color: #64748b; font-size: 18px; border: 4px solid #e2e8f0; box-shadow: 0 6px 0 #cbd5e1; width: 100%; border-radius: 25px; padding: 15px 0; font-weight: 900; cursor: pointer; transition: 0.15s;}
+        .btn-home:active, .btn-stacked:active { transform: translateY(6px); box-shadow: 0 0 0 transparent; }
 
         .progress-container { width: 100%; background: #f1f5f9; height: 16px; border-radius: 10px; margin-bottom: 20px; overflow: hidden; border: 2px solid #e2e8f0; flex: none; }
         .progress-bar { height: 100%; background: linear-gradient(90deg, #34d399, #10b981); width: 0%; transition: width 0.4s; }
@@ -59,29 +61,40 @@
         
         .practice-main { display: flex; flex-direction: column; flex: 1; width: 100%; min-height: 0; }
         .practice-area { background: #f8fafc; padding: 20px 10px; border-radius: 30px; border: 4px dashed #cbd5e1; margin-bottom: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; position: relative; overflow: hidden; min-height: 250px;}
-        .hanzi-box { width: 240px; height: 240px; border: 4px solid #94a3b8; border-radius: 25px; background: white; }
+        
+        /* 💡 完美的米字格背景 */
+        .hanzi-box { 
+            width: 240px; height: 240px; 
+            border: 4px solid #94a3b8; border-radius: 20px; background-color: white; 
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"><line x1="0" y1="0" x2="100%" y2="100%" stroke="%23cbd5e1" stroke-width="2" stroke-dasharray="6,6"/><line x1="100%" y1="0" x2="0" y2="100%" stroke="%23cbd5e1" stroke-width="2" stroke-dasharray="6,6"/><line x1="50%" y1="0" x2="50%" y2="100%" stroke="%23cbd5e1" stroke-width="2" stroke-dasharray="6,6"/><line x1="0" y1="50%" x2="100%" y2="50%" stroke="%23cbd5e1" stroke-width="2" stroke-dasharray="6,6"/></svg>');
+            background-size: cover; box-shadow: inset 0 0 20px rgba(0,0,0,0.05); 
+        }
         
         .helper-row { display: flex; gap: 15px; margin-top: 15px; justify-content: center; width: 100%; }
         .btn-helper { font-size: 16px; padding: 10px 20px; border-radius: 20px; font-weight: 900; cursor: pointer; transition: 0.15s; outline: none; display: none; }
         #peek-btn { background: #fef08a; color: #a16207; border: 3px solid #fde047; box-shadow: 0 5px 0 #facc15; }
         #skip-char-btn { background: #f1f5f9; color: #64748b; border: 3px solid #e2e8f0; box-shadow: 0 5px 0 #cbd5e1; }
+        .btn-helper:active { transform: translateY(5px); box-shadow: 0 0 0 transparent !important; }
         
         .controls-row { display: flex; gap: 12px; width: 100%; height: 65px; flex: none; }
         .btn-action { border-radius: 20px; border: none; font-weight: 900; font-size: 20px; cursor: pointer; transition: 0.15s; display: flex; align-items: center; justify-content: center; outline: none; }
         .btn-quit { flex: 1; background: #f1f5f9; color: #64748b; font-size: 16px; border: 3px solid #e2e8f0; box-shadow: 0 5px 0 #cbd5e1; } 
         .btn-nav { flex: 1.5; background: #38bdf8; color: white; box-shadow: 0 5px 0 #0284c7; } 
+        .btn-action:active { transform: translateY(5px); box-shadow: 0 0 0 transparent; }
+        
         /* 💡 灰色不可用状态 */
-        .btn-nav:disabled { background: #cbd5e1 !important; color: #f8fafc !important; box-shadow: 0 5px 0 #94a3b8 !important; cursor: not-allowed; transform: none !important; }
+        .btn-nav:disabled { background: #e2e8f0 !important; color: #94a3b8 !important; box-shadow: 0 5px 0 #cbd5e1 !important; cursor: not-allowed; transform: none !important; }
 
         @keyframes bounceIn { 0% { opacity: 0; transform: scale(0.9); } 100% { opacity: 1; transform: scale(1); } }
         
         @media (orientation: landscape) and (min-width: 768px) {
-            .container { max-width: 900px; padding: 25px 30px; height: 95dvh; border-radius: 40px;}
-            .practice-main { flex-direction: row; align-items: flex-start; gap: 20px; }
-            .practice-area { margin-bottom: 0; height: 100%; min-height: 280px; flex: 1; }
-            .practice-main .controls-row { display: grid; grid-template-columns: 1fr 1fr; width: 280px; height: auto; gap: 15px; flex: none; }
-            .practice-main .btn-action { height: 75px; width: 100%; border-radius: 20px; }
-            .practice-main .btn-quit { grid-column: 1 / 3; font-size: 20px; }
+            .container { max-width: 950px; padding: 35px 40px; height: 95dvh; border-radius: 50px;}
+            .practice-main { flex-direction: row; align-items: flex-start; gap: 30px; }
+            .practice-area { margin-bottom: 0; height: 100%; min-height: 320px; flex: 1; }
+            .hanzi-box { width: 280px; height: 280px; }
+            .practice-main .controls-row { display: grid; grid-template-columns: 1fr 1fr; width: 300px; height: auto; gap: 15px; flex: none; }
+            .practice-main .btn-action { height: 80px; width: 100%; border-radius: 25px; }
+            .practice-main .btn-quit { grid-column: 1 / 3; font-size: 22px; }
         }
     </style>
 </head>
@@ -261,8 +274,9 @@
 
     function startReview(btn) {
         let sel = [...document.querySelectorAll('#topic-list input:checked')].map(i => i.value);
-        if(sel.length === 0) {
-            const ot = btn.innerText; btn.innerText = "请先选择课文哦🐣"; btn.style.background = "#f43f5e";
+        // 💡 挑战模式至少 2 课
+        if(sel.length < 2) {
+            const ot = btn.innerText; btn.innerText = "至少选两课哦🐣"; btn.style.background = "#f43f5e";
             setTimeout(() => { btn.innerText = ot; btn.style.background = "#f59e0b"; }, 2000);
             return;
         }
@@ -272,6 +286,7 @@
         currentMode = 'challenge'; 
         let pool = db[curUser] || [];
         let filtered = pool.filter(q => sel.includes(q.Topic)).sort(() => 0.5 - Math.random());
+        // 取 10 题进行挑战
         practiceList = filtered.slice(0, Math.min(10, filtered.length));
         curIdx = 0; sessionErrors = 0; showScreen('practice-screen'); renderQuestion();
     }
@@ -287,7 +302,7 @@
         document.getElementById('prog-bar').style.width = `${((curIdx + 1) / practiceList.length) * 100}%`;
         document.getElementById('prog-text').innerText = `${curIdx + 1} / ${practiceList.length}`;
         
-        // 💡 第一题时，按钮置灰且不可点
+        // 💡 第一题时，“上一个”按钮变灰且不可按
         const prevBtn = document.getElementById('prev-btn');
         if (curIdx === 0) { prevBtn.disabled = true; } else { prevBtn.disabled = false; }
         
@@ -296,15 +311,21 @@
         document.getElementById('draw-target').innerHTML = '';
         const skb = document.getElementById('skip-char-btn');
         const pkb = document.getElementById('peek-btn');
-        skb.style.display = 'block'; 
+        // 💡 挑战模式隐藏“跳过”和“偷看”
+        skb.style.display = currentMode === 'challenge' ? 'none' : 'block'; 
         pkb.style.display = currentMode === 'challenge' ? 'none' : 'block'; 
 
         const word = q.Answer.trim(); const pinyins = q.Hint.trim().split(/\s+/);
-        q.charsData = []; let pIdx = 0;
-        for(let char of word) {
-            let isP = /[，。！？、：；（）《》“”" "]/u.test(char);
-            q.charsData.push({ char, pinyin: isP ? char : (pinyins[pIdx++] || ''), isP, done: isP });
+        q.charsData = q.charsData || []; // 保持之前已经完成的状态
+        
+        if (q.charsData.length === 0) {
+            let pIdx = 0;
+            for(let char of word) {
+                let isP = /[，。！？、：；（）《》“”" "]/u.test(char);
+                q.charsData.push({ char, pinyin: isP ? char : (pinyins[pIdx++] || ''), isP, done: isP });
+            }
         }
+        
         practiceChars = q.charsData;
         document.getElementById('hint-area').innerHTML = practiceChars.map((item, i) => {
             let innerHtml = item.isP ? item.char : (item.done && currentMode !== 'challenge' ? item.char : item.pinyin);
@@ -338,7 +359,7 @@
     function skipCurrentChar() {
         let idx = practiceChars.findIndex(i => !i.done);
         if(idx !== -1) { 
-            sessionErrors++; 
+            sessionErrors++; // 跳过也算错
             practiceChars[idx].done = true; 
             document.getElementById(`py-${idx}`).classList.add('done'); 
             autoJump(); 
@@ -349,20 +370,43 @@
     function showThumb() { const t = document.getElementById('thumb-up'); t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 600); }
 
     function finish() {
-        const isPerfect = sessionErrors === 0;
+        // 💡 交卷前检查：是否有没写完的字
+        let uncompleted = 0;
+        practiceList.forEach(q => {
+            if (q.charsData) {
+                q.charsData.forEach(c => {
+                    if (!c.isP && !c.done) {
+                        uncompleted++;
+                        q.isWrong = true; // 没写完的直接算错
+                    }
+                });
+            }
+        });
+
+        if (uncompleted > 0 && currentMode === 'challenge') {
+            if (!confirm(`还有 ${uncompleted} 个字没写完哦！确定要直接交卷吗？\n(没写完的将被算作错误)`)) {
+                return; // 用户取消交卷，继续写
+            }
+            // 确认交卷，把没写的字计入错误总数
+            sessionErrors += uncompleted;
+        }
+
+        const isPerfect = (sessionErrors === 0 && uncompleted === 0);
         let earnedCoins = 0;
         let badgeEarned = false;
         let newBadgedTopics = [];
 
+        // 💰 结算奖励（仅挑战模式 且 全对）
         if (currentMode === 'challenge' && isPerfect) {
             let involvedTopics = [...new Set(practiceList.map(q => q.Topic))];
             
             involvedTopics.forEach(topic => {
                 let badgeKey = `tingxie_badge_${currentPlayer}_${topic}`;
+                // 💡 确保这节课以前从来没拿过大王徽章
                 if (!localStorage.getItem(badgeKey)) {
                     localStorage.setItem(badgeKey, "true");
                     badgeEarned = true;
-                    earnedCoins += 1; 
+                    earnedCoins += 1; // 统一给 1 个金币
                     newBadgedTopics.push(topic);
                     syncToCloud({ type: 'badge', user: currentPlayer, subject: '听写', icon: '👑', title: '听写大王', desc: `完美攻克《${topic}》` });
                 }
@@ -396,6 +440,7 @@
         html += `<button class="btn-action btn-quit" style="width:200px; margin:30px auto;" onclick="window.location.href='index.html'">返回主页 🏠</button></div>`;
         document.getElementById('finish-screen').innerHTML = html; showScreen('finish-screen');
         
+        // 全对后前往打气球！
         if (isPerfect) setTimeout(() => { window.location.href = "https://andydang2007.github.io/game/popballoons.html?ticket=" + Date.now(); }, 3000);
     }
 
