@@ -63,7 +63,6 @@
         .practice-main { display: flex; flex-direction: column; flex: 1; width: 100%; min-height: 0; }
         .practice-area { background: #f8fafc; padding: 20px 10px; border-radius: 30px; border: 4px dashed #cbd5e1; margin-bottom: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; position: relative; overflow: hidden; min-height: 250px;}
         
-        /* 💡 修复完毕的米字格背景（URL-Encode 转码格式） */
         .hanzi-box { 
             width: 240px; height: 240px; 
             border: 4px solid #94a3b8; border-radius: 20px; background-color: white; 
@@ -344,7 +343,6 @@
         document.querySelectorAll('.hint-unit').forEach((el, i) => el.classList.toggle('active', i === idx));
         document.getElementById('draw-target').innerHTML = `<div id="hz-box" class="hanzi-box"></div>`;
         let boxSize = window.innerWidth <= 768 ? 200 : 240;
-        // 💡 这里修改回了 #cbd5e1 浅蓝字帖轮廓
         hzWriter = HanziWriter.create('hz-box', practiceChars[idx].char, { width: boxSize, height: boxSize, padding: 15, showOutline: false, showCharacter: false, strokeColor: '#1e293b', drawingColor: '#3b82f6', outlineColor: '#cbd5e1' });
         hzWriter.quiz({ 
             onMistake: () => { sessionErrors++; practiceList[curIdx].isWrong = true; },
@@ -357,7 +355,6 @@
         });
         if (currentMode !== 'challenge') {
             const peek = document.getElementById('peek-btn');
-            // 💡 恢复动画点击效果与透明阴影
             const show = (e) => { if(e) e.preventDefault(); peek.style.transform = 'translateY(5px)'; peek.style.boxShadow = '0 0 0 transparent'; hzWriter.showOutline(); };
             const hide = (e) => { if(e) e.preventDefault(); peek.style.transform = ''; peek.style.boxShadow = ''; hzWriter.hideOutline(); };
             peek.onmousedown = peek.ontouchstart = show;
@@ -390,7 +387,7 @@
 
         if (uncompleted > 0 && currentMode === 'challenge') {
             if (!confirm(`还有 ${uncompleted} 个字没写哦！确定要直接交卷吗？\n(空着的将被算作错误)`)) return; 
-            sessionErrors += uncompleted; // 强行交卷计入错误
+            sessionErrors += uncompleted; 
         }
 
         const isPerfect = (sessionErrors === 0 && uncompleted === 0);
@@ -398,11 +395,10 @@
         let badgeEarned = false;
         let newBadgedTopics = [];
 
-        // 🌟 读取 God Mode 后台配置：听写奖励数
+        // 🌟 读取 God Mode 配置
         let config = JSON.parse(localStorage.getItem('hub_config') || "{}");
         let rewardCoinAmount = config.tingxie_reward_coin || 1;
 
-        // 💰 只有挑战模式 + 全对 才发奖
         if (currentMode === 'challenge' && isPerfect) {
             let involvedTopics = [...new Set(practiceList.map(q => q.Topic))];
             
@@ -411,7 +407,7 @@
                 if (!localStorage.getItem(badgeKey)) {
                     localStorage.setItem(badgeKey, "true");
                     badgeEarned = true;
-                    earnedCoins += rewardCoinAmount; // 💡 读取后台设定的金币数量
+                    earnedCoins += rewardCoinAmount; 
                     newBadgedTopics.push(topic);
                     syncToCloud({ type: 'badge', user: currentPlayer, subject: '听写', icon: '👑', title: '听写大王', desc: `完美攻克《${topic}》` });
                 }
@@ -424,7 +420,7 @@
             }
         }
 
-        // 🌟 双轨打卡结算逻辑 (只要点交卷就算打卡)
+        // 🌟 双轨打卡逻辑
         const today = new Date().toISOString().split('T')[0];
         let lastDate = localStorage.getItem(`last_date_${currentPlayer}`);
         let currentStreak = parseInt(localStorage.getItem(`current_streak_${currentPlayer}`) || "0");
@@ -439,7 +435,7 @@
         }
 
         if (lastDate !== today) {
-            totalDays++; // 累计天数永远 +1
+            totalDays++; 
             localStorage.setItem(`last_date_${currentPlayer}`, today);
             localStorage.setItem(`current_streak_${currentPlayer}`, currentStreak);
             localStorage.setItem(`total_days_${currentPlayer}`, totalDays);
@@ -452,13 +448,9 @@
                 crystalEarned = true;
             }
             
-            // 一并推给 Dashboard
             syncToCloud({ 
-                type: 'crystal_update', 
-                user: currentPlayer, 
-                crystalsTotal: crys, 
-                totalDays: totalDays, 
-                streak: currentStreak 
+                type: 'crystal_update', user: currentPlayer, 
+                crystalsTotal: crys, totalDays: totalDays, streak: currentStreak 
             });
         }
 
@@ -480,7 +472,6 @@
             html += `<div style="color:#94a3b8; margin:20px 0; font-weight:800;">(这几课的【听写大王】你已经拿过啦，去挑战新课文吧！)</div>`;
         }
 
-        // 💡 界面上显示连击奖励
         if (crystalEarned) {
              html += `<div style="font-size: 16px; color: #38bdf8; margin-top: 15px; font-weight: 900;">💎 连续打卡${currentStreak}天，水晶 +1！</div>`;
         }
@@ -488,10 +479,10 @@
         html += `<button class="btn-action btn-quit" style="width:200px; margin:30px auto;" onclick="window.location.href='index.html'">返回主页 🏠</button></div>`;
         document.getElementById('finish-screen').innerHTML = html; showScreen('finish-screen');
         
-        if (isPerfect) setTimeout(() => { window.location.href = "https://andydang2007.github.io/game/popballoons.html?ticket=" + Date.now(); }, 3000);
+        // 🌟 已加上带回家地址的回城车票！
+        if (isPerfect) setTimeout(() => { window.location.href = "https://andydang2007.github.io/game/popballoons.html?ticket=" + Date.now() + "&returnUrl=index.html"; }, 3000);
     }
     
-
     function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.style.display='none'); document.getElementById(id).style.display='flex'; }
     init();
 </script>
