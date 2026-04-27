@@ -268,7 +268,6 @@
         let mistakesPicked = [];
         if (eligibleMistakes.length > 0) {
             let weightedList = [];
-            // 💡 错得越多（weight越大），放进池子里的签越多，被抽中的概率越大
             eligibleMistakes.forEach(item => { let w = Math.max(1, item.weight); for(let i=0; i<w; i++) weightedList.push(item.q); });
             let targetMistakes = Math.min(5, eligibleMistakes.length);
             while (mistakesPicked.length < targetMistakes && weightedList.length > 0) {
@@ -336,7 +335,6 @@
         btn.classList.add('active'); document.getElementById('ans-in').value = val;
     }
 
-    // 💡 修复：艾宾浩斯权重算法注入 (本地防丢，云端计算)
     function checkAns() {
         const input = document.getElementById('ans-in'), user = input.value.trim(); 
         const userLower = user.toLowerCase();
@@ -345,6 +343,7 @@
         
         if(userLower === "") { if(qType === 'MCQ') alert(isCN ? "请选择一个选项！" : "Please select!"); return; }
         
+        // 保留本地的 key 用于本地权重逻辑
         let isCorrect = (userLower === correctRaw.toLowerCase()), key = getQuestionKey(curSub, curUser, sessionQs[curIdx].Question), mistakes = getMistakes();
         
         if (qType === 'OPEN') {
@@ -360,20 +359,28 @@
             input.disabled = true; document.getElementById('sub-btn').style.display = 'none'; document.getElementById('next-btn').style.display = 'flex';
             fb.innerHTML = `<span style="color:#10b981;">${isCN ? "✅ 答对啦！" : "✅ Correct!"}</span>`;
             
-            // 🌟 错题复习做对了：本地权重 -1，并发送 isCorrect 给云端
             if (mistakes[key] && !sessionQs[curIdx].isEvaluated) {
                 mData.weight = Math.max(0, mData.weight - 1); 
                 if (mData.weight <= 0) delete mistakes[key]; 
                 else mistakes[key] = mData;
                 saveMistakes(mistakes); 
-                syncToCloud({type: 'mistake_update', user: curUser, grade: curGrade, subject: curSub, questionKey: key, isCorrect: true});
+                
+                // 💡 传给云端时，包含完整题目和正确答案
+                syncToCloud({
+                    type: 'mistake_update', 
+                    user: curUser, 
+                    grade: curGrade, 
+                    subject: curSub, 
+                    questionText: sessionQs[curIdx].Question, 
+                    correctAns: correctRaw,
+                    isCorrect: true
+                });
             }
         } else {
             if (!sessionQs[curIdx].isEvaluated) sessionErrors++; 
             fb.innerHTML = `<span style="color:#ef4444;">❌ 不对哦！</span><br><span style="font-size:16px; color:#64748b;">答案：<b style="color:#0f172a;">${correctRaw}</b></span>`;
             input.classList.add('error-shake'); setTimeout(()=> input.classList.remove('error-shake'), 400);
             
-            // 🌟 做错了：首错+3，续错+1，并发送完整题目
             if (!sessionQs[curIdx].isEvaluated) {
                 if (!mistakes[key]) mData.weight = 3; 
                 else mData.weight += 1; 
@@ -384,10 +391,14 @@
                 mistakes[key] = mData;
                 saveMistakes(mistakes); 
                 
+                // 💡 做错了：发送完整题目、正确答案、错误答案给云端
                 syncToCloud({
-                    type: 'mistake_update', user: curUser, grade: curGrade, subject: curSub, 
-                    questionKey: key, 
+                    type: 'mistake_update', 
+                    user: curUser, 
+                    grade: curGrade, 
+                    subject: curSub, 
                     questionText: sessionQs[curIdx].Question, 
+                    correctAns: correctRaw,
                     wrongAns: user
                 });
             }
@@ -397,7 +408,6 @@
 
     function nextQ() { if (curIdx < sessionQs.length - 1) { curIdx++; renderQ(); } else { finishQuiz(); } }
 
-    // 💡 修复：补全了本地核心战绩的存储，神射手和核心徽章才能正常显示
     function finishQuiz() {
         const timeTakenSec = Math.floor((Date.now() - startTime) / 1000);
         const isPerfect = sessionErrors <= 1;
@@ -423,8 +433,8 @@
 
         if (isPerfect) {
             earnedBadgesForCoin++;
-            badgeQueue.push({ icon: '🎯', title: isCN ? '神射手！' : 'Sharpshooter!', desc: isCN ? '错题在1道以内，神射手徽章 +1！' : 'Great accuracy! Sharpshooter badge +1!' });
-            syncToCloud({ type: 'badge', user: curUser, grade: curGrade, subject: curSub, icon: '🎯', title: '神射手', desc: '错题<=1' });
+            badgeQueue.push({ icon: '🎯', title: isCN ? '神奇射手！' : 'Sharpshooter!', desc: isCN ? '错题在1道以内，神奇射手徽章 +1！' : 'Great accuracy! Sharpshooter badge +1!' });
+            syncToCloud({ type: 'badge', user: curUser, grade: curGrade, subject: curSub, icon: '🎯', title: '神奇射手', desc: '错题<=1' });
 
             if (timeTakenSec <= speedLimit) {
                 earnedBadgesForCoin++;
@@ -476,27 +486,22 @@
             }
         }
 
-        // 5. 触发隐藏彩蛋（周末狂人：单周末累计狂揽 10 个基础徽章）
         const dayOfWeek = new Date().getDay();
-        if (dayOfWeek === 0 || dayOfWeek === 6) { // 必须是星期六或星期天
+        if (dayOfWeek === 0 || dayOfWeek === 6) { 
             if (earnedBadgesForCoin > 0) {
-                // 算法：获取本周六的日期作为这个周末的“唯一ID”，保证下周末会自动重置
                 let d = new Date();
                 d.setDate(d.getDate() - (d.getDay() === 0 ? 7 : d.getDay()) + 6); 
                 let weekendId = d.toISOString().split('T')[0];
                 
-                // 设置本地存储的 Key
                 let wkKey = `wk_count_${curUser}_${weekendId}`;
                 let wkAwardedKey = `wk_awarded_${curUser}_${weekendId}`;
                 
-                // 读取本周末已攒的徽章数，加上刚才这把获得的
                 let currentWkCount = parseInt(localStorage.getItem(wkKey) || "0");
                 currentWkCount += earnedBadgesForCoin;
                 localStorage.setItem(wkKey, currentWkCount);
 
-                // 如果本周末累计达到或超过 10 个，并且这个周末还没发过这个彩蛋
                 if (currentWkCount >= 10 && !localStorage.getItem(wkAwardedKey)) {
-                    localStorage.setItem(wkAwardedKey, "1"); // 标记为已发放，防止重复发
+                    localStorage.setItem(wkAwardedKey, "1"); 
                     badgeQueue.push({ 
                         icon: '🎉', 
                         title: isCN ? '周末狂人！' : 'Weekend Maniac!', 
@@ -507,7 +512,6 @@
             }
         }
 
-        // 下面是原有的结尾代码，保持不变
         if (badgeQueue.length > 0) {
             document.getElementById('badge-modal').style.display = 'flex';
             showNextBadge();
