@@ -463,29 +463,46 @@
             let coinGain = earnedBadgesForCoin * coinMultiplier;
             let vaultCoins = parseInt(localStorage.getItem('gold_coins_vault') || "0");
             localStorage.setItem('gold_coins_vault', vaultCoins + coinGain);
-            syncToCloud({ type: 'coin_update', user: curUser, amount: coinGain, total: vaultCoins + coinGain });
+            syncToCloud({ type: 'coin_update', user: curUser, total: vaultCoins + coinGain });
         }
 
+        // 💡 双轨打卡逻辑
         let lastDate = localStorage.getItem(`last_date_${curUser}`);
-        let streak = parseInt(localStorage.getItem(`streak_${curUser}`) || "0");
+        let currentStreak = parseInt(localStorage.getItem(`current_streak_${curUser}`) || "0");
+        let totalDays = parseInt(localStorage.getItem(`total_days_${curUser}`) || "0");
 
         if (lastDate) {
             let diff = Math.floor((new Date(today) - new Date(lastDate)) / 864e5);
-            if (diff === 1) streak++; else if (diff > 1) streak = 1; 
-        } else streak = 1;
-
-        if (lastDate !== today) {
-            localStorage.setItem(`last_date_${curUser}`, today);
-            localStorage.setItem(`streak_${curUser}`, streak);
-
-            if (streak >= 3) {
-                let crys = parseInt(localStorage.getItem(`crystals_${curUser}`) || "0");
-                localStorage.setItem(`crystals_${curUser}`, crys + 1);
-                badgeQueue.push({ icon: '💎', title: isCN ? '毅力水晶' : 'Crystal', desc: isCN ? `连续打卡 ${streak} 天，水晶 +1！` : `Streak ${streak} days! Crystal +1!` });
-                syncToCloud({ type: 'crystal_update', user: curUser, amount: 1, streak: streak });
-            }
+            if (diff === 1) currentStreak++; else if (diff > 1) currentStreak = 1; 
+        } else {
+            currentStreak = 1;
         }
 
+        if (lastDate !== today) {
+            totalDays++; // 累计打卡永远 +1
+            localStorage.setItem(`last_date_${curUser}`, today);
+            localStorage.setItem(`current_streak_${curUser}`, currentStreak);
+            localStorage.setItem(`total_days_${curUser}`, totalDays);
+
+            let crys = parseInt(localStorage.getItem(`crystals_${curUser}`) || "0");
+
+            if (currentStreak >= 3) {
+                crys += 1;
+                localStorage.setItem(`crystals_${curUser}`, crys);
+                badgeQueue.push({ icon: '💎', title: isCN ? '毅力水晶' : 'Crystal', desc: isCN ? `连续打卡 ${currentStreak} 天，水晶 +1！` : `Streak ${currentStreak} days! Crystal +1!` });
+            }
+            
+            // 🌟 一并发送给云端 Dashboard
+            syncToCloud({ 
+                type: 'crystal_update', 
+                user: curUser, 
+                crystalsTotal: crys, 
+                totalDays: totalDays, 
+                streak: currentStreak 
+            });
+        }
+
+        // 周末狂人彩蛋逻辑
         const dayOfWeek = new Date().getDay();
         if (dayOfWeek === 0 || dayOfWeek === 6) { 
             if (earnedBadgesForCoin > 0) {
