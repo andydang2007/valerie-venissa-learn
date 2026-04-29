@@ -956,10 +956,23 @@
         requestAnimationFrame(gameLoop);
     }
 
+    // 🌟 防 iPad 死机补丁：记录上一次发声的时间
+    let lastSoundTime = 0;
+
     function playSound(type) {
         if (!actx) return;
-        let osc = actx.createOscillator(); let g = actx.createGain();
-        osc.connect(g); g.connect(actx.destination);
+        
+        let now = Date.now();
+        // 🛡️ 核心防御：如果是高频触发的机械音，强制加上 80 毫秒的冷却时间
+        if (type === 'mech') {
+            if (now - lastSoundTime < 80) return; 
+            lastSoundTime = now;
+        }
+
+        let osc = actx.createOscillator(); 
+        let g = actx.createGain();
+        osc.connect(g); 
+        g.connect(actx.destination);
         
         if(type === 'select'){ 
             osc.type = 'sine'; osc.frequency.setValueAtTime(600, actx.currentTime); 
