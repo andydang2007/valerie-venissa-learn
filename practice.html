@@ -158,8 +158,16 @@
     function saveMistakes(m) { localStorage.setItem('hub_mistakes', JSON.stringify(m)); }
     function getQuestionKey(sub, user, qText) { return `${user}_${sub}_${qText.trim()}`; }
 
+    // 🌟 辅助功能：获取新加坡标准时间的 YYYY-MM-DD
+    function getSGTDateString() {
+        const d = new Date();
+        const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
+        const sgt = new Date(utc + (3600000 * 8));
+        return sgt.getFullYear() + '-' + String(sgt.getMonth() + 1).padStart(2, '0') + '-' + String(sgt.getDate()).padStart(2, '0');
+    }
+
     function applyBalloonLogic(errors) {
-        const today = new Date().toISOString().split('T')[0];
+        const today = getSGTDateString();
         const key = `balloon_stats_${today}_${curUser}`;
         let stats = JSON.parse(localStorage.getItem(key) || '{"goodCount":0, "date":""}');
         if (stats.date !== today) stats = { goodCount: 0, date: today }; 
@@ -192,7 +200,7 @@
         let activeIcon = curSub === '华文' ? '🐼' : (curSub === 'Science' ? '🌱' : (curSub === 'Math' ? '🔢' : '🚀'));
         document.getElementById('header-info').innerHTML = `${activeIcon} ${curUser} - ${curSub}`;
 
-        const today = new Date().toISOString().split('T')[0];
+        const today = getSGTDateString();
         const limitKey = `limit_${today}_${curUser}_${curSub}`;
         if (parseInt(localStorage.getItem(limitKey) || "0") >= 1) {
             document.getElementById('loading').innerHTML = `
@@ -254,7 +262,7 @@
             setTimeout(() => window.location.href='index.html', 2000); return; 
         }
 
-        const today = new Date().toISOString().split('T')[0];
+        const today = getSGTDateString();
         localStorage.setItem(`limit_${today}_${curUser}_${curSub}`, "1");
 
         let lowerGrade = curGrade === 'P3' ? 'P2' : (curGrade === 'P2' ? 'P1' : null);
@@ -327,7 +335,6 @@
         if (qType === 'OPEN') {
             container.innerHTML = hintHtml + `<textarea id="ans-in" class="ans-input" rows="4" placeholder="${isCN ? '输入你的完整答案...' : 'Type full answer...'}"></textarea>`;
         } else if (qType === 'MCQ') {
-            // 🌟 分数防冲突：已将 split('/') 修改为 split('|')
             const opts = (q.Options || q.options || "").toString().split('|').map(o => o.trim()).filter(o => o);
             let html = `<div class="mcq-list">`;
             opts.forEach(opt => html += `<button class="mcq-btn" onclick="selectMCQ(this, '${opt.replace(/'/g, "\\'").replace(/"/g, "&quot;")}')">${opt}</button>`);
@@ -416,14 +423,13 @@
         const isPerfect = sessionErrors <= 1;
         const isCN = (curSub === '华文');
         
-        // 🌟 读取 God Mode 后台动态设置的时间限制
         let config = JSON.parse(localStorage.getItem('hub_config') || "{}");
         const speedLimit = (curGrade === 'P1' || curUser === 'Venessa') ? (config.speed_limit_p1 || 360) : (config.speed_limit_p3 || 180);
 
         badgeQueue = [];
         let earnedBadgesForCoin = 0;
         
-        const today = new Date().toISOString().split('T')[0];
+        const today = getSGTDateString();
         const statsKey = `practice_stats_${today.replace(/-/g, '')}_${curUser}_${curSub}`;
         let localStats = JSON.parse(localStorage.getItem(statsKey) || '{"perfects":0, "gamesPlayed":0}');
         if (isPerfect) localStats.perfects += 1;
@@ -465,7 +471,6 @@
         }
 
         if (earnedBadgesForCoin > 0) {
-            // 🌟 移除两倍判定，保证姐姐妹妹都是1个徽章=1个金币
             let coinGain = earnedBadgesForCoin;
             let vaultCoins = parseInt(localStorage.getItem('gold_coins_vault') || "0");
             localStorage.setItem('gold_coins_vault', vaultCoins + coinGain);
@@ -528,6 +533,9 @@
             }
         }
 
+        // 🌟🌟 核心：盖上今日打卡印章 🌟🌟
+        localStorage.setItem(`last_checkin_date_${curUser}`, today);
+
         if (badgeQueue.length > 0) {
             document.getElementById('badge-modal').style.display = 'flex';
             showNextBadge();
@@ -559,7 +567,6 @@
         html += `<button class="btn-action" style="background:#f1f5f9; color:#64748b; width:100%; max-width: 250px; margin: 30px auto 0 auto; border: 3px solid #e2e8f0;" onclick="window.location.href='index.html'">🏠 返回主页</button></div>`;
         document.getElementById('finish-screen').innerHTML = html; showScreen('finish-screen');
         
-        // 🌟 已加上带回家地址的回城车票！
         if (isPerfect && pendingGameResult && pendingGameResult.trigger) setTimeout(() => { window.location.href = "https://andydang2007.github.io/game/popballoons.html?ticket=" + Date.now() + "&returnUrl=index.html"; }, 2500);
     }
 
