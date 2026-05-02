@@ -26,11 +26,11 @@
         .upload-area input[type="file"] { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
         .upload-text { font-size: 16px; font-weight: 800; color: #64748b; }
         
-        .preview-container { text-align: center; display: none; margin-bottom: 15px; }
-        #preview-img { max-width: 100%; max-height: 250px; border-radius: 10px; cursor: pointer; border: 3px solid #3b82f6; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        .click-hint { font-size: 13px; color: #3b82f6; font-weight: bold; margin-top: 8px; animation: pulse 1.5s infinite; }
+        .preview-container { text-align: center; display: none; margin-bottom: 15px; background: #f8fafc; padding: 15px; border-radius: 15px; border: 2px dashed #cbd5e1;}
+        #preview-img { max-width: 100%; max-height: 200px; border-radius: 10px; cursor: pointer; border: 3px solid #3b82f6; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .click-hint { font-size: 13px; color: #64748b; font-weight: bold; margin-top: 8px; }
+        .image-count-badge { background: #3b82f6; color: white; padding: 2px 8px; border-radius: 10px; font-size: 12px; vertical-align: top; margin-left: 5px; }
 
-        /* 🌟 修复裁切界面溢出的核心 CSS */
         #crop-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 999; padding: 20px; padding-bottom: max(20px, env(safe-area-inset-bottom)); flex-direction: column; box-sizing: border-box; }
         .cropper-wrapper { flex: 1; min-height: 0; overflow: hidden; background: #111; display: flex; align-items: center; justify-content: center; border-radius: 10px; margin-bottom: 15px; }
         #image-to-crop { max-width: 100%; max-height: 100%; }
@@ -43,6 +43,9 @@
         .btn-action { width: 100%; border-radius: 15px; border: none; font-weight: 900; font-size: 16px; cursor: pointer; padding: 15px; color: white; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.1s; }
         .btn-action:active { transform: translateY(2px); }
         .btn-ai { background: #8b5cf6; box-shadow: 0 5px 0 #7e22ce; }
+        .btn-add-more { background: #f1f5f9; color: #3b82f6; border: 2px dashed #3b82f6; box-shadow: none; padding: 12px; font-size: 14px; margin-bottom: 15px; position: relative;}
+        .btn-add-more input[type="file"] { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+        
         .btn-save { background: #10b981; box-shadow: 0 5px 0 #059669; }
         .btn-crop-confirm { background: #3b82f6; box-shadow: 0 5px 0 #2563eb; }
 
@@ -70,19 +73,26 @@
         </div>
 
         <div class="preview-container" id="preview-container">
-            <img id="preview-img" onclick="startCropping()" title="点我裁剪图片">
-            <div class="click-hint">☝️ 如果有干扰项，可点击图片进行局部裁剪</div>
+            <div class="click-hint" style="margin-bottom: 10px;">已准备就绪 <span class="image-count-badge" id="image-count">1 张图</span></div>
+            <img id="preview-img" onclick="startCropping()" title="点我重新裁剪这张图">
+            <div class="click-hint" style="margin-top: 10px; font-weight: normal;">(点击图片可重新裁剪)</div>
+        </div>
+
+        <!-- 🌟 升级：允许无限补充图片 -->
+        <div class="btn-action btn-add-more" id="btn-add-more" style="display: none;">
+            ➕ 补充跨页图片 (阅读理解适用)
+            <input type="file" id="file-input-more" accept="image/*">
         </div>
 
         <div id="error-msg"></div>
-        <button class="btn-action btn-ai" id="btn-analyze" style="display: none;" onclick="processImage()">✨ AI 识别并解析</button>
-        <div id="ai-loading">🧠 Gemini 2.5 正在读图中...</div>
+        <button class="btn-action btn-ai" id="btn-analyze" style="display: none;" onclick="processImage()">✨ AI 识别并解析所有图片</button>
+        <div id="ai-loading">🧠 Gemini 正在进行跨页合并解析...</div>
 
         <div id="editor-area" style="display: none; margin-top: 20px;">
             <div style="display:flex; gap:10px; margin-bottom:10px;">
                 <div class="form-group" style="flex:1;">
                     <label>👤 谁的错题？</label>
-                    <select id="f-user"><option value="Valerie">Valerie (姐姐)</option><option value="Venessa">Venessa (妹妹)</option></select>
+                    <select id="f-user"><option value="Valerie">Valerie</option><option value="Venessa">Venessa</option></select>
                 </div>
                 <div class="form-group" style="flex:1;">
                     <label>📚 科目</label>
@@ -92,7 +102,7 @@
             
             <div class="form-group">
                 <label>📝 题目内容</label>
-                <textarea id="f-question" rows="5" placeholder="题目内容（如题目太长，可按住右下角往下拖拽拉伸）" style="resize: vertical; min-height: 100px;"></textarea>
+                <textarea id="f-question" rows="5" placeholder="跨页合并后的题目内容会显示在这里..." style="resize: vertical; min-height: 100px;"></textarea>
             </div>
             <div class="form-group">
                 <label>✅ 正确答案</label>
@@ -109,12 +119,10 @@
     </div>
 </div>
 
-<!-- 裁剪模态层 -->
 <div id="crop-modal">
     <div class="cropper-wrapper">
         <img id="image-to-crop">
     </div>
-    <!-- 裁切层的底部按钮容器 -->
     <div style="display: flex; gap: 10px; width: 100%; max-width: 600px; margin: 0 auto; flex-shrink: 0;">
         <button class="btn-action" style="background:#64748b; box-shadow: 0 5px 0 #475569; flex: 1;" onclick="closeCropModal()">取消</button>
         <button class="btn-action btn-crop-confirm" style="flex: 2;" onclick="confirmCrop()">✂️ 确认截取</button>
@@ -124,9 +132,11 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 <script>
     const SYNC_API_URL = "https://script.google.com/macros/s/AKfycbzbNOgg7deW9uVVyfYGTfKGOtVgNs_9ZfUQ9J_9cYpG2Ufow9KLDICHgsinBXrPJlmz/exec";
-    let base64Image = "";
+    
+    // 🌟 核心升级：从单张图变成图片数组
+    let imageArray = []; 
+    let currentOriginalImage = ""; 
     let cropper = null;
-    let originalImageSrc = ""; 
 
     window.onload = function() {
         const savedKey = localStorage.getItem('my_gemini_key');
@@ -143,16 +153,11 @@
     }
 
     function resetApiKey() { if(confirm("确定要清除本地保存的 API Key 吗？")) { localStorage.removeItem('my_gemini_key'); location.reload(); } }
-
     function resetScanner() { location.reload(); }
+    function showError(msg) { const el = document.getElementById('error-msg'); el.innerText = msg; el.style.display = 'block'; }
 
-    function showError(msg) {
-        const el = document.getElementById('error-msg');
-        el.innerText = msg;
-        el.style.display = 'block';
-    }
-
-    document.getElementById('file-input').addEventListener('change', function(e) {
+    // 处理图片读取的共用函数
+    function handleFileSelection(e) {
         const file = e.target.files[0];
         if (!file) return;
         
@@ -161,53 +166,33 @@
             const img = new Image();
             img.onload = function() {
                 const canvas = document.createElement('canvas');
-                let width = img.width;
-                let height = img.height;
-                const MAX_WIDTH = 1200;
-
-                if (width > MAX_WIDTH) {
-                    height = Math.round((height * MAX_WIDTH) / width);
-                    width = MAX_WIDTH;
-                }
-                canvas.width = width;
-                canvas.height = height;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, width, height);
+                let width = img.width; let height = img.height; const MAX_WIDTH = 1200;
+                if (width > MAX_WIDTH) { height = Math.round((height * MAX_WIDTH) / width); width = MAX_WIDTH; }
+                canvas.width = width; canvas.height = height;
+                const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height);
                 
-                originalImageSrc = canvas.toDataURL('image/jpeg', 0.8);
-                base64Image = originalImageSrc.split(',')[1];
+                currentOriginalImage = canvas.toDataURL('image/jpeg', 0.8);
                 
-                document.getElementById('preview-img').src = originalImageSrc;
-                document.getElementById('preview-container').style.display = 'block';
-                document.getElementById('upload-area').style.display = 'none';
+                // 每次选完图，立刻弹出裁剪框（跨页题通常有很多杂乱信息，必须裁）
+                startCropping();
                 
-                // 🌟 修复：重新上传新图片时，确保按钮出现并重置状态
-                document.getElementById('btn-analyze').style.display = 'flex';
-                document.getElementById('btn-analyze').innerText = "✨ AI 识别并解析";
-                document.getElementById('editor-area').style.display = 'none';
-                document.getElementById('error-msg').style.display = 'none';
+                // 重置上传框的值，以便可以连续选同一张图
+                e.target.value = "";
             }
             img.src = event.target.result;
         };
         reader.readAsDataURL(file);
-    });
+    }
+
+    document.getElementById('file-input').addEventListener('change', handleFileSelection);
+    document.getElementById('file-input-more').addEventListener('change', handleFileSelection);
 
     function startCropping() {
         document.getElementById('crop-modal').style.display = 'flex';
         const image = document.getElementById('image-to-crop');
-        image.src = originalImageSrc;
+        image.src = currentOriginalImage;
         if(cropper) cropper.destroy();
-        
-        setTimeout(() => {
-            cropper = new Cropper(image, { 
-                viewMode: 1, 
-                autoCropArea: 0.8, 
-                checkOrientation: false,
-                background: false,
-                modal: true,
-                guides: true
-            });
-        }, 50);
+        setTimeout(() => { cropper = new Cropper(image, { viewMode: 1, autoCropArea: 0.8, checkOrientation: false, background: false, modal: true, guides: true }); }, 50);
     }
 
     function closeCropModal() { 
@@ -220,47 +205,56 @@
         const canvas = cropper.getCroppedCanvas({ maxWidth: 1200, fillColor: '#fff' });
         const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
         
-        document.getElementById('preview-img').src = dataUrl;
-        base64Image = dataUrl.split(',')[1]; 
-        closeCropModal();
-
-        // 🌟 核心修复：确认裁切后，重新唤起识别按钮，清理之前的残余表单
+        // 将裁切好的图片塞进数组里
+        const base64Data = dataUrl.split(',')[1];
+        imageArray.push(base64Data);
+        
+        // 更新 UI
+        document.getElementById('preview-img').src = dataUrl; // 预览区显示最后裁切的这张
+        document.getElementById('image-count').innerText = `${imageArray.length} 张图`;
+        
+        document.getElementById('preview-container').style.display = 'block';
+        document.getElementById('upload-area').style.display = 'none';
+        document.getElementById('btn-add-more').style.display = 'block';
         document.getElementById('btn-analyze').style.display = 'flex';
-        document.getElementById('btn-analyze').innerText = "✨ AI 识别并解析";
         document.getElementById('editor-area').style.display = 'none';
         document.getElementById('error-msg').style.display = 'none';
+        
+        closeCropModal();
     }
 
+    // 🌟 多图打包发送给 Gemini
     async function processImage() {
-        if (!base64Image) return;
+        if (imageArray.length === 0) return;
         const apiKey = localStorage.getItem('my_gemini_key');
         
         document.getElementById('btn-analyze').style.display = 'none';
+        document.getElementById('btn-add-more').style.display = 'none'; // 开始识别后不让再加图了
         document.getElementById('ai-loading').style.display = 'block';
         document.getElementById('error-msg').style.display = 'none';
 
         const prompt = `你是一个严谨的OCR和教育数据提取专家。
-请提取图片中的题目。
+用户上传了 ${imageArray.length} 张图片（可能包含跨页的阅读理解篇章和题目）。
+请综合理解所有图片的内容，并提取出最终的题目和答案。
 规则：
-1. 提取题目的完整文本。如果是选择题，请将选项提取在题目下方。
+1. 提取题目的完整文本。如果篇章和题目分开，请将它们合并整理。
 2. 识别图片中手写的正确答案和错误答案（若无则留空）。
 3. 必须返回合法的JSON格式，不带任何Markdown代码块，格式如下：
 {
-  "question": "提取的题目内容",
+  "question": "提取的题目内容及篇章",
   "correctAns": "推断的正确答案",
   "wrongAns": "学生写错的答案"
 }`;
 
+        // 🌟 动态构建 parts 数组，把所有的图都塞进去！
+        let partsArray = [{ text: prompt }];
+        imageArray.forEach(imgBase64 => {
+            partsArray.push({ inlineData: { mimeType: "image/jpeg", data: imgBase64 } });
+        });
+
         const requestBody = {
-            contents: [{
-                parts: [
-                    { text: prompt },
-                    { inlineData: { mimeType: "image/jpeg", data: base64Image } }
-                ]
-            }],
-            generationConfig: {
-                responseMimeType: "application/json" 
-            }
+            contents: [{ parts: partsArray }],
+            generationConfig: { responseMimeType: "application/json" }
         };
 
         try {
@@ -275,15 +269,11 @@
                     localStorage.removeItem('my_gemini_key');
                     throw new Error(`API 密钥无效或被拒绝 (代码: ${response.status})。请刷新页面重试。`);
                 }
-                const errorData = await response.text();
                 throw new Error(`识别失败 (代码: ${response.status})`);
             }
 
             const data = await response.json();
-            
-            if (!data.candidates || data.candidates.length === 0) {
-                throw new Error("未能识别到内容，请截取清晰的部分重试。");
-            }
+            if (!data.candidates || data.candidates.length === 0) throw new Error("未能识别到内容，请重试。");
 
             const parsed = JSON.parse(data.candidates[0].content.parts[0].text);
             
@@ -293,13 +283,12 @@
             
             document.getElementById('ai-loading').style.display = 'none';
             document.getElementById('editor-area').style.display = 'block';
-            document.getElementById('btn-analyze').style.display = 'none';
 
         } catch (error) {
             console.error(error);
             document.getElementById('ai-loading').style.display = 'none';
-            // 🌟 修复：如果识别错误了，显示重试按钮
             document.getElementById('btn-analyze').style.display = 'flex';
+            document.getElementById('btn-add-more').style.display = 'block';
             document.getElementById('btn-analyze').innerText = "🔄 遇到错误，点击重试";
             showError("❌ " + error.message);
         }
