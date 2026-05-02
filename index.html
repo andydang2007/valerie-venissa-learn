@@ -36,8 +36,13 @@
         .dashboard-header .avatar { font-size: 50px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.15)); }
         .dashboard-header h2 { margin: 0; font-size: 28px; color: #0f172a; font-weight: 900; }
         
+        /* 🌟 多邻国风格打卡变色样式 */
         .streak-info-box { display: flex; flex-direction: column; align-items: center; gap: 5px; margin-top: 5px; }
-        .streak-badge { font-size: 16px; color: #d97706; background: #fffbeb; padding: 8px 20px; border-radius: 20px; font-weight: 900; border: 2.5px solid #fde68a; box-shadow: 0 4px 0 #fde68a; }
+        .streak-badge { font-size: 15px; padding: 8px 20px; border-radius: 20px; font-weight: 900; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        /* ⚪ 状态一：今日未打卡 (多邻国灰色) */
+        .streak-badge.pending { background: #f1f5f9; color: #64748b; border: 2.5px solid #cbd5e1; box-shadow: 0 4px 0 #cbd5e1; filter: grayscale(100%); opacity: 0.8; }
+        /* 🔥 状态二：今日已打卡 (多邻国亮色) */
+        .streak-badge.completed { background: #fffbeb; color: #d97706; border: 2.5px solid #fde68a; box-shadow: 0 4px 0 #fde68a; filter: grayscale(0%); opacity: 1; animation: bounceIn 0.5s ease-out; }
 
         .honor-wall { width: 100%; background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border: 4px solid #fde68a; border-radius: 30px; padding: 15px; margin-bottom: 30px; text-align: left; box-shadow: inset 0 4px 15px rgba(245, 158, 11, 0.1), 0 10px 20px rgba(0,0,0,0.05); position: relative; overflow: hidden; }
         .honor-wall::after { content: '✨'; position: absolute; top: -15px; right: -5px; font-size: 100px; opacity: 0.15; transform: rotate(15deg); pointer-events: none; }
@@ -205,7 +210,8 @@
                 <h2 id="dash-name">Welcome!</h2>
             </div>
             <div class="streak-info-box">
-                <div class="streak-badge" id="dash-streak">📅 开启你的第 1 天打卡吧！</div>
+                <!-- 预留多邻国样式的徽章坑位 -->
+                <div class="streak-badge pending" id="dash-streak">⚪ 开启你的第 1 天打卡吧！</div>
             </div>
         </div>
 
@@ -377,6 +383,12 @@
         return new Date(utc + (3600000 * 8));
     }
 
+    // 🌟 辅助功能：获取新加坡标准时间的 YYYY-MM-DD
+    function getSGTDateString() {
+        const sgt = getSGTDate();
+        return sgt.getFullYear() + '-' + String(sgt.getMonth() + 1).padStart(2, '0') + '-' + String(sgt.getDate()).padStart(2, '0');
+    }
+
     function checkMasterLock() {
         if (localStorage.getItem('family_hub_unlocked') === 'true') {
             document.getElementById('master-lock-screen').style.display = 'none';
@@ -404,7 +416,6 @@
     });
 
     function initDate() {
-        // 🌟 替换为新加坡时间
         const now = getSGTDate();
         const t2 = new Date(2026, 2, 23), t3 = new Date(2026, 5, 29), t4 = new Date(2026, 8, 14);
         const diff = (d1, d2) => Math.floor((d1 - d2) / 864e5);
@@ -618,7 +629,6 @@
 
     function verifyHubPin() {
         const input = document.getElementById('hub-pin-input').value;
-        // 🌟 替换为新加坡时间
         const now = getSGTDate();
         const mmdd = (now.getMonth() + 1) * 100 + now.getDate();
         const day = now.getDay() === 0 ? 7 : now.getDay();
@@ -630,12 +640,29 @@
     }
     function closePinModal() { document.getElementById('pin-modal').style.display = 'none'; document.getElementById('hub-pin-input').value = ''; }
 
+    // 🌟 核心升级：变色判定逻辑 (多邻国打卡机制)
     function updateEconomyUI() {
         let totalDays = parseInt(localStorage.getItem(`total_days_${currentUser}`) || "0");
+        let currentStreak = parseInt(localStorage.getItem(`current_streak_${currentUser}`) || "0");
+        
+        let lastCheckin = localStorage.getItem(`last_checkin_date_${currentUser}`);
+        let todayStr = getSGTDateString();
+        
+        let streakEl = document.getElementById('dash-streak');
+        
         if (totalDays === 0) { 
-            document.getElementById('dash-streak').innerText = `📅 开启你的第 1 天打卡吧！`; 
+            streakEl.className = 'streak-badge pending';
+            streakEl.innerHTML = `⚪ 开启你的第 1 天打卡吧！`; 
         } else { 
-            document.getElementById('dash-streak').innerText = `📅 你已累计打卡 ${totalDays} 天`; 
+            if (lastCheckin === todayStr) {
+                // ✅ 今日印章对得上号 -> 变彩色火焰！
+                streakEl.className = 'streak-badge completed';
+                streakEl.innerHTML = `🔥 今日已打卡 (连击 ${currentStreak} 天)`; 
+            } else {
+                // ❌ 还没印章 -> 变灰色待打卡！
+                streakEl.className = 'streak-badge pending';
+                streakEl.innerHTML = `⚪ 今日待打卡 (连击 ${currentStreak} 天)`; 
+            }
         }
         
         document.getElementById('shop-vault-total').innerText = localStorage.getItem('gold_coins_vault') || "0";
@@ -683,7 +710,6 @@
             let currentRedeemed = parseInt(localStorage.getItem(`redeemed_${prefix}`) || "0");
             localStorage.setItem(`redeemed_${prefix}`, currentRedeemed + 1);
 
-            // 🌟 替换为新加坡时间生成兑换口令
             const now = getSGTDate();
             const datePart = (now.getMonth() + 1).toString().padStart(2, '0') + now.getDate().toString().padStart(2, '0');
             const checkSum = (now.getDate() + price).toString().padStart(3, '0'); 
