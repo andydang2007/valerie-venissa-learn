@@ -253,6 +253,14 @@
     const SYNC_API_URL = "https://script.google.com/macros/s/AKfycbzbNOgg7deW9uVVyfYGTfKGOtVgNs_9ZfUQ9J_9cYpG2Ufow9KLDICHgsinBXrPJlmz/exec";
     const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQlpdRHnR9ybEHHgX6fouRI-vXOh8KQNLSjsbt0TYh9R3No_9i7QNv_4ELwJZJGQpTe3oZVXaZijaW4/pub?gid=573238154&single=true&output=csv";
     
+    // 🌟 辅助功能：获取新加坡标准时间的 YYYY-MM-DD
+    function getSGTDateString() {
+        const d = new Date();
+        const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
+        const sgt = new Date(utc + (3600000 * 8));
+        return sgt.getFullYear() + '-' + String(sgt.getMonth() + 1).padStart(2, '0') + '-' + String(sgt.getDate()).padStart(2, '0');
+    }
+
     async function syncToCloud(payload) {
         try { fetch(SYNC_API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) }); } catch (e) {}
     }
@@ -433,7 +441,7 @@
         gameLoop();
     }
 
-    // 💡 全新的双轨打卡与上帝模式核心函数
+    // 💡 全新的双轨打卡与上帝模式核心函数 (带点亮多邻国印章)
     function endGame() {
         state.isPlaying = false;
         document.getElementById('overlay').style.display = 'flex';
@@ -442,7 +450,7 @@
         let config = JSON.parse(localStorage.getItem('hub_config') || "{}");
         const threshold = isSister ? (config.pinyin_threshold_p1 || 2000) : (config.pinyin_threshold_p3 || 6000);
         
-        const today = new Date().toISOString().split('T')[0];
+        const today = getSGTDateString();
         const badgeDateKey = `pinyin_badge_date_${currentUser}`;
         const badgeCountKey = `pinyin_badge_count_${currentUser}`;
         const lastBadgeDate = localStorage.getItem(badgeDateKey);
@@ -484,6 +492,9 @@
                 streak: currentStreak 
             });
         }
+        
+        // 🌟🌟 核心：在此处印下今日打卡印章 🌟🌟
+        localStorage.setItem(`last_checkin_date_${currentUser}`, today);
 
         // 🌟 分数门槛判断
         if (state.score >= threshold) {
