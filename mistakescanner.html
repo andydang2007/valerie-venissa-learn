@@ -154,37 +154,42 @@
             }]
         };
 
-        try {
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(requestBody)
-            });
+        // 替换 scanner.html 中 processImage 函数里的 try 块内容
+    try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestBody)
+        });
 
-            const data = await response.json();
-            
-            // 剥离出 JSON 文本
-            let textOutput = data.candidates[0].content.parts[0].text;
-            textOutput = textOutput.replace(/```json/g, '').replace(/```/g, '').trim();
-            
-            const parsed = JSON.parse(textOutput);
+        const data = await response.json();
+        
+        // 🚨 增强版提取逻辑：过滤 AI 的所有废话，只找 { ... }
+        let rawText = data.candidates[0].content.parts[0].text;
+        console.log("AI 原始输出：", rawText); // 你可以按 F12 在控制台看到 AI 说了什么
 
-            // 填入输入框，让老爸进行最后的人工审核
-            document.getElementById('f-question').value = parsed.question || "";
-            document.getElementById('f-correct').value = parsed.correctAns || "";
-            document.getElementById('f-wrong').value = parsed.wrongAns || "";
+        const jsonMatch = rawText.match(/\{[\s\S]*\}/); // 贪婪匹配最外层的花括号
+        if (!jsonMatch) throw new Error("无法从输出中找到有效的 JSON 格式");
 
-            document.getElementById('ai-loading').style.display = 'none';
-            document.getElementById('editor-area').style.display = 'block';
-            document.getElementById('btn-analyze').style.display = 'flex';
-            document.getElementById('btn-analyze').innerText = "🔄 重新识别";
+        const parsed = JSON.parse(jsonMatch[0]);
 
-        } catch (error) {
-            alert("❌ AI 识别失败，请检查网络或更换图片再试一次！");
-            console.error(error);
-            document.getElementById('ai-loading').style.display = 'none';
-            document.getElementById('btn-analyze').style.display = 'flex';
-        }
+        // 填入输入框
+        document.getElementById('f-question').value = parsed.question || "";
+        document.getElementById('f-correct').value = parsed.correctAns || "";
+        document.getElementById('f-wrong').value = parsed.wrongAns || "";
+
+        document.getElementById('ai-loading').style.display = 'none';
+        document.getElementById('editor-area').style.display = 'block';
+        document.getElementById('btn-analyze').style.display = 'flex';
+        document.getElementById('btn-analyze').innerText = "🔄 重新识别";
+
+    } catch (error) {
+        console.error("详细错误信息:", error);
+        alert("❌ 识别失败：" + error.message);
+        document.getElementById('ai-loading').style.display = 'none';
+        document.getElementById('btn-analyze').style.display = 'flex';
+    }
+        
     }
 
     // 3. 提交给 Google Apps Script 后台 (直接复用现有的 mistake_update 接口)
