@@ -150,12 +150,20 @@
     let sessionErrors = 0;
     let currentMode = 'practice';
 
+    // 🌟 辅助功能：获取新加坡标准时间的 YYYY-MM-DD
+    function getSGTDateString() {
+        const d = new Date();
+        const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
+        const sgt = new Date(utc + (3600000 * 8));
+        return sgt.getFullYear() + '-' + String(sgt.getMonth() + 1).padStart(2, '0') + '-' + String(sgt.getDate()).padStart(2, '0');
+    }
+
     async function syncToCloud(payload) {
         try { fetch(SYNC_API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) }); } catch (e) {}
     }
 
     function checkAndIncrementLimit(lessons, mode) {
-        const today = new Date().toISOString().split('T')[0];
+        const today = getSGTDateString();
         const storageKey = `spelling_usage_${today}`;
         let usage = JSON.parse(localStorage.getItem(storageKey) || "{}");
         for (let lesson of lessons) {
@@ -421,7 +429,7 @@
         }
 
         // 🌟 双轨打卡逻辑
-        const today = new Date().toISOString().split('T')[0];
+        const today = getSGTDateString();
         let lastDate = localStorage.getItem(`last_date_${currentPlayer}`);
         let currentStreak = parseInt(localStorage.getItem(`current_streak_${currentPlayer}`) || "0");
         let totalDays = parseInt(localStorage.getItem(`total_days_${currentPlayer}`) || "0");
@@ -453,6 +461,9 @@
                 crystalsTotal: crys, totalDays: totalDays, streak: currentStreak 
             });
         }
+        
+        // 🌟🌟 核心：在此处印下今日打卡印章 🌟🌟
+        localStorage.setItem(`last_checkin_date_${currentPlayer}`, today);
 
         if (isPerfect) {
             confetti({ particleCount: 250, spread: 100 });
