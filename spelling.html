@@ -352,6 +352,9 @@
             }
             document.getElementById('badge-modal').style.display = 'flex'; showNextBadge();
         } else { pendingGameResult = null; renderFinalScreen(); }
+        // 🌟 成功完成练习，盖上今日打卡印章（自动换算为新加坡时间）
+const todayStr = new Date(new Date().getTime() + (8 * 3600000)).toISOString().split('T')[0];
+localStorage.setItem(`last_checkin_date_${localStorage.getItem('currentPlayer')}`, todayStr);
     }
 
     function showNextBadge() {
