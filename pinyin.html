@@ -265,6 +265,29 @@
         try { fetch(SYNC_API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) }); } catch (e) {}
     }
 
+    // 🌟🌟 核心：开局从云端同步连击与金币数据
+    async function syncUserDataFromCloud() {
+        try {
+            const statsResp = await fetch(`${SYNC_API_URL}?type=fetch_user_data&user=${currentUser}`);
+            const cloudStats = await statsResp.json();
+            if (cloudStats && Object.keys(cloudStats).length > 0) {
+                localStorage.setItem(`total_days_${currentUser}`, cloudStats.userTotalDays);
+                localStorage.setItem(`current_streak_${currentUser}`, cloudStats.userStreak);
+                localStorage.setItem(`crystals_${currentUser}`, cloudStats.userCrystals);
+                localStorage.setItem(`gold_coins_vault`, cloudStats.vaultCoins); // 同步最新金币
+                
+                if (cloudStats.lastCheckinDate) {
+                    let d = new Date(cloudStats.lastCheckinDate);
+                    let sgtStr = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+                    localStorage.setItem(`last_date_${currentUser}`, sgtStr);
+                }
+                console.log("✅ 成功从云端同步玩家数据！云端连击数：", cloudStats.userStreak);
+            }
+        } catch (e) {
+            console.log("❌ 云端数据同步失败，将使用本地缓存:", e);
+        }
+    }
+
     const lessonMap = {
         '第一课': 1, '第二课': 2, '第三课': 3, '第四课': 4, '第五课': 5,
         '第六课': 6, '第七课': 7, '第八课': 8, '第九课': 9, '第十课': 10,
@@ -329,6 +352,9 @@
     }
 
     async function loadDB() {
+        // 先偷偷启动云端同步
+        syncUserDataFromCloud();
+        
         try {
             let ALL_WORDS = [];
             let cachedPinyinDB = sessionStorage.getItem('pinyin_db_cache');
@@ -441,7 +467,7 @@
         gameLoop();
     }
 
-    // 💡 全新的双轨打卡与上帝模式核心函数 (带点亮多邻国印章)
+    // 💡 全新的双轨打卡与上帝模式核心函数
     function endGame() {
         state.isPlaying = false;
         document.getElementById('overlay').style.display = 'flex';
@@ -483,13 +509,14 @@
                 crystalEarned = true;
             }
             
-            // 一并推给 Dashboard
+            // 一并推给 Dashboard，携带最新打卡日期
             syncToCloud({ 
                 type: 'crystal_update', 
                 user: currentUser, 
                 crystalsTotal: crys, 
                 totalDays: totalDays, 
-                streak: currentStreak 
+                streak: currentStreak,
+                checkinDate: today 
             });
         }
         
@@ -508,7 +535,8 @@
                 localStorage.setItem('gold_coins_vault', vaultCoins + coinGain);
 
                 syncToCloud({ type: 'badge', user: currentUser, subject: '拼音', icon: '🎮', title: '拼音高手', desc: `镭射射击达到 ${state.score} 分！` });
-                syncToCloud({ type: 'coin_update', user: currentUser, total: vaultCoins + coinGain });
+                // 🌟 核心修改：只发送增量 earned
+                syncToCloud({ type: 'coin_update', user: currentUser, earned: coinGain });
 
                 resultHTML = `
                     <div style="font-size: 48px; color: #39ff14; text-shadow: 0 0 20px #39ff14;">MISSION ACCOMPLISHED</div>
@@ -967,14 +995,12 @@
         requestAnimationFrame(gameLoop);
     }
 
-    // 🌟 防 iPad 死机补丁：记录上一次发声的时间
     let lastSoundTime = 0;
 
     function playSound(type) {
         if (!actx) return;
         
         let now = Date.now();
-        // 🛡️ 核心防御：如果是高频触发的机械音，强制加上 80 毫秒的冷却时间
         if (type === 'mech') {
             if (now - lastSoundTime < 80) return; 
             lastSoundTime = now;
