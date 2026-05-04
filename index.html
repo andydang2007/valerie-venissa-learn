@@ -211,7 +211,7 @@
                 <h2 id="dash-name">Welcome!</h2>
             </div>
             <div class="streak-info-box">
-                <!-- 预留多邻国样式的徽章坑位 -->
+                <!-- 🌟 预留多邻国样式的徽章坑位 -->
                 <div class="streak-badge pending" id="dash-streak">⚪ 开启你的第 1 天打卡吧！</div>
             </div>
         </div>
@@ -598,6 +598,15 @@
                 if (cloudData.weekend !== undefined) localStorage.setItem(`easter_weekend_${currentUser}`, cloudData.weekend);
                 if (cloudData.holiday !== undefined) localStorage.setItem(`easter_holiday_${currentUser}`, cloudData.holiday);
                 
+                // 🌟 把云端上的最新打卡时间带回来覆盖本地
+                if (cloudData.lastCheckinDate) {
+                    let d = new Date(cloudData.lastCheckinDate);
+                    let sgtStr = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+                    localStorage.setItem(`last_checkin_date_${currentUser}`, sgtStr);
+                    // 顺便把旧字段也更新了
+                    localStorage.setItem(`last_date_${currentUser}`, sgtStr); 
+                }
+
                 updateEconomyUI();
                 renderBadges();
             }
