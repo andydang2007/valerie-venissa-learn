@@ -36,12 +36,9 @@
         .dashboard-header .avatar { font-size: 50px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.15)); }
         .dashboard-header h2 { margin: 0; font-size: 28px; color: #0f172a; font-weight: 900; }
         
-        /* 🌟 多邻国风格打卡变色样式 */
         .streak-info-box { display: flex; flex-direction: column; align-items: center; gap: 5px; margin-top: 5px; }
         .streak-badge { font-size: 15px; padding: 8px 20px; border-radius: 20px; font-weight: 900; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 6px; }
-        /* ⚪ 状态一：今日未打卡 (多邻国灰色) */
         .streak-badge.pending { background: #f1f5f9; color: #64748b; border: 2.5px solid #cbd5e1; box-shadow: 0 4px 0 #cbd5e1; filter: grayscale(100%); opacity: 0.8; }
-        /* 🔥 状态二：今日已打卡 (多邻国亮色) */
         .streak-badge.completed { background: #fffbeb; color: #d97706; border: 2.5px solid #fde68a; box-shadow: 0 4px 0 #fde68a; filter: grayscale(0%); opacity: 1; animation: bounceIn 0.5s ease-out; }
 
         .honor-wall { width: 100%; background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border: 4px solid #fde68a; border-radius: 30px; padding: 15px; margin-bottom: 30px; text-align: left; box-shadow: inset 0 4px 15px rgba(245, 158, 11, 0.1), 0 10px 20px rgba(0,0,0,0.05); position: relative; overflow: hidden; }
@@ -71,7 +68,7 @@
         .badge-count { position: absolute; top: -6px; right: -6px; background: #ef4444; color: white; font-size: 11px; font-weight: 900; padding: 2px 6px; border-radius: 10px; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.2); animation: popPulse 2s infinite alternate; z-index: 3; white-space: nowrap; }
         .badge-name { font-size: 11px; font-weight: 900; color: #64748b; text-align: center; line-height: 1.2; width: 100%; word-break: keep-all; }
         .badge-item.unlocked .badge-name { color: #d97706; }
-        .badge-progress { font-size: 10px; color: #94a3b8; font-weight: 800; margin-top: 2px; }
+        .badge-progress { font-size: 10px; color: #94a3b8; font-weight: 800; margin-top: 2px; text-align: center; width: 100%; }
 
         .section-title { width: 100%; text-align: left; margin: 0 0 15px 5px; font-size: 20px; font-weight: 900; color: #334155; }
         .grid-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; width: 100%; margin-bottom: 25px; }
@@ -136,7 +133,6 @@
         }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
 
-        /* 全局主密码锁 UI 样式 */
         #master-lock-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; }
         .master-input { font-size: 36px; letter-spacing: 12px; text-align: center; width: 220px; padding: 15px; border-radius: 25px; border: 4px solid #334155; background: rgba(0,0,0,0.3); color: #38bdf8; outline: none; margin: 20px 0 30px 0; transition: 0.2s; font-family: monospace; font-weight: 900; box-shadow: inset 0 4px 10px rgba(0,0,0,0.5); }
         .master-input:focus { border-color: #3b82f6; box-shadow: 0 0 20px rgba(59, 130, 246, 0.4), inset 0 4px 10px rgba(0,0,0,0.5); }
@@ -152,27 +148,21 @@
     <p style="color: #94a3b8; font-size: 16px; margin: 0; font-weight: 800;">Please verify to proceed.</p>
     
     <input type="password" id="master-pwd" class="master-input" maxlength="4" placeholder="****" inputmode="numeric" pattern="[0-9]*">
-    
     <button class="master-btn" onclick="verifyMasterLock()">ENTER</button>
 </div>
 
 <div class="container" id="main-app-container" style="display: none;">
-    
     <div id="school-term-display"></div>
     <div id="cloud-sync-indicator"></div>
 
     <div id="admin-screen" class="screen">
         <h2 style="color: #3b82f6; font-size: 28px; font-weight: 900; margin-bottom: 20px;">⚙️ 系统控制台</h2>
-        
         <div id="admin-loading" style="font-weight:900; color:#94a3b8; padding: 30px;">📡 连接云端引擎中...</div>
-        
         <div id="admin-config-container" style="display:none; width: 100%; flex-direction: column; gap: 12px; margin-bottom: 25px;">
             <div class="config-row"><label>P1 拼音要求</label><input type="number" id="cfg-pinyin_threshold_p1"></div>
             <div class="config-row"><label>P3 拼音要求</label><input type="number" id="cfg-pinyin_threshold_p3"></div>
-            
             <div class="config-row"><label>P1 极速时间(秒)</label><input type="number" id="cfg-speed_limit_p1"></div>
             <div class="config-row"><label>P3 极速时间(秒)</label><input type="number" id="cfg-speed_limit_p3"></div>
-            
             <div class="config-row"><label>听写全对奖励</label><input type="number" id="cfg-tingxie_reward_coin"></div>
             <div class="config-row"><label>汉堡价格 (金币)</label><input type="number" id="cfg-shop_hb_price"></div>
             <div class="config-row"><label>套餐价格 (金币)</label><input type="number" id="cfg-shop_tc_price"></div>
@@ -180,14 +170,11 @@
             <div class="config-row"><label>甜筒价格 (水晶)</label><input type="number" id="cfg-shop_tt_price"></div>
             <div class="config-row"><label>麦旋风价格 (水晶)</label><input type="number" id="cfg-shop_xf_price"></div>
         </div>
-        
         <button id="admin-save-btn" class="btn-action" style="background:#10b981; color:white; box-shadow:0 6px 0 #059669; margin-bottom: 15px; display:none;" onclick="saveAdminConfig()">💾 保存并推送云端</button>
-        
         <div style="font-size:14px; color:#64748b; font-weight:800; margin-bottom:15px; line-height:1.5;">
             💡 提示：如需修改徽章数量或打卡天数，请直接在 Google Sheets 表格的 Dashboard 中修改，App 下次刷新会自动同步。
         </div>
         <button class="btn-action" style="background:#8b5cf6; color:white; border-color:#7e22ce; box-shadow:0 6px 0 #6b21a8; margin-bottom: 15px;" onclick="window.location.href='mistakescanner.html'">📸 智能错题扫描台 (老爸专属)</button>
-
         <button class="btn-action" style="background:#ef4444; color:white; border-color:#dc2626; box-shadow:0 6px 0 #b91c1c; margin-bottom: 15px;" onclick="executeNuclearReset()">☢️ 清空所有本地数据</button>
         <button class="btn-action" onclick="showScreen('dashboard-screen')">← 返回主页</button>
     </div>
@@ -195,7 +182,6 @@
     <div id="user-screen" class="screen">
         <h2 style="margin:0 0 5px 0; color:#0f172a; font-size: 30px; font-weight: 900;">Who is learning?</h2>
         <div style="font-size: 16px; color: #64748b; margin-top: 5px; font-weight: 800; margin-bottom: 25px;">Aim for <span class="magic-number" style="font-size:1.1em;">6~7</span> today!</div>
-
         <button class="name-btn" onclick="switchUser('Valerie', 'P3')">
             <span class="avatar">👱‍♀️</span> Valerie
         </button>
@@ -211,7 +197,6 @@
                 <h2 id="dash-name">Welcome!</h2>
             </div>
             <div class="streak-info-box">
-                <!-- 🌟 预留多邻国样式的徽章坑位 -->
                 <div class="streak-badge pending" id="dash-streak">⚪ 开启你的第 1 天打卡吧！</div>
             </div>
         </div>
@@ -244,13 +229,11 @@
             </h3>
             <div class="badges-container" id="badges-container"></div>
         </div>
-        
         <button class="btn-action" onclick="showScreen('user-screen')">👤 Switch User</button>
     </div>
 
     <div id="shop-screen" class="screen">
         <h2 style="margin:0 0 20px 0; font-size: 28px; font-weight: 900; color: #b45309; text-shadow: 0 2px 4px rgba(245,158,11,0.2);">🎁 神秘兑换中心</h2>
-        
         <div class="shop-header">
             <div class="shop-bal-card shop-bal-vault">
                 <div style="font-size:14px; color:#d97706; font-weight:900; margin-bottom:4px;">团队金币</div>
@@ -294,7 +277,6 @@
                 <div class="price">💎 14</div>
             </div>
         </div>
-
         <button id="do-redeem-btn" class="btn-action" style="background:#cbd5e1; color:white; border-color:#94a3b8; box-shadow:0 6px 0 #94a3b8; margin-bottom:15px;" disabled onclick="executeRedeem()">✅ 确认兑换</button>
         <button class="btn-action" onclick="showScreen('dashboard-screen')">← 返回荣誉墙</button>
     </div>
@@ -377,14 +359,13 @@
     
     const SYNC_API_URL = "https://script.google.com/macros/s/AKfycbzbNOgg7deW9uVVyfYGTfKGOtVgNs_9ZfUQ9J_9cYpG2Ufow9KLDICHgsinBXrPJlmz/exec";
 
-    // 🌟 核心升级：强行锁定新加坡时间 (UTC+8)，彻底解决跨时区早起打卡的 Bug
+    // 🌟 核心升级：锁定新加坡时间 (UTC+8)
     function getSGTDate() {
         const d = new Date();
         const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
         return new Date(utc + (3600000 * 8));
     }
 
-    // 🌟 辅助功能：获取新加坡标准时间的 YYYY-MM-DD
     function getSGTDateString() {
         const sgt = getSGTDate();
         return sgt.getFullYear() + '-' + String(sgt.getMonth() + 1).padStart(2, '0') + '-' + String(sgt.getDate()).padStart(2, '0');
@@ -581,6 +562,11 @@
                 if (cloudData.userTotalDays !== undefined) localStorage.setItem(`total_days_${currentUser}`, cloudData.userTotalDays);
                 if (cloudData.userStreak !== undefined) localStorage.setItem(`current_streak_${currentUser}`, cloudData.userStreak);
                 
+                // 🌟 把云端最高记录拿回来
+                if (cloudData.maxStreak !== undefined) {
+                    localStorage.setItem(`max_streak_${currentUser}`, cloudData.maxStreak);
+                }
+                
                 if (cloudData.pinyin !== undefined) localStorage.setItem(`pinyin_badge_count_${currentUser}`, cloudData.pinyin);
                 if (cloudData.speed !== undefined) localStorage.setItem(`speed_breaks_${currentUser}`, cloudData.speed);
                 if (cloudData.tingxie !== undefined) localStorage.setItem(`tingxie_badge_count_${currentUser}`, cloudData.tingxie);
@@ -598,12 +584,10 @@
                 if (cloudData.weekend !== undefined) localStorage.setItem(`easter_weekend_${currentUser}`, cloudData.weekend);
                 if (cloudData.holiday !== undefined) localStorage.setItem(`easter_holiday_${currentUser}`, cloudData.holiday);
                 
-                // 🌟 把云端上的最新打卡时间带回来覆盖本地
                 if (cloudData.lastCheckinDate) {
                     let d = new Date(cloudData.lastCheckinDate);
                     let sgtStr = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
                     localStorage.setItem(`last_checkin_date_${currentUser}`, sgtStr);
-                    // 顺便把旧字段也更新了
                     localStorage.setItem(`last_date_${currentUser}`, sgtStr); 
                 }
 
@@ -650,7 +634,6 @@
     }
     function closePinModal() { document.getElementById('pin-modal').style.display = 'none'; document.getElementById('hub-pin-input').value = ''; }
 
-    // 🌟 核心升级：变色判定逻辑 (多邻国打卡机制)
     function updateEconomyUI() {
         let totalDays = parseInt(localStorage.getItem(`total_days_${currentUser}`) || "0");
         let currentStreak = parseInt(localStorage.getItem(`current_streak_${currentUser}`) || "0");
@@ -665,11 +648,9 @@
             streakEl.innerHTML = `⚪ 开启你的第 1 天打卡吧！`; 
         } else { 
             if (lastCheckin === todayStr) {
-                // ✅ 今日印章对得上号 -> 变彩色火焰！
                 streakEl.className = 'streak-badge completed';
                 streakEl.innerHTML = `🔥 今日已打卡 (连击 ${currentStreak} 天)`; 
             } else {
-                // ❌ 还没印章 -> 变灰色待打卡！
                 streakEl.className = 'streak-badge pending';
                 streakEl.innerHTML = `⚪ 今日待打卡 (连击 ${currentStreak} 天)`; 
             }
@@ -766,7 +747,15 @@
             else { classes.push('locked'); }
             
             let countHtml = (b.count > 1) ? `<div class="badge-count">x${b.count}</div>` : '';
-            let progressHtml = (b.count === 0 && b.targetStreak) ? `<div class="badge-progress">${b.currentStreak}/${b.targetStreak}</div>` : '';
+            
+            // 🌟 滑动窗口特殊展示：如果是王冠显示天数，普通的显示 进度/目标
+            let progressHtml = '';
+            if (b.isCrown) {
+                progressHtml = `<div class="badge-progress" style="color:#d97706;">${b.currentStreak} 天</div>`;
+            } else if (b.count === 0 && b.targetStreak) {
+                progressHtml = `<div class="badge-progress">${b.currentStreak}/${b.targetStreak}</div>`;
+            }
+            
             return `<div class="${classes.join(' ')}"><div class="badge-icon-wrapper"><div class="badge-icon">${b.icon}</div>${countHtml}</div><div class="badge-name">${b.name}</div>${progressHtml}</div>`;
         };
 
@@ -787,9 +776,32 @@
         ];
         container.innerHTML += `<div class="badge-category"><div class="badge-category-title">🎓 科目大师</div><div class="badge-grid">${subBadges.map(renderItemHTML).join('')}</div></div>`;
 
+        // 🌟 核心升级：毅力连击的 滑动窗口算法
         const currentStreak = parseInt(localStorage.getItem(`current_streak_${currentUser}`) || '0');
-        const streakMilestones = [3, 5, 10, 15, 30];
+        const maxStreak = Math.max(parseInt(localStorage.getItem(`max_streak_${currentUser}`) || '0'), currentStreak);
+        
+        let streakMilestones = [3, 5, 10, 15, 30];
+        
+        // 当连击超过 30 天后，窗口开始滑动
+        if (currentStreak >= 30) {
+            let nextTarget = (Math.floor(currentStreak / 5) + 1) * 5; // 如果是32，下一个就是35
+            streakMilestones = [nextTarget - 20, nextTarget - 15, nextTarget - 10, nextTarget - 5, nextTarget];
+        }
+        
         let streakBadges = [];
+        
+        // 1. 最左侧永远放一个最高纪录的王冠
+        streakBadges.push({ 
+            icon: '👑', 
+            name: `最高记录`, 
+            count: 1, 
+            tier: 'gold', 
+            targetStreak: maxStreak, 
+            currentStreak: maxStreak,
+            isCrown: true 
+        });
+
+        // 2. 依次排开 5 个滑动坑位
         streakMilestones.forEach(day => {
             let isAchieved = (currentStreak >= day);
             let count = isAchieved ? 1 : 0;
