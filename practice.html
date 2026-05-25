@@ -126,6 +126,7 @@
 <div id="badge-modal" class="modal-overlay">
     <div class="epic-modal">
         <div class="epic-icon" id="badge-icon">⚡️</div>
+        <div class="epic-icon" id="badge-icon">⚡️</div>
         <div class="epic-title" id="badge-title">新纪录诞生！</div>
         <div class="epic-desc" id="badge-desc"></div>
         <div style="font-size:12px; color:#b45309; font-weight:800; margin-bottom: 20px;">☁️ 荣誉已存入云端荣誉墙...</div>
@@ -244,29 +245,53 @@
         let cached = sessionStorage.getItem('hub_db_cache');
         if (cached) { try { db = JSON.parse(cached); if (Object.keys(db).length > 0) { startQuiz(); return; } } catch(e) { sessionStorage.removeItem('hub_db_cache'); } }
 
+        // 🌟 修复关键：移除了这里有冲突的 2PACX-- 前缀拼接 Bug，并进行大小写深度兼容
         const loads = Object.entries(GIDS).map(([name, gid]) => new Promise(res => {
-            Papa.parse(`https://docs.google.com/spreadsheets/d/e/2PACX-${SHEET_ID}/pub?gid=${gid}&single=true&output=csv&t=${Date.now()}`, {
+            Papa.parse(`https://docs.google.com/spreadsheets/d/e/${SHEET_ID}/pub?gid=${gid}&single=true&output=csv&t=${Date.now()}`, {
                 download: true, header: true, skipEmptyLines: 'greedy',
-                complete: r => res({ name, data: r.data.map(row => { let n = {}; Object.keys(row).forEach(k => n[k.trim()] = row[k]); return n; }) }),
+                transformHeader: h => h.trim(), // 格式化头部标签去除空格
+                complete: r => res({ name, data: r.data }),
                 error: () => res({name, data: []})
             });
         }));
+        
         const results = await Promise.race([Promise.all(loads), new Promise(res => setTimeout(() => res('timeout'), 5000))]);
-        if (results === 'timeout') { document.getElementById('loading').innerHTML = "⚠️ 网络慢，请重试。"; return; }
+        if (results === 'timeout') { document.getElementById('loading').innerHTML = "⚠️ 网络拥堵，请刷新页面重试。"; return; }
+        
         db = {};
-        results.forEach(r => { if(r && r.data) { r.data.forEach(row => { 
-            let g = (row.Grade || row.GRADE || "").toUpperCase(); if(!g) return;
-            if(!db[g]) db[g] = {}; if(!db[g][r.name]) db[g][r.name] = []; db[g][r.name].push(row);
-        }); } });
-        if (Object.keys(db).length > 0) { sessionStorage.setItem('hub_db_cache', JSON.stringify(db)); startQuiz(); }
-        else { document.getElementById('loading').innerText = "⚠️ Data error."; }
+        results.forEach(r => { 
+            if(r && r.data) { 
+                r.data.forEach(row => { 
+                    // 🌟 深度兼容大小写：不论表格写 Grade 还是 GRADE 都能捕获
+                    let g = (row.Grade || row.GRADE || "").toUpperCase(); 
+                    if(!g) return;
+                    if(!db[g]) db[g] = {}; 
+                    if(!db[g][r.name]) db[g][r.name] = []; 
+                    
+                    // 统一转换格式并推入题库
+                    db[g][r.name].push({
+                        Question: row.Question || row.QUESTION || "",
+                        Answer: row.Answer || row.ANSWER || row['Correct Answer'] || row['CORRECT ANSWER'] || "",
+                        Type: row.Type || row.TYPE || "",
+                        Options: row.Options || row.OPTIONS || "",
+                        Term: row.Term || row.TERM || ""
+                    });
+                }); 
+            } 
+        });
+        
+        if (Object.keys(db).length > 0) { 
+            sessionStorage.setItem('hub_db_cache', JSON.stringify(db)); 
+            startQuiz(); 
+        } else { 
+            document.getElementById('loading').innerText = "⚠️ 题库数据读取为空，请检查表格权限配置。"; 
+        }
     }
 
-    
     function startQuiz() {
         let mainPool = (db[curGrade][curSub] || []).filter(q => (q.Type || "").toString().trim().toUpperCase() !== 'SPELLING');
         mainPool = mainPool.filter(q => {
-            let t = q.Term || q.TERM; if (!t) return true; 
+            let t = q.Term; if (!t) return true; 
             let tNum = parseInt(t.toString().replace(/\D/g, ''));
             return isNaN(tNum) || tNum <= currentTermNum;
         });
@@ -332,6 +357,7 @@
     }
 
     function renderQ() {
+        if(sessionQs.length === 0) return;
         updateProgress(); if(ctx && canvas) clearPad();
         const q = sessionQs[curIdx], isCN = (curSub === '华文');
         document.getElementById('q-text').innerText = q.Question;
@@ -340,7 +366,7 @@
 
         let hintHtml = "";
         if (curUser === 'Venessa' && qType !== 'MCQ') {
-            const correctRaw = (q['Correct Answer'] || q['ANSWER'] || "").toString().trim();
+            const correctRaw = (q.Answer || "").toString().trim();
             const hintStr = correctRaw.split('').map(c => /[a-zA-Z0-9\u4e00-\u9fa5]/.test(c) ? '_' : c).join(' ');
             hintHtml = `<div class="hint-text">Hint: ${hintStr}</div>`;
         }
@@ -348,7 +374,7 @@
         if (qType === 'OPEN') {
             container.innerHTML = hintHtml + `<textarea id="ans-in" class="ans-input" rows="4" placeholder="${isCN ? '输入你的完整答案...' : 'Type full answer...'}"></textarea>`;
         } else if (qType === 'MCQ') {
-            const opts = (q.Options || q.options || "").toString().split('|').map(o => o.trim()).filter(o => o);
+            const opts = (q.Options || "").toString().split('|').map(o => o.trim()).filter(o => o);
             let html = `<div class="mcq-list">`;
             opts.forEach(opt => html += `<button class="mcq-btn" onclick="selectMCQ(this, '${opt.replace(/'/g, "\\'").replace(/"/g, "&quot;")}')">${opt}</button>`);
             container.innerHTML = html + `</div><input type="hidden" id="ans-in" value="">`;
@@ -371,8 +397,8 @@
     function checkAns() {
         const input = document.getElementById('ans-in'), user = input.value.trim(); 
         const userLower = user.toLowerCase();
-        const correctRaw = (sessionQs[curIdx]['Correct Answer'] || sessionQs[curIdx]['ANSWER'] || "").toString().trim();
-        const fb = document.getElementById('fb-text'), qType = (sessionQs[curIdx]['Type'] || "").toString().trim().toUpperCase(), isCN = (curSub === '华文');
+        const correctRaw = (sessionQs[curIdx].Answer || "").toString().trim();
+        const fb = document.getElementById('fb-text'), qType = (sessionQs[curIdx].Type || "").toString().trim().toUpperCase(), isCN = (curSub === '华文');
         
         if(userLower === "") { if(qType === 'MCQ') alert(isCN ? "请选择一个选项！" : "Please select!"); return; }
         
@@ -433,7 +459,7 @@
 
     function finishQuiz() {
         const timeTakenSec = Math.floor((Date.now() - startTime) / 1000);
-        const isPerfect = sessionErrors <= 1; // 错题1道以内判定为完美
+        const isPerfect = sessionErrors <= 1; 
         const isCN = (curSub === '华文');
         
         let config = JSON.parse(localStorage.getItem('hub_config') || "{}");
@@ -448,7 +474,7 @@
         if (isPerfect) localStats.perfects += 1;
         localStorage.setItem(statsKey, JSON.stringify(localStats));
 
-        // 1. 基础科目徽章奖励 (错题 <= 3)
+        // 1. 科目特定结算
         if (sessionErrors <= 3) {
             if (curSub === '华文') {
                 earnedBadgesForCoin += 2;
@@ -463,13 +489,12 @@
             }
         }
 
-        // 2. 核心战绩徽章 (完美/极速/气球)
+        // 2. 核心战绩徽章结算
         if (isPerfect) {
             earnedBadgesForCoin++;
             badgeQueue.push({ icon: '🎯', title: isCN ? '神奇射手！' : 'Sharpshooter!', desc: isCN ? '错题在1道以内，神奇射手徽章 +1！' : 'Great accuracy! Sharpshooter badge +1!' });
             syncToCloud({ type: 'badge', user: curUser, grade: curGrade, subject: curSub, icon: '🎯', title: '神奇射手', desc: '错题<=1' });
 
-            // ⚡️ 极速突破
             if (timeTakenSec <= speedLimit) {
                 earnedBadgesForCoin++;
                 let currentBreaks = parseInt(localStorage.getItem(`speed_breaks_${curUser}`) || '0');
@@ -478,7 +503,6 @@
                 syncToCloud({ type: 'badge', user: curUser, grade: curGrade, subject: curSub, icon: '⚡️', title: '极速突破', desc: `耗时: ${timeTakenSec}秒` });
             }
 
-            // 🎈 气球猎人
             pendingGameResult = applyBalloonLogic(sessionErrors);
             if (pendingGameResult && pendingGameResult.trigger) {
                 badgeQueue.push({ icon: '🎈', title: isCN ? '气球猎人！' : 'Balloon Hunter!', desc: pendingGameResult.msg });
@@ -487,7 +511,6 @@
                 syncToCloud({ type: 'badge', user: curUser, grade: curGrade, subject: curSub, icon: '🎈', title: '气球猎人', desc: '解锁气球游戏' });
             }
 
-            // 🔥 核心逻辑：全对三连 (Hat-trick)
             let pStreak = parseInt(localStorage.getItem(`perfect_streak_${curUser}`) || "0") + 1;
             localStorage.setItem(`perfect_streak_${curUser}`, pStreak);
             if (pStreak === 3) {
@@ -495,21 +518,20 @@
                 localStorage.setItem(`easter_hattrick_${curUser}`, htCount + 1);
                 badgeQueue.push({ icon: '🔥', title: isCN ? '全对三连！' : 'Hat-trick!', desc: isCN ? `连续 3 次完美通关！手感火热！` : `3 perfect scores in a row! On fire!` });
                 syncToCloud({ type: 'badge', user: curUser, grade: curGrade, subject: curSub, icon: '🔥', title: '全对三连', desc: '连续3次完美' });
-                localStorage.setItem(`perfect_streak_${curUser}`, 0); // 发放后重置
+                localStorage.setItem(`perfect_streak_${curUser}`, 0); 
             }
         } else {
             pendingGameResult = null; 
-            localStorage.setItem(`perfect_streak_${curUser}`, 0); // 只要有一次不完美，连击直接归零
+            localStorage.setItem(`perfect_streak_${curUser}`, 0); 
         }
 
-        // 3. 资产结算：发放金币
         if (earnedBadgesForCoin > 0) {
             let vaultCoins = parseInt(localStorage.getItem('gold_coins_vault') || "0");
             localStorage.setItem('gold_coins_vault', vaultCoins + earnedBadgesForCoin);
             syncToCloud({ type: 'coin_update', user: curUser, earned: earnedBadgesForCoin });
         }
 
-        // 4. 打卡连击与水晶奖励 (每日一次)
+        // 连击打卡天数处理
         let lastDate = localStorage.getItem(`last_date_${curUser}`);
         let currentStreak = parseInt(localStorage.getItem(`current_streak_${curUser}`) || "0");
         let totalDays = parseInt(localStorage.getItem(`total_days_${curUser}`) || "0");
@@ -532,32 +554,28 @@
             syncToCloud({ type: 'crystal_update', user: curUser, crystalsTotal: crys, totalDays: totalDays, streak: currentStreak, checkinDate: today });
         }
 
-        // 🌟🌟 5. 新增：隐藏彩蛋 (早起 / 熬夜 / 假期) 🌟🌟
+        // 隐藏彩蛋逻辑
         let currentHour = new Date().getHours();
-        
-        // 🌅 5.1 早起鸟儿 (< 7点)
         if (currentHour < 7) {
             let ebCount = parseInt(localStorage.getItem(`easter_earlybird_${curUser}`) || '0');
             localStorage.setItem(`easter_earlybird_${curUser}`, ebCount + 1);
             badgeQueue.push({ icon: '🌅', title: isCN ? '早起鸟儿！' : 'Early Bird!', desc: isCN ? `一日之计在于晨！真棒！` : `The early bird catches the worm!` });
             syncToCloud({ type: 'badge', user: curUser, grade: curGrade, subject: curSub, icon: '🌅', title: '早起鸟儿', desc: `时间: ${currentHour}点` });
-        } 
-        // 🦉 5.2 小猫头鹰 (>= 22点)
-        else if (currentHour >= 22) {
+        } else if (currentHour >= 22) {
             let noCount = parseInt(localStorage.getItem(`easter_nightowl_${curUser}`) || '0');
             localStorage.setItem(`easter_nightowl_${curUser}`, noCount + 1);
             badgeQueue.push({ icon: '🦉', title: isCN ? '小猫头鹰！' : 'Night Owl!', desc: isCN ? `夜深了，做完赶紧休息哦！` : `Studying late! Time to rest soon!` });
             syncToCloud({ type: 'badge', user: curUser, grade: curGrade, subject: curSub, icon: '🦉', title: '小猫头鹰', desc: `时间: ${currentHour}点` });
         }
 
-        // 🔋 5.3 假期充电 (根据 2026 MOE 校历)
+        // 校历假期处理
         const d = new Date();
         const y = d.getFullYear(), m = d.getMonth() + 1, day = d.getDate();
         const isHoliday = (y === 2026 && (
-            (m === 3 && day >= 14 && day <= 22) ||   // Term 1 Break
-            (m === 5 && day >= 30) || (m === 6 && day <= 28) || // Term 2 Break
-            (m === 9 && day >= 5 && day <= 13) ||    // Term 3 Break
-            (m === 11 && day >= 21) || m === 12      // Term 4 Break
+            (m === 3 && day >= 14 && day <= 22) ||   
+            (m === 5 && day >= 30) || (m === 6 && day <= 28) || 
+            (m === 9 && day >= 5 && day <= 13) ||    
+            (m === 11 && day >= 21) || m === 12      
         ));
         if (isHoliday && lastDate !== today) {
             let holCount = parseInt(localStorage.getItem(`easter_holiday_${curUser}`) || '0');
@@ -566,7 +584,7 @@
             syncToCloud({ type: 'badge', user: curUser, grade: curGrade, subject: curSub, icon: '🔋', title: '假期充电', desc: `假期首次打卡` });
         }
 
-        // 🎉 6. 周末狂人
+        // 周末大赢家结算
         const dayOfWeek = new Date().getDay();
         if (dayOfWeek === 0 || dayOfWeek === 6) { 
             if (earnedBadgesForCoin > 0) {
