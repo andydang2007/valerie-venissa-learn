@@ -437,6 +437,7 @@
         } catch(e){}
     }
 
+    // 🌟 升级版同步函数：带有数据防吞与日期、打卡连击防倒退保护
     async function syncFromCloud() {
         if (!currentUser) return;
         const indicator = document.getElementById('cloud-sync-indicator');
@@ -447,14 +448,22 @@
             const cloudData = await resp.json();
             
             if (cloudData && Object.keys(cloudData).length > 0) {
-                // 更新货币与打卡
+                let localTotal = parseInt(localStorage.getItem(`total_days_${currentUser}`) || "0");
+                let localStreak = parseInt(localStorage.getItem(`current_streak_${currentUser}`) || "0");
+
                 if (cloudData.vaultCoins !== undefined) localStorage.setItem('gold_coins_vault', cloudData.vaultCoins);
                 if (cloudData.userCrystals !== undefined) localStorage.setItem(`crystals_${currentUser}`, cloudData.userCrystals);
-                if (cloudData.userTotalDays !== undefined) localStorage.setItem(`total_days_${currentUser}`, cloudData.userTotalDays);
-                if (cloudData.userStreak !== undefined) localStorage.setItem(`current_streak_${currentUser}`, cloudData.userStreak);
+                
+                // 连击天数与打卡天数：只有云端大于等于本地，才允许覆盖（防止竞态倒退）
+                if (cloudData.userTotalDays !== undefined && cloudData.userTotalDays >= localTotal) {
+                    localStorage.setItem(`total_days_${currentUser}`, cloudData.userTotalDays);
+                }
+                if (cloudData.userStreak !== undefined && cloudData.userStreak >= localStreak) {
+                    localStorage.setItem(`current_streak_${currentUser}`, cloudData.userStreak);
+                }
                 if (cloudData.maxStreak !== undefined) localStorage.setItem(`max_streak_${currentUser}`, cloudData.maxStreak);
                 
-                // 更新各科数据
+                // 更新各科勋章数据
                 if (cloudData.pinyin !== undefined) localStorage.setItem(`pinyin_badge_count_${currentUser}`, cloudData.pinyin);
                 if (cloudData.speed !== undefined) localStorage.setItem(`speed_breaks_${currentUser}`, cloudData.speed);
                 if (cloudData.tingxie !== undefined) localStorage.setItem(`tingxie_badge_count_${currentUser}`, cloudData.tingxie);
@@ -475,33 +484,46 @@
                 if (cloudData.lastCheckinDate) {
                     let d = new Date(cloudData.lastCheckinDate);
                     let sgtStr = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
-                    localStorage.setItem(`last_checkin_date_${currentUser}`, sgtStr);
-                    localStorage.setItem(`last_date_${currentUser}`, sgtStr); 
+                    let localLast = localStorage.getItem(`last_checkin_date_${currentUser}`);
+                    if (!localLast || sgtStr >= localLast) {
+                        localStorage.setItem(`last_checkin_date_${currentUser}`, sgtStr);
+                        localStorage.setItem(`last_date_${currentUser}`, sgtStr); 
+                    }
                 }
 
-                // 核心同步：用云端的背包清单强制覆盖本地！
+                // 背包防吞核心逻辑
                 if (cloudData.activeItems !== undefined) {
                     const validItems = ['HB', 'TC', 'PZ', 'TT', 'XF'];
-                    validItems.forEach(p => {
-                        localStorage.setItem(`redeemed_${p}`, 0);
-                        localStorage.removeItem(`last_code_${p}`);
-                    });
-                    
-                    cloudData.activeItems.forEach(item => {
-                        if (item.code) {
-                            let prefix = item.code.split('-')[0];
-                            if (validItems.includes(prefix)) {
-                                let c = parseInt(localStorage.getItem(`redeemed_${prefix}`)||0);
-                                localStorage.setItem(`redeemed_${prefix}`, c + 1);
-                                localStorage.setItem(`last_code_${prefix}`, item.code); 
+                    let localItemsCount = 0;
+                    validItems.forEach(p => localItemsCount += parseInt(localStorage.getItem(`redeemed_${p}`) || 0));
+
+                    // 如果云端读取到的背包由于网络延迟是空的，但本地其实有刚买的东西，触发防吞保护
+                    if (cloudData.activeItems.length === 0 && localItemsCount > 0) {
+                        console.log("触发背包防吞保护，保留本地刚兑换的产品结构。");
+                    } else {
+                        validItems.forEach(p => {
+                            localStorage.setItem(`redeemed_${p}`, 0);
+                            localStorage.removeItem(`last_code_${p}`);
+                        });
+                        
+                        cloudData.activeItems.forEach(item => {
+                            if (item.code) {
+                                let prefix = item.code.split('-')[0];
+                                if (validItems.includes(prefix)) {
+                                    let c = parseInt(localStorage.getItem(`redeemed_${prefix}`)||0);
+                                    localStorage.setItem(`redeemed_${prefix}`, c + 1);
+                                    localStorage.setItem(`last_code_${prefix}`, item.code); 
+                                }
                             }
-                        }
-                    });
+                        });
+                    }
                 }
 
                 updateEconomyUI(); renderBadges();
             }
-        } catch (e) {}
+        } catch (e) {
+            console.error("云端加载故障或超时，自动沿用本地数据缓存: ", e);
+        }
         setTimeout(() => { indicator.style.display = 'none'; }, 800);
     }
 
@@ -631,7 +653,7 @@
     }
 
     function executeNuclearReset() {
-        if(confirm("☢️ 警告：此操作将清空本地所有测试数据（Ticket将重置）！\n\n确定要执行吗？")) {
+        if(confirm("☢️ 警告：此操作将清空本地所有测试数据！\n\n确定要执行吗？")) {
             localStorage.clear(); sessionStorage.clear(); alert("🧹 所有本地数据已清零。"); window.location.reload();
         }
     }
@@ -655,6 +677,5 @@
 
     window.onload = checkMasterLock;
 </script>
-
 </body>
 </html>
